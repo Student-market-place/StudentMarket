@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  student
+  company
+  school
+  admin
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model UploadFile {
+  id             String   @id @default(cuid())
+  url            String   @unique
+  createdAt      DateTime @default(now())
+  modifiedAt     DateTime @default(now())
+  deletedAt      DateTime?
+
+  CV             Student? @relation("cv")
+  profilePicture Student? @relation("profilePicture")
+
+  schools        School[]
+  companies      Company[]
+
+  @@map("upload_file")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  role       Role     @default(student)
+  student    Student?
+
+  createdAt  DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  deletedAt  DateTime?
+
+  @@map("user")
+}
+
+model Student {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  status          String
+  description     String
+  isAvailable     Boolean  @default(true)
+  userId          String   @unique
+  skillsId        String
+  schoolId        String
+  CVId            String   @unique
+  profilePictureId String   @unique
+
+  createdAt       DateTime @default(now())
+  modifiedAt      DateTime @default(now())
+  deletedAt       DateTime?
+
+  user            User      @relation(fields: [userId], references: [id])
+  skills          Skill     @relation(fields: [skillsId], references: [id])
+  school          School    @relation(fields: [schoolId], references: [id])
+  CV              UploadFile @relation("cv", fields: [CVId], references: [id])
+  profilePicture  UploadFile @relation("profilePicture", fields: [profilePictureId], references: [id])
+
+  studentHistories Student_history[]
+  studentApplies   Student_apply[]
+}
+
+model Skill {
+  id         String    @id @default(cuid())
+  name       String
+  students   Student[]
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @default(now())
+  deletedAt  DateTime?
+
+  @@map("skill")
+}
+
+model Student_history {
+  id         String    @id @default(cuid())
+  studentId  String
+  companyId  String
+  startDate  DateTime
+  endDate    DateTime?
+
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @default(now())
+  deletedAt  DateTime?
+
+  student    Student  @relation(fields: [studentId], references: [id])
+  company    Company  @relation(fields: [companyId], references: [id])
+
+  @@map("student_history")
+}
+
+model Student_apply {
+  id             String         @id @default(cuid())
+  studentId      String
+  companyOfferId String
+  message        String
+
+  createdAt      DateTime       @default(now())
+  modifiedAt     DateTime       @default(now())
+  deletedAt      DateTime?
+
+  student        Student        @relation(fields: [studentId], references: [id])
+  companyOffer   Company_offer  @relation(fields: [companyOfferId], references: [id])
+
+  @@map("student_apply")
+}
+
+model School {
+  id               String     @id @default(cuid())
+  name             String
+  domainName       String
+  isActive         Boolean    @default(true)
+  students         Student[]
+  profilePictureId String
+
+  createdAt        DateTime   @default(now())
+  modifiedAt       DateTime   @default(now())
+  deletedAt        DateTime?
+
+  profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
+  
+  @@map("school")
+}
+
+model Company {
+  id               String          @id @default(cuid())
+  name             String
+  companyOffers    Company_offer[]
+  profilePictureId String
+
+  createdAt        DateTime        @default(now())
+  modifiedAt       DateTime        @default(now())
+  deletedAt        DateTime?
+
+  profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
+  studentHistories Student_history[]
+
+  @@map("company")
+}
+
+model Company_offer {
+  id             String          @id @default(cuid())
+  companyId      String
+  title          String
+  description    String
+  expectedSkills String
+  startDate      DateTime
+  type           String
+
+  createdAt      DateTime        @default(now())
+  modifiedAt     DateTime        @default(now())
+  deletedAt      DateTime?
+
+  company        Company         @relation(fields: [companyId], references: [id])
+  studentApplies Student_apply[]
+
+  @@map("company_offer")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_token")
+}
