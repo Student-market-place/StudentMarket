@@ -9,12 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "@react-email/components": "^0.0.33",
+    "@tanstack/react-query": "^5.66.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.477.0",
     "next": "15.2.0",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "resend": "^4.1.2",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7"
   },
