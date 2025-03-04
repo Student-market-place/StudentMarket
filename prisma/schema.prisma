@@ -136,6 +136,7 @@ model School {
 model Company {
   id               String          @id @default(cuid())
   name             String
+  description      String
   companyOffers    Company_offer[]
   profilePictureId String
 
