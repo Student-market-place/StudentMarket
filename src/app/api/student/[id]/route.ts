@@ -1,13 +1,49 @@
+import { IParams } from "@/types/api.type";
+import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  return NextResponse.json({ name: "Student" }, { status: 200 });
+const prisma = new PrismaClient();
+
+export async function GET(req: NextRequest, { params }: IParams) {
+  const { id } = await params;
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!student) {
+      return NextResponse.json(
+        { error: "student not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(student, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }
 
-export async function DELETE(req: NextRequest) {
-  return NextResponse.json({ message: "Student delete" }, { status: 201 });
-}
+export async function DELETE(req: NextRequest, { params }: IParams) {
+  const { id } = await params;
 
-export async function PUT(req: NextRequest) {
-  return NextResponse.json({ message: "Student update" }, { status: 201 });
+  try {
+    const student = await prisma.student.delete({
+      where: {
+        id: id,
+      },
+    });
+    if (!student) {
+      return NextResponse.json(
+        { error: "student not found" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json(student, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }
