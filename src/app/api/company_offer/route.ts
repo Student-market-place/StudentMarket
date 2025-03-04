@@ -1,15 +1,26 @@
+import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+const prisma = new PrismaClient();
+
 export async function GET(req: NextRequest) {
-  return NextResponse.json(
-    { message: "Company_offer retrieve " },
-    { status: 200 }
-  );
+  const company_offer = await prisma.company_offer.findMany();
+  return NextResponse.json(company_offer, { status: 200 });
 }
 
 export async function POST(req: NextRequest) {
-  return NextResponse.json(
-    { message: "Company_offer created" },
-    { status: 201 }
-  );
+  const { companyId, title, description, expectedSkills, startDate, type } =
+    await req.json();
+
+  const company_offer = await prisma.company_offer.create({
+    data: {
+      companyId,
+      title,
+      description,
+      expectedSkills,
+      startDate,
+      type,
+    },
+  });
+  return NextResponse.json(company_offer, { status: 201 });
 }
