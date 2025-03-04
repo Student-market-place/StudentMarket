@@ -14,10 +14,7 @@ export async function GET(req: NextRequest, { params }: IParams) {
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: "Classroom not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "company not found" }, { status: 404 });
     }
 
     return NextResponse.json(company, { status: 200 });
