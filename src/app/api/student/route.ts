@@ -1,9 +1,35 @@
+import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  return NextResponse.json({ message: "Students retrieve " }, { status: 200 });
+const prisma = new PrismaClient();
+
+export async function GET() {
+
+  const student = await prisma.student.findMany();
+
+  return NextResponse.json(student, { status: 200 });
 }
 
 export async function POST(req: NextRequest) {
-  return NextResponse.json({ message: "Student created" }, { status: 201 });
+  const { firstName, lastName, status, description, isAvailable, userId, skillsId, schoolId, CVId, profilePictureId } = await req.json();
+
+  const student = await prisma.student.create({
+    data: {
+      firstName,
+      lastName,
+      status,
+      description,
+      isAvailable,
+      userId,
+      skillsId,
+      schoolId,
+      CVId,
+      profilePictureId
+    },
+  });
+
+  return NextResponse.json(student, { status: 201 });
 }
+
+
+
