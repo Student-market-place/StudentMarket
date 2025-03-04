@@ -10,7 +10,7 @@ export async function DELETE(req: NextRequest) {
     { status: 201 }
   );
 }
-//
+
 export async function PUT(req: NextRequest) {
   return NextResponse.json(
     { message: "Company_offer update" },
