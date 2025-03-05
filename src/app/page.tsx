@@ -1,4 +1,5 @@
-import Image from "next/image";
+import CardJobOffer from "@/components/custom-ui/CardOffer";
+import CardStudent from "@/components/custom-ui/CardStudent";
 
 export default function Home() {
   return (
