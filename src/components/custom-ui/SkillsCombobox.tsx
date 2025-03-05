@@ -64,7 +64,7 @@ export function SkillsCombobox() {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-[200px] h-10 px-3 justify-between"
+            className="w-full max-w-[296px] h-10 px-3 justify-between"
           >
             <div
               className="flex items-center gap-1 overflow-x-auto scrollbar-hide"
