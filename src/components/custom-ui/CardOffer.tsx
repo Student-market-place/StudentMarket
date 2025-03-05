@@ -1,3 +1,4 @@
+import { Badge } from "../ui/badge";
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
 
 const CardJobOffer = () => {
   return (
-    <Card className=" w-[250px] p-4 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all">
+    <Card className=" w-[250px] p-4 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0 text-center">
         <CardTitle className="text-md font-semibold">
           Développeur Front-end
@@ -25,12 +26,9 @@ const CardJobOffer = () => {
         <div className="flex item-center justify-center flex-wrap gap-1 mt-1 ">
           {["React", "TypeScript", "Tailwind CSS", "Git"].map(
             (skill, index) => (
-              <span
-                key={index}
-                className="bg-gray-200 text-black px-2 py-1 text-xs rounded-md"
-              >
+              <Badge key={index} variant="secondary">
                 {skill}
-              </span>
+              </Badge>
             )
           )}
         </div>
