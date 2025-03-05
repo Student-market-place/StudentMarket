@@ -52,19 +52,32 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
+  const {       
+    studentId,
+    companyOfferId,
+    message,
+  } = await req.json();
+
+  if (!studentId || !companyOfferId || !message) {
+    return NextResponse.json(
+      { error: "Veuillez renseigner tous les champs obligatoires" },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Récupérer les nouvelles données du corps de la requête
-    const data = await req.json();
-
-    // Vérifier si l'ID est bien présent
-    if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 });
-    }
-
-    // Mettre à jour l'entreprise avec les nouvelles données
     const student_apply = await prisma.student_apply.update({
-      where: { id: id },
-      data: data, // Passer les nouvelles données
+      where: {
+        id: id,
+      },
+      data: {
+        student: {
+          connect: { id: studentId }},
+          companyOffer: {
+          connect: { id: companyOfferId }},
+          message,
+          
+      },
     });
 
     return NextResponse.json(student_apply, { status: 200 });

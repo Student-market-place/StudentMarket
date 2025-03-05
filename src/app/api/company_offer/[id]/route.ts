@@ -26,8 +26,6 @@ export async function GET(req: NextRequest, { params }: IParams) {
 }
 
 export async function DELETE(req: NextRequest, { params }: IParams) {
-  console.log("DELETE ONE company_offer");
-  console.log("DELETE req", req);
   const { id } = await params;
 
   try {
@@ -51,21 +49,30 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
+  const { companyId, title, description, expectedSkills, startDate, type } =
+    await req.json();
+
+  if (!companyId || !title || !description || !expectedSkills || !startDate || !type) {
+    return NextResponse.json(
+      { error: "companyId, title, description, expectedSkills, startDate, type are required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Récupérer les nouvelles données du corps de la requête
-    const data = await req.json();
-
-    // Vérifier si l'ID est bien présent
-    if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 });
-    }
-
-    // Mettre à jour l'entreprise avec les nouvelles données
     const company_offer = await prisma.company_offer.update({
-      where: { id: id },
-      data: data, // Passer les nouvelles données
+      where: {
+        id: id,
+      },
+      data: {
+        company: { connect: { id: companyId } },
+        title,
+        description,
+        expectedSkills,
+        startDate,
+        type,
+      },
     });
-
     return NextResponse.json(company_offer, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });

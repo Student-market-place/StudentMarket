@@ -19,7 +19,7 @@ model UploadFile {
   id             String   @id @default(cuid())
   url            String   @unique
   createdAt      DateTime @default(now())
-  modifiedAt     DateTime @default(now())
+  modifiedAt     DateTime @updatedAt
   deletedAt      DateTime?
 
   CV             Student? @relation("cv")
@@ -39,7 +39,7 @@ model User {
   student    Student?
 
   createdAt  DateTime @default(now())
-  modifiedAt DateTime @default(now())
+  modifiedAt DateTime @updatedAt
   deletedAt  DateTime?
 
   @@map("user")
@@ -53,23 +53,23 @@ model Student {
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
-  skillsId        String
   schoolId        String
   CVId            String   @unique
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-  modifiedAt      DateTime @default(now())
+  modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
-  user            User      @relation(fields: [userId], references: [id])
-  skills          Skill     @relation(fields: [skillsId], references: [id])
-  school          School    @relation(fields: [schoolId], references: [id])
+  user            User       @relation(fields: [userId], references: [id])
+  skills          Skill[]   
+  school          School     @relation(fields: [schoolId], references: [id])
   CV              UploadFile @relation("cv", fields: [CVId], references: [id])
   profilePicture  UploadFile @relation("profilePicture", fields: [profilePictureId], references: [id])
 
   studentHistories Student_history[]
   studentApplies   Student_apply[]
+  reviews          Review[]
 }
 
 model Skill {
@@ -77,7 +77,7 @@ model Skill {
   name       String
   students   Student[]
   createdAt  DateTime  @default(now())
-  modifiedAt DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   @@map("skill")
@@ -91,7 +91,7 @@ model Student_history {
   endDate    DateTime?
 
   createdAt  DateTime  @default(now())
-  modifiedAt DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   student    Student  @relation(fields: [studentId], references: [id])
@@ -100,6 +100,22 @@ model Student_history {
   @@map("student_history")
 }
 
+model Review {
+  id         String    @id @default(cuid())
+  studentId  String
+  companyId  String
+  rating     Int
+  comment    String
+
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  student    Student  @relation(fields: [studentId], references: [id])
+  company    Company  @relation(fields: [companyId], references: [id])
+
+  @@map("review")
+}
 model Student_apply {
   id             String         @id @default(cuid())
   studentId      String
@@ -107,7 +123,7 @@ model Student_apply {
   message        String
 
   createdAt      DateTime       @default(now())
-  modifiedAt     DateTime       @default(now())
+  modifiedAt     DateTime       @updatedAt
   deletedAt      DateTime?
 
   student        Student        @relation(fields: [studentId], references: [id])
@@ -125,7 +141,7 @@ model School {
   profilePictureId String
 
   createdAt        DateTime   @default(now())
-  modifiedAt       DateTime   @default(now())
+  modifiedAt       DateTime   @updatedAt
   deletedAt        DateTime?
 
   profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
@@ -141,11 +157,12 @@ model Company {
   profilePictureId String
 
   createdAt        DateTime        @default(now())
-  modifiedAt       DateTime        @default(now())
+  modifiedAt       DateTime        @updatedAt
   deletedAt        DateTime?
 
   profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
   studentHistories Student_history[]
+  reviews          Review[]
 
   @@map("company")
 }
@@ -160,7 +177,7 @@ model Company_offer {
   type           String
 
   createdAt      DateTime        @default(now())
-  modifiedAt     DateTime        @default(now())
+  modifiedAt     DateTime        @updatedAt
   deletedAt      DateTime?
 
   company        Company         @relation(fields: [companyId], references: [id])
@@ -174,6 +191,6 @@ model VerificationToken {
   token      String
   expires    DateTime
 
-  @@unique([identifier, token])
+  @@id([identifier, token])
   @@map("verification_token")
 }

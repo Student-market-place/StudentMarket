@@ -1,7 +1,9 @@
+import AuthCard from "@/components/custom-ui/AuthCard";
+
 const SigninPage = () => {
   return (
-    <div>
-      <h1>Hello Signin Page</h1>
+    <div className="flex justify-center items-center h-screen">
+      <AuthCard variant="login" />
     </div>
   );
 };

@@ -26,12 +26,19 @@ export async function GET(req: NextRequest, { params }: IParams) {
 export async function POST(req: NextRequest) {
   const { name, domainName, isActive, profilePictureId } = await req.json();
 
+  if(!name || !domainName || !isActive || !profilePictureId) {
+    return NextResponse.json(
+      { error: "name, domainName, isActive, profilePictureId are required" },
+      { status: 400 }
+    );
+  }
+
   const school = await prisma.school.create({
     data: {
       name,
       domainName,
       isActive,
-      profilePictureId,
+      profilePicture: { connect: { id: profilePictureId }},
     },
   });
   return NextResponse.json(school, { status: 201 });
