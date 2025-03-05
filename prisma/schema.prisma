@@ -19,7 +19,7 @@ model UploadFile {
   id             String   @id @default(cuid())
   url            String   @unique
   createdAt      DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  modifiedAt     DateTime @updatedAt
   deletedAt      DateTime?
 
   CV             Student? @relation("cv")
@@ -35,11 +35,14 @@ model User {
   id         String   @id @default(cuid())
   name       String
   email      String   @unique
+  emailVerified DateTime?
   role       Role     @default(student)
   student    Student?
+  company    Company?
+  school     School?
 
   createdAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  modifiedAt DateTime @updatedAt
   deletedAt  DateTime?
 
   @@map("user")
@@ -58,7 +61,8 @@ model Student {
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+
+  modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
   user            User       @relation(fields: [userId], references: [id])
@@ -76,8 +80,9 @@ model Skill {
   id         String    @id @default(cuid())
   name       String
   students   Student[]
+  company_offers Company_offer[]
   createdAt  DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   @@map("skill")
@@ -91,7 +96,7 @@ model Student_history {
   endDate    DateTime?
 
   createdAt  DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   student    Student  @relation(fields: [studentId], references: [id])
@@ -108,7 +113,7 @@ model Review {
   comment    String
 
   createdAt  DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   student    Student  @relation(fields: [studentId], references: [id])
@@ -123,7 +128,7 @@ model Student_apply {
   message        String
 
   createdAt      DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  modifiedAt     DateTime       @updatedAt
   deletedAt      DateTime?
 
   student        Student        @relation(fields: [studentId], references: [id])
@@ -139,11 +144,13 @@ model School {
   isActive         Boolean    @default(true)
   students         Student[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  modifiedAt       DateTime   @updatedAt
   deletedAt        DateTime?
 
+  user             User       @relation(fields: [userId], references: [id])
   profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
   
   @@map("school")
@@ -155,11 +162,13 @@ model Company {
   description      String
   companyOffers    Company_offer[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  modifiedAt       DateTime        @updatedAt
   deletedAt        DateTime?
 
+  user             User           @relation(fields: [userId], references: [id])
   profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
   studentHistories Student_history[]
   reviews          Review[]
@@ -175,9 +184,11 @@ model Company_offer {
   expectedSkills String
   startDate      DateTime
   type           String
+  skills          Skill[]   
+
 
   createdAt      DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  modifiedAt     DateTime        @updatedAt
   deletedAt      DateTime?
 
   company        Company         @relation(fields: [companyId], references: [id])

@@ -1,3 +1,4 @@
+import { User, School, UploadFile } from "@prisma/client";
 
 enum Status {
     STAGIAIRE = 'Stagiaire',
@@ -12,10 +13,10 @@ export interface Student {
     status: Status;
     description: string;
     isAvailable: boolean;
-    userId: string;
-    schoolId: string;
-    CVId: string;
-    profilePictureId: string;
+    userId: string | User;
+    schoolId: string| School;
+    CVId: string | UploadFile;
+    profilePictureId: string | UploadFile;
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
