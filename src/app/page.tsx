@@ -47,7 +47,7 @@ export default function Home() {
 
       <div className="flex flex-col items-center px-40 gap-25">
         <div className="flex w-full justify-between">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les étudiants</h2>
             <p className="max-w-2xl">
               Student Market vous permet de trouver facilement un stage ou une
@@ -59,6 +59,9 @@ export default function Home() {
               Pour accéder à la plateforme et postuler, votre école doit être
               partenaire de Student Market.
             </p>
+            <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+              Créer mon profil
+            </Button>
           </div>
           <img
             src="/assets/card-job-offer.png"
@@ -66,34 +69,47 @@ export default function Home() {
             alt="Aperçu d'une offre"
           />
         </div>
-        <div className="flex w-full justify-between">
+        <div className="flex w-full justify-between ">
           <img
             src="/assets/card-student.png"
             className="w-[250px] max-h-[300px] object-fit shadow-lg"
             alt="Aperçu d'une offre"
           />
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les entreprises</h2>
             <p className="max-w-2xl">
-              Les entreprises ont accès à une liste d'étudiants qualifiés ainsi
-              qu'aux candidatures qu'ils reçoivent. Elles peuvent ainsi
-              consulter les profils et contacter directement les étudiants qui
-              correspondent à leurs besoins. Publier une offre sur Student
-              Market leur permet de gagner en visibilité et d'attirer des
-              candidats motivés.
+              Sur Student Market, vous avez l'opportunité de toucher directement
+              les talents les plus motivés et qualifiés. Publiez vos offres et
+              accédez à une sélection de profils d'étudiants détaillés, où vous
+              pouvez évaluer leurs compétences, leur expérience et leurs projets
+              réalisés. Gérez les candidatures en toute simplicité, consultez
+              les profils des étudiants qui postulent et suivez facilement
+              l’évolution de vos recrutements.
+              <br /> Student Market vous permet de gagner en efficacité et de
+              trouver rapidement les talents qui feront la différence dans vos
+              projets
             </p>
+            <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+              Créer mon profil
+            </Button>
           </div>
         </div>
-        <div className="flex w-full justify-between">
-          <div className="flex flex-col gap-3">
+        <div className="flex w-full justify-between ">
+          <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les écoles</h2>
             <p className="max-w-2xl">
               Afin de garantir la qualité et la fiabilité des profils étudiants,
               l'inscription sur Student Market est réservée aux écoles
-              partenaires. Les établissements doivent souscrire à une formule
-              payante permettant à leurs étudiants d'accéder aux offres et de
-              postuler aux opportunités proposées par les entreprises.
+              partenaires. Si vous êtes intéressé(e), vous devez nous contacter
+              pour souscrire à une formule payante, permettant ainsi à vos
+              étudiants d'accéder aux offres et de postuler aux opportunités
+              proposées par les entreprises. <br /> Un accès vous sera dédié à
+              la plateforme, avec un tableau de bord incluant des visualisations
+              de données et la liste des étudiants inscrits.
             </p>
+            <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+              Devenir Partenaire
+            </Button>
           </div>
           <img
             src="/assets/card-job-offer.png"
