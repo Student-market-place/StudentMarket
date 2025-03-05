@@ -7,9 +7,9 @@ export async function GET() {
   try {
     const students = await prisma.student.findMany();
     return NextResponse.json(students, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Erreur lors de la récupération des étudiants" },
+      { error: (error as Error).message || "Erreur lors de la récupération des étudiants" },
       { status: 500 }
     );
   }
@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(student, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Erreur lors de la création de l'étudiant" },
+      { error: (error as Error).message || "Erreur lors de la création de l'étudiant" },
       { status: 500 }
     );
   }
