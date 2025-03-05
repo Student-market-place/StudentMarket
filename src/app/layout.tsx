@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col gap-20`}
       >
-        <NavBar menu={"Candidatures"} />
+        {/* <NavBar menu={"Candidatures"} /> */}
         <main className="p-8">{children}</main>
       </body>
     </html>
