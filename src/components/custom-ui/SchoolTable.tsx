@@ -64,6 +64,54 @@ const schools = [
     students: 720,
     isActive: true,
   },
+  {
+    name: "Ridgemont High",
+    domainName: "ridgemont.edu",
+    students: 550,
+    isActive: false,
+  },
+  {
+    name: "Rydell High",
+    domainName: "rydell.edu",
+    students: 890,
+    isActive: true,
+  },
+  {
+    name: "Bayside High",
+    domainName: "bayside.edu",
+    students: 1100,
+    isActive: true,
+  },
+  {
+    name: "Degrassi High",
+    domainName: "degrassi.edu",
+    students: 600,
+    isActive: true,
+  },
+  {
+    name: "Liberty High",
+    domainName: "liberty.edu",
+    students: 800,
+    isActive: true,
+  },
+  {
+    name: "Capeside High",
+    domainName: "capeside.edu",
+    students: 400,
+    isActive: false,
+  },
+  {
+    name: "Dawson High",
+    domainName: "dawson.edu",
+    students: 350,
+    isActive: true,
+  },
+  {
+    name: "Angel Grove High",
+    domainName: "angelgrove.edu",
+    students: 951,
+    isActive: true,
+  },
 ];
 
 type SortField = "name" | "domainName" | "students" | "isActive";
@@ -139,134 +187,147 @@ export function SchoolTable() {
       </div>
 
       <div className="rounded-md border">
-        <Table className="px-1">
-          <TableHeader className="bg-muted/50">
-            <TableRow className="text-center">
-              <TableHead className="px-4">
-                <Button
-                  variant="ghost"
-                  className="h-7 p-0 hover:bg-transparent font-medium"
-                  onClick={() => handleSort("name")}
-                >
-                  <span>School</span>
-                  {sortField === "name" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="ml-2 h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="px-4">
-                <Button
-                  variant="ghost"
-                  className="h-7 p-0 hover:bg-transparent font-medium"
-                  onClick={() => handleSort("domainName")}
-                >
-                  <span>Domain</span>
-                  {sortField === "domainName" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="ml-2 h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="px-4 text-center">
-                <Button
-                  variant="ghost"
-                  className="h-7 p-0 hover:bg-transparent font-medium"
-                  onClick={() => handleSort("students")}
-                >
-                  <span>Number of Students</span>
-                  {sortField === "students" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="ml-2 h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="px-4 text-center">
-                <Button
-                  variant="ghost"
-                  className="h-7 p-0 hover:bg-transparent font-medium"
-                  onClick={() => handleSort("isActive")}
-                >
-                  <span>In Partnership</span>
-                  {sortField === "isActive" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="ml-2 h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    )
-                  ) : (
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="px-4 text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedData.length === 0 ? (
-              <TableRow className="px-4">
-                <TableCell colSpan={5} className="h-24 text-center">
-                  No schools found starting with "{searchTerm}".
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredAndSortedData.map((school) => (
-                <TableRow key={school.name} className="p-4">
-                  <TableCell className="font-medium">{school.name}</TableCell>
-                  <TableCell>{school.domainName}</TableCell>
-                  <TableCell className="text-center">
-                    {school.students}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant={school.isActive ? "success" : "secondary"}
-                      className={
-                        school.isActive
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                      }
+        <div className="relative">
+          {/* Fixed Header */}
+          <div className="sticky top-0 z-10 bg-muted/50 border-b">
+            <Table>
+              <TableHeader>
+                <TableRow className="text-center">
+                  <TableHead className="px-4">
+                    <Button
+                      variant="ghost"
+                      className="h-7 p-0 hover:bg-transparent font-medium"
+                      onClick={() => handleSort("name")}
                     >
-                      {school.isActive ? "Yes" : "No"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 cursor-pointer"
-                      >
-                        <Pencil className="h-4 w-4 " />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                      <span>School</span>
+                      {sortField === "name" ? (
+                        sortDirection === "asc" ? (
+                          <ChevronUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="px-4">
+                    <Button
+                      variant="ghost"
+                      className="h-7 p-0 hover:bg-transparent font-medium"
+                      onClick={() => handleSort("domainName")}
+                    >
+                      <span>Domain</span>
+                      {sortField === "domainName" ? (
+                        sortDirection === "asc" ? (
+                          <ChevronUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="px-4 text-center">
+                    <Button
+                      variant="ghost"
+                      className="h-7 p-0 hover:bg-transparent font-medium"
+                      onClick={() => handleSort("students")}
+                    >
+                      <span>Number of Students</span>
+                      {sortField === "students" ? (
+                        sortDirection === "asc" ? (
+                          <ChevronUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="px-4 text-center">
+                    <Button
+                      variant="ghost"
+                      className="h-7 p-0 hover:bg-transparent font-medium"
+                      onClick={() => handleSort("isActive")}
+                    >
+                      <span>In Partnership</span>
+                      {sortField === "isActive" ? (
+                        sortDirection === "asc" ? (
+                          <ChevronUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="px-4 text-center">Actions</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              </TableHeader>
+            </Table>
+          </div>
+
+          {/* Scrollable Body */}
+          <div className="max-h-[350px] overflow-y-auto">
+            <Table>
+              <TableBody>
+                {filteredAndSortedData.length === 0 ? (
+                  <TableRow className="px-4">
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      No schools found starting with "{searchTerm}".
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredAndSortedData.map((school) => (
+                    <TableRow key={school.name} className="p-4">
+                      <TableCell className="font-medium">
+                        {school.name}
+                      </TableCell>
+                      <TableCell>{school.domainName}</TableCell>
+                      <TableCell className="text-center">
+                        {school.students}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant={school.isActive ? "success" : "secondary"}
+                          className={
+                            school.isActive
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                          }
+                        >
+                          {school.isActive ? "Yes" : "No"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 cursor-pointer"
+                          >
+                            <Pencil className="h-4 w-4 " />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
     </div>
   );
