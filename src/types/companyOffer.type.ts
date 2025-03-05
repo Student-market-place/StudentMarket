@@ -1,3 +1,4 @@
+import { Company } from "@prisma/client";
 
 enum Type {
     STAGE = 'Stage',
@@ -7,10 +8,9 @@ enum Type {
 
 export interface CompanyOffer {
     id: string;
-    companyId: string;
+    companyId: string | Company;
     title: string;
     description: string;
-    expectedSkills: string[];
     startDate: Date;
     type: Type;
     createdAt: Date;

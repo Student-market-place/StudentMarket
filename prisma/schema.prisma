@@ -37,6 +37,8 @@ model User {
   email      String   @unique
   role       Role     @default(student)
   student    Student?
+  company    Company?
+  school     School?
 
   createdAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -76,6 +78,7 @@ model Skill {
   id         String    @id @default(cuid())
   name       String
   students   Student[]
+  company_offers Company_offer[]
   createdAt  DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt  DateTime?
@@ -139,11 +142,13 @@ model School {
   isActive         Boolean    @default(true)
   students         Student[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   deletedAt        DateTime?
 
+  user             User       @relation(fields: [userId], references: [id])
   profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
   
   @@map("school")
@@ -155,11 +160,13 @@ model Company {
   description      String
   companyOffers    Company_offer[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt        DateTime?
 
+  user             User           @relation(fields: [userId], references: [id])
   profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
   studentHistories Student_history[]
   reviews          Review[]
@@ -175,6 +182,8 @@ model Company_offer {
   expectedSkills String
   startDate      DateTime
   type           String
+  skills          Skill[]   
+
 
   createdAt      DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
