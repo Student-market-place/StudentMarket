@@ -13,6 +13,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { name } = await req.json();
 
+  if(!name) {
+    return NextResponse.json(
+      { error: "name is required" },
+      { status: 400 }
+    );
+  }
+
   const skill = await prisma.skill.create({
     data: {
       name

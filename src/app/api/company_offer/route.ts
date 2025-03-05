@@ -11,10 +11,17 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { companyId, title, description, expectedSkills, startDate, type } =
     await req.json();
+    
+  if (!companyId || !title || !description || !expectedSkills || !startDate || !type) {
+    return NextResponse.json(
+      { error: "companyId, title, description, expectedSkills, startDate, type are required" },
+      { status: 400 }
+    );
+  }
 
   const company_offer = await prisma.company_offer.create({
     data: {
-      companyId,
+      company: { connect: { id: companyId } },
       title,
       description,
       expectedSkills,

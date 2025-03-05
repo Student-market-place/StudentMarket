@@ -24,8 +24,6 @@ export async function GET(req: NextRequest, { params }: IParams) {
 }
 
 export async function DELETE(req: NextRequest, { params }: IParams) {
-  console.log("DELETE ONE company");
-  console.log("DELETE req", req);
   const { id } = await params;
 
   try {
@@ -46,21 +44,26 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
+  const { name, profilePictureId, description } = await req.json();
+
+  if (!name || !profilePictureId || !description) {
+    return NextResponse.json(
+      { error: "name, profilePictureId, description are required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Récupérer les nouvelles données du corps de la requête
-    const data = await req.json();
-
-    // Vérifier si l'ID est bien présent
-    if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 });
-    }
-
-    // Mettre à jour l'entreprise avec les nouvelles données
     const company = await prisma.company.update({
-      where: { id: id },
-      data: data, // Passer les nouvelles données
+      where: {
+        id: id,
+      },
+      data: {
+        name,
+        profilePicture: { connect: { id: profilePictureId } },
+        description,
+      },
     });
-
     return NextResponse.json(company, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });

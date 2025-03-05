@@ -1,12 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-export async function GET(req: NextRequest) {
-  return NextResponse.json(
-    { message: "UploadFile retrieve " },
-    { status: 200 }
-  );
-}
+const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
-  return NextResponse.json({ message: "UploadFile created" }, { status: 201 });
+  const { url } = await req.json();
+
+  if (!url) {
+    return NextResponse.json({ message: "url is required" }, { status: 400 });
+  }
+
+  const uploadFile = await prisma.uploadFile.create({
+    data: {
+      url,
+    },
+  });
+
+  return NextResponse.json(uploadFile, { status: 201 });
+}
+
+export async function GET() {
+  const uploadFile = await prisma.uploadFile.findMany();
+
+  return NextResponse.json(uploadFile, { status: 200 });
 }
