@@ -10,7 +10,11 @@ import {
   navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
 
-const NavBar = () => {
+interface NavBarProps {
+  menu: "Offres" | "Candidatures" | "Dashboard";
+}
+
+const NavBar = ({ menu }: NavBarProps) => {
   return (
     <div>
       <NavigationMenu>
@@ -31,7 +35,7 @@ const NavBar = () => {
               </NavigationMenuLink>
               <NavigationMenuLink>
                 {/* <Link href={`/candidatory/${id}`}>Candidatures</Link> */}
-                Candidatures
+                {menu}
               </NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
