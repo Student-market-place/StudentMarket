@@ -8,7 +8,6 @@ export default function PublicLayout({
   return (
     <div>
       <NavBar menu={"Dashboard"} />
-
       {children}
     </div>
   );
