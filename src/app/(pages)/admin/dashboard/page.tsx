@@ -1,10 +1,9 @@
+import { SchoolTable } from "@/components/custom-ui/SchoolTable";
+
 const DashboardAdminPage = () => {
   return (
     <div>
-      <h1>Hello Dashboard Admin</h1>
-      {/* 
-      - SchoolsList
-      */}
+      <SchoolTable />
     </div>
   );
 };
