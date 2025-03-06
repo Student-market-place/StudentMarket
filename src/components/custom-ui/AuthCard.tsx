@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import SigninWithGoogle from "./signinWithGoogle";
 import {
   Card,
   CardContent,
@@ -82,10 +83,7 @@ const AuthCard = ({
                 </Label>
                 <hr className="flex-grow border-gray-300" />
               </div>
-              <Button variant="outline" className="flex items-center">
-                <Image src="/google.svg" alt="Google" width={20} height={20} />
-                <span>{variant === "login" ? "Sign In" : "Sign Up"}</span>
-              </Button>
+              <SigninWithGoogle />
             </div>
             <p className="text-center text-gray-400">
               {variant === "login"
