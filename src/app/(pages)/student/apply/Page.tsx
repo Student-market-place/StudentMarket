@@ -1,9 +1,7 @@
+import { ApplicationTable } from "@/components/custom-ui/table/ApplicationTable";
+
 const ApplyPage = () => {
-  return (
-    <div>
-      <h1>Hello Student Apply Page</h1>
-    </div>
-  );
+  return <ApplicationTable />;
 };
 
 export default ApplyPage;
