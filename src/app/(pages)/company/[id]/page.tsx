@@ -18,15 +18,17 @@ const CompanyProfilPage = () => {
           <div className="flex flex-col gap-5 items-center">
             <h2 className="text-xl font-bold">L'entreprise</h2>
             <p className="max-w-[500px] text-center">
-              Passionnée par le développement web, je suis actuellement en
-              première année de Bachelor à l'ESD Bordeaux. Curieuse et
-              rigoureuse, j'aime relever des défis techniques et concevoir des
-              interfaces modernes et intuitives. Au fil de mes projets, j'ai
-              acquis des compétences en React, Vue.js, TypeScript, Tailwind CSS
-              et en gestion d’API. Je recherche actuellement un stage pouvant
-              évoluer en apprentissage, où je pourrai mettre en pratique mes
-              compétences et continuer à apprendre aux côtés de professionnels
-              du domaine.
+              [Nom de l’entreprise] est une agence digitale spécialisée dans le
+              développement web et mobile. Nous concevons des solutions
+              innovantes sur mesure, allant de la création d’applications et de
+              sites web à l’intégration d’outils digitaux performants. Notre
+              équipe, composée de passionnés de technologie, allie expertise
+              technique et créativité pour répondre aux besoins de nos clients
+              et offrir des expériences numériques optimales. Nous recherchons
+              des talents motivés pour rejoindre notre aventure et participer à
+              des projets stimulants au sein d’un environnement collaboratif et
+              dynamique. Rejoignez-nous et construisons ensemble le futur du
+              digital ! 🚀
             </p>
 
             <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
