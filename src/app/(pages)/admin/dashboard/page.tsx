@@ -1,6 +1,6 @@
-import { CompanyTable } from "@/components/custom-ui/CompanyTable";
-import { SchoolTable } from "@/components/custom-ui/SchoolTable";
-import { StudentTable } from "@/components/custom-ui/StudentTable";
+import { CompanyTable } from "@/components/custom-ui/table/CompanyTable";
+import { SchoolTable } from "@/components/custom-ui/table/SchoolTable";
+import { StudentTable } from "@/components/custom-ui/table/StudentTable";
 
 const DashboardAdminPage = () => {
   return (

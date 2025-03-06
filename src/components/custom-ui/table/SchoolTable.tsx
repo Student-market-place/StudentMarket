@@ -184,6 +184,9 @@ export function SchoolTable() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <Button variant="default" className="cursor-pointer">
+          New
+        </Button>
       </div>
 
       <div className="rounded-md border">
