@@ -15,6 +15,11 @@ enum Apply_Status {
   refuse
 }
 
+enum Offer_Status {
+  Open
+  Closed
+}
+
 enum Type {
   stage
   alternance
@@ -85,6 +90,8 @@ model Student {
   studentHistories Student_history[]
   studentApplies   Student_apply[]
   reviews          Review[]
+
+  @@map("student")
 }
 
 model Skill {
@@ -195,6 +202,7 @@ model Company_offer {
   description    String
   expectedSkills String
   startDate      DateTime
+  status         Offer_Status
   type           Type
   skills         Skill[]   
 

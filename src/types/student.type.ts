@@ -14,6 +14,7 @@ export interface Student {
     description: string;
     isAvailable: boolean;
     userId: string | User;
+    skillsId: string[];
     schoolId: string| School;
     CVId: string | UploadFile;
     profilePictureId: string | UploadFile;
