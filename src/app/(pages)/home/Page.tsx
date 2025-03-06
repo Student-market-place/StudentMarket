@@ -4,6 +4,9 @@ import CardStudent from "@/components/custom-ui/CardStudent";
 import FilterBlock from "@/components/custom-ui/FilterBlock";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Student } from "@/types/student.type";
+import StudentService from "@/services/student.service";
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
@@ -11,6 +14,20 @@ const HomePage = () => {
   const handleActive = (tab: "students" | "offers") => {
     setActiveTab(tab);
   };
+
+  const query = useQuery({
+    queryKey: ["students"],
+    queryFn: () =>
+      StudentService.fetchStudents({
+        isAvailable: true, // Exemple de paramètre
+        status: "Alternance", // Exemple de paramètre
+        skills: ["JavaScript", "React"],
+      }),
+  });
+
+  const students = query.data;
+
+  console.log("students", students);
 
   return (
     <div className="flex flex-col gap-10 w-full">
@@ -45,18 +62,9 @@ const HomePage = () => {
           {activeTab === "students" ? (
             // Affichage des étudiants
             <>
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
-              <CardStudent />
+              {students?.map((student: Student) => (
+                <CardStudent key={student.id} student={student} />
+              ))}
             </>
           ) : (
             <>

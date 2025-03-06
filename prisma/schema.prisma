@@ -33,7 +33,7 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String
+  name       String?
   email      String   @unique
   emailVerified DateTime?
   role       Role     @default(student)
@@ -61,7 +61,6 @@ model Student {
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-
   modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
