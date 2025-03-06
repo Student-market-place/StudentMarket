@@ -1,14 +1,33 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Divide } from "lucide-react";
-import { useState } from "react";
+import StudentService from "@/services/student.service";
+import { StudentWithRelation } from "@/types/student.type";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const StudentProfilPage = () => {
+interface CardStudentProps {
+  student: StudentWithRelation;
+}
+
+const StudentProfilPage = ({ student }: CardStudentProps) => {
+  const { id } = useParams(); // Récupération de l'ID depuis l'URL
+  const [studentid, setStudentid] = useState<StudentWithRelation | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      StudentService.fetchStudentById(id as string)
+        .then((data) => setStudentid(data))
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
+
   return (
     <div className="flex flex-col gap-5 items-center w-full">
       <div className="flex flex-col  items-center">
-        <h1 className="text-3xl font-bold">Nom de l'étudiant</h1>
+        <h1 className="text-3xl font-bold">{student.firstName}</h1>
         <h3>En recherche Alternance</h3>
       </div>
       <div className="flex justify-between w-full py-10 px-30">
