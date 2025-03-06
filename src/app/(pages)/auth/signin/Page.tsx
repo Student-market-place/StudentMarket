@@ -1,21 +1,13 @@
-import { signIn } from "@/auth";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { handleSignIn } from "@/app/server/authActions"; // Импортируем серверную функцию
 
 const SigninPage = () => {
+  const router = useRouter();
+
   return (
-    <form
-      className="flex flex-col gap-2"
-      action={async (formData) => {
-        "use server";
-        console.log("formData", formData);
-        try {
-          await signIn("resend", formData, {
-            callbackUrl: "http://localhost:3000",
-          });
-        } catch (error) {
-          console.error("Failed to sign in", error);
-        }
-      }}
-    >
+    <form className="flex flex-col gap-2" action={handleSignIn}>
       <input
         type="text"
         name="email"
@@ -23,7 +15,11 @@ const SigninPage = () => {
         id="email"
         placeholder="thomas@gmail.com"
       />
-      <button type="submit" className="w-full">
+      <button
+        type="submit"
+        className="w-full"
+        onClick={() => router.push("/auth/verify-request")}
+      >
         Connexion
       </button>
     </form>
