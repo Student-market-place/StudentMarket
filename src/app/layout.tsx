@@ -30,9 +30,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col gap-20`}
       >
         {/* <NavBar menu={"Candidatures"} /> */}
+
         <main className="p-8">
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </main>
+
       </body>
     </html>
   );
