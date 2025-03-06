@@ -3,9 +3,35 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const searchParams = req.nextUrl.searchParams;
+    const availableParam = searchParams.get("available");
+    const statusParam = searchParams.get("status");
+    const skillsParams = searchParams.getAll("skills");
+
+    const where: {
+      isAvailable?: boolean;
+      status?: string;
+      skills?: { some: { id: { in: string[] } } };
+    } = {};
+
+    if (availableParam === "true") {
+      where.isAvailable = true;
+    } else if (availableParam === "false") {
+      where.isAvailable = false;
+    }
+
+    if (statusParam) {
+      where.status = statusParam;
+    }
+
+    if (skillsParams.length > 0) {
+      where.skills = { some: { id: { in: skillsParams } } };
+    }
+
     const students = await prisma.student.findMany({
+      where,
       include: {
         user: true,
         skills: true,
@@ -13,7 +39,11 @@ export async function GET() {
         CV: true,
         profilePicture: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
+
     return NextResponse.json(students, { status: 200 });
   } catch (error: unknown) {
     return NextResponse.json(
