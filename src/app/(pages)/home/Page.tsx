@@ -22,8 +22,6 @@ const HomePage = () => {
     queryFn: () =>
       StudentService.fetchStudents({
         isAvailable: true,
-        status: EnumStatusTYpe.stage,
-        skills: [],
       }),
   });
 

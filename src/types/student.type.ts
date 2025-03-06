@@ -8,8 +8,8 @@ import {
 } from "@prisma/client";
 
 enum Type {
-  STAGIAIRE = "Stage",
-  ALTERNANT = "Alternance",
+  STAGIAIRE = "stage",
+  ALTERNANT = "alternance",
 }
 
 export interface Student {
