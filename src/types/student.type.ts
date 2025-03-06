@@ -33,6 +33,8 @@ export interface GetAllParams {
   isAvailable?: boolean;
   status?: EnumStatusTYpe;
   skills?: string[];
+  studentHistories?: string[];
+  CV?: string[];
 }
 
 export type StudentWithRelation = Prisma.StudentGetPayload<{
@@ -41,5 +43,7 @@ export type StudentWithRelation = Prisma.StudentGetPayload<{
     user: true;
     profilePicture: true;
     skills: true;
+    studentHistories: true;
+    CV: true;
   };
 }>;

@@ -1,4 +1,5 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StudentService from "@/services/student.service";
@@ -6,52 +7,69 @@ import { StudentWithRelation } from "@/types/student.type";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface CardStudentProps {
-  student: StudentWithRelation;
-}
-
-const StudentProfilPage = ({ student }: CardStudentProps) => {
-  const { id } = useParams(); // Récupération de l'ID depuis l'URL
-  const [studentid, setStudentid] = useState<StudentWithRelation | null>(null);
+// Remove the props interface since we'll be fetching the data directly
+const StudentProfilPage = () => {
+  const { id } = useParams();
+  const [student, setStudent] = useState<StudentWithRelation | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleDownload = async () => {
+    if (student?.CV?.url) {
+      await StudentService.downloadCV(student.CV.url);
+    }
+  };
 
   useEffect(() => {
     if (id) {
       StudentService.fetchStudentById(id as string)
-        .then((data) => setStudentid(data))
+        .then((data) => setStudent(data))
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     }
   }, [id]);
 
+  // Show loading state while data is being fetched
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Chargement...
+      </div>
+    );
+  }
+
+  // Handle case when student data couldn't be loaded
+  if (!student) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Étudiant non trouvé
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5 items-center w-full">
-      <div className="flex flex-col  items-center">
-        <h1 className="text-3xl font-bold">{student.firstName}</h1>
-        <h3>En recherche Alternance</h3>
+      <div className="flex flex-col items-center">
+        <h1 className="text-3xl font-bold">
+          {student.firstName} {student.lastName}
+        </h1>
+        <h3>En recherche {student.status}</h3>
       </div>
       <div className="flex justify-between w-full py-10 px-30">
-        <div className="flex flex-col gap-10 justify-between   items-center">
+        <div className="flex flex-col gap-10 justify-between items-center">
           <img
-            src="/assets/home-img.jpg"
+            src={student.profilePicture.url}
             className="w-[200px] h-[150px] rounded-xl object-cover shadow-lg"
+            alt="Photo de profil"
           />
 
           <div className="flex flex-col gap-5 items-center">
             <h2 className="text-xl font-bold">Biographie</h2>
-            <p className="max-w-[500px]">
-              Passionnée par le développement web, je suis actuellement en
-              première année de Bachelor à l'ESD Bordeaux. Curieuse et
-              rigoureuse, j'aime relever des défis techniques et concevoir des
-              interfaces modernes et intuitives. Au fil de mes projets, j'ai
-              acquis des compétences en React, Vue.js, TypeScript, Tailwind CSS
-              et en gestion d’API. Je recherche actuellement un stage pouvant
-              évoluer en apprentissage, où je pourrai mettre en pratique mes
-              compétences et continuer à apprendre aux côtés de professionnels
-              du domaine.
-            </p>
+            <p className="max-w-[500px]">{student.description}</p>
             <div className="flex justify-between w-full px-30">
-              <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+              <Button
+                onClick={handleDownload}
+                className="bg-blue-500 hover:bg-blue-700 w-fit"
+              >
                 Telecharger le CV
               </Button>
               <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
@@ -70,52 +88,32 @@ const StudentProfilPage = ({ student }: CardStudentProps) => {
             <TabsContent value="infos">
               <h2>Informations</h2>
               <ul>
-                <li>École</li>
-                <li>Disponible ?</li>
-                <li>Type de contrat recherché</li>
+                <li>{student.school.name}</li>
+                <li>{student.isAvailable}</li>
+                <li>{student.status}</li>
               </ul>
             </TabsContent>
 
             <TabsContent value="experience">
               <h2>Expériences</h2>
-              <ul>
-                <li>
-                  <strong>
-                    Projet personnel - Application de gestion de recettes :
-                  </strong>{" "}
-                  Développement d'une application en PHP permettant d'ajouter,
-                  modifier et supprimer des recettes, avec phpMyAdmin et Docker.
-                </li>
-                <li>
-                  <strong>Projet scolaire - Redesign de Parkfornight :</strong>{" "}
-                  Refonte d'une application d'aide au stationnement en pleine
-                  nature, en React avec Tailwind CSS.
-                </li>
-                <li>
-                  <strong>Stage (à définir) :</strong> En recherche d'un stage
-                  pouvant mener à un apprentissage pour approfondir mes
-                  compétences en développement web.
-                </li>
-              </ul>
+              {/* <ul className="flex flex-wrap gap-1 mt-1">
+                {student?.studentHistories.map((history, index) => (
+                  <li key={index}>{history?.startDate.toLocaleDateString()}</li>
+                ))}
+              </ul> */}
             </TabsContent>
 
             <TabsContent value="skills">
               <h2>Compétences</h2>
-              <ul>
-                <li>HTML/CSS</li>
-                <li>JavaScript/TypeScript</li>
-                <li>React</li>
-                <li>Vue.js</li>
-                <li>Django</li>
-                <li>Tailwind CSS</li>
-                <li>Git/GitHub</li>
-                <li>Gestion d'API</li>
-                <li>Docker</li>
-                <li>PHP/MySQL</li>
-              </ul>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {student?.skills?.map((skill, index) => (
+                  <Badge key={index} variant="secondary">
+                    {skill?.name}
+                  </Badge>
+                ))}
+              </div>
             </TabsContent>
           </Tabs>
-          <div></div>
         </div>
       </div>
     </div>
