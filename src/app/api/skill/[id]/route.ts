@@ -31,6 +31,13 @@ export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
   const { name } = await req.json();
 
+  if (!name) {
+    return NextResponse.json(
+      { error: "name is required" },
+      { status: 400 }
+    );
+  }
+
   try {
     const skill = await prisma.skill.update({
       where: {

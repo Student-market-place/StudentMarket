@@ -63,6 +63,7 @@ model Student {
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
+
   modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 

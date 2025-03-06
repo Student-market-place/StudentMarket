@@ -27,8 +27,6 @@ export async function GET(req: NextRequest, { params }: IParams) {
 }
 
 export async function DELETE(req: NextRequest, { params }: IParams) {
-  console.log("DELETE ONE student_history");
-  console.log("DELETE req", req);
   const { id } = await params;
 
   try {
@@ -50,25 +48,38 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 }
 
 export async function PUT(req: NextRequest, { params }: IParams) {
-  const { id } = await params;
+ const { id } = await params;
+   const {       
+      studentId,
+      companyId,
+      startDate,
+      endDate,  
+   } = await req.json();
+ 
+    if (!studentId || !companyId || !startDate || !endDate) {
+     return NextResponse.json(
+       { error: "Veuillez renseigner tous les champs obligatoires" },
+       { status: 400 }
+     );
+   }
+ 
+   try {
+     const student_history = await prisma.student_history.update({
+       where: {
+         id: id,
+       },
+       data: {
+          student: { connect: { id: studentId } },
+          company: { connect: { id: companyId } },
+          startDate,
+          endDate,
+       },
+      });
 
-  try {
-    // Récupérer les nouvelles données du corps de la requête
-    const data = await req.json();
 
-    // Vérifier si l'ID est bien présent
-    if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+      return NextResponse.json(student_history, { status: 200 });
+   } catch (error) {
+      return NextResponse.json({ error: error }, { status: 500 });
     }
-
-    // Mettre à jour l'entreprise avec les nouvelles données
-    const student_history = await prisma.student_history.update({
-      where: { id: id },
-      data: data, // Passer les nouvelles données
-    });
-
-    return NextResponse.json(student_history, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
-  }
 }
+    
