@@ -19,7 +19,7 @@ model UploadFile {
   id             String   @id @default(cuid())
   url            String   @unique
   createdAt      DateTime @default(now())
-  modifiedAt     DateTime @default(now())
+  modifiedAt     DateTime @updatedAt
   deletedAt      DateTime?
 
   CV             Student? @relation("cv")
@@ -33,17 +33,22 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String
+  name       String?
   email      String   @unique
+  emailVerified DateTime?
   role       Role     @default(student)
   student    Student?
+  company    Company?
+  school     School?
 
   createdAt  DateTime @default(now())
-  modifiedAt DateTime @default(now())
+  modifiedAt DateTime @updatedAt
   deletedAt  DateTime?
 
   @@map("user")
 }
+
+
 
 model Student {
   id              String   @id @default(cuid())
@@ -53,31 +58,32 @@ model Student {
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
-  skillsId        String
   schoolId        String
   CVId            String   @unique
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-  modifiedAt      DateTime @default(now())
+  modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
-  user            User      @relation(fields: [userId], references: [id])
-  skills          Skill     @relation(fields: [skillsId], references: [id])
-  school          School    @relation(fields: [schoolId], references: [id])
+  user            User       @relation(fields: [userId], references: [id])
+  skills          Skill[]   
+  school          School     @relation(fields: [schoolId], references: [id])
   CV              UploadFile @relation("cv", fields: [CVId], references: [id])
   profilePicture  UploadFile @relation("profilePicture", fields: [profilePictureId], references: [id])
 
   studentHistories Student_history[]
   studentApplies   Student_apply[]
+  reviews          Review[]
 }
 
 model Skill {
   id         String    @id @default(cuid())
   name       String
   students   Student[]
+  company_offers Company_offer[]
   createdAt  DateTime  @default(now())
-  modifiedAt DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   @@map("skill")
@@ -91,7 +97,7 @@ model Student_history {
   endDate    DateTime?
 
   createdAt  DateTime  @default(now())
-  modifiedAt DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
   student    Student  @relation(fields: [studentId], references: [id])
@@ -100,6 +106,22 @@ model Student_history {
   @@map("student_history")
 }
 
+model Review {
+  id         String    @id @default(cuid())
+  studentId  String
+  companyId  String
+  rating     Int
+  comment    String
+
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  student    Student  @relation(fields: [studentId], references: [id])
+  company    Company  @relation(fields: [companyId], references: [id])
+
+  @@map("review")
+}
 model Student_apply {
   id             String         @id @default(cuid())
   studentId      String
@@ -107,7 +129,7 @@ model Student_apply {
   message        String
 
   createdAt      DateTime       @default(now())
-  modifiedAt     DateTime       @default(now())
+  modifiedAt     DateTime       @updatedAt
   deletedAt      DateTime?
 
   student        Student        @relation(fields: [studentId], references: [id])
@@ -123,11 +145,13 @@ model School {
   isActive         Boolean    @default(true)
   students         Student[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime   @default(now())
-  modifiedAt       DateTime   @default(now())
+  modifiedAt       DateTime   @updatedAt
   deletedAt        DateTime?
 
+  user             User       @relation(fields: [userId], references: [id])
   profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
   
   @@map("school")
@@ -139,13 +163,16 @@ model Company {
   description      String
   companyOffers    Company_offer[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime        @default(now())
-  modifiedAt       DateTime        @default(now())
+  modifiedAt       DateTime        @updatedAt
   deletedAt        DateTime?
 
+  user             User           @relation(fields: [userId], references: [id])
   profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
   studentHistories Student_history[]
+  reviews          Review[]
 
   @@map("company")
 }
@@ -158,9 +185,11 @@ model Company_offer {
   expectedSkills String
   startDate      DateTime
   type           String
+  skills          Skill[]   
+
 
   createdAt      DateTime        @default(now())
-  modifiedAt     DateTime        @default(now())
+  modifiedAt     DateTime        @updatedAt
   deletedAt      DateTime?
 
   company        Company         @relation(fields: [companyId], references: [id])
@@ -174,6 +203,6 @@ model VerificationToken {
   token      String
   expires    DateTime
 
-  @@unique([identifier, token])
+  @@id([identifier, token])
   @@map("verification_token")
 }
