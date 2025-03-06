@@ -20,7 +20,7 @@ enum Offer_Status {
   Closed
 }
 
-enum Type {
+enum EnumStatusTYpe {
   stage
   alternance
 }
@@ -49,7 +49,7 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String
+  name       String?
   email      String   @unique
   emailVerified DateTime?
   role       Role     @default(student)
@@ -68,7 +68,7 @@ model Student {
   id              String   @id @default(cuid())
   firstName       String
   lastName        String
-  status          Type
+  status          EnumStatusTYpe
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
@@ -77,7 +77,6 @@ model Student {
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-
   modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
@@ -203,7 +202,7 @@ model Company_offer {
   expectedSkills String
   startDate      DateTime
   status         Offer_Status
-  type           Type
+  type           EnumStatusTYpe
   skills         Skill[]   
 
 

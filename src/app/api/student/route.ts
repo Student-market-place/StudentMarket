@@ -10,10 +10,10 @@ export async function GET(req: NextRequest) {
     const statusParam = searchParams.get("status");
     const skillsParams = searchParams.getAll("skills");
 
-    const where: { 
-      isAvailable?: boolean; 
+    const where: {
+      isAvailable?: boolean;
       status?: string;
-      skills?: { some: { id: { in: string[] } } }
+      skills?: { some: { id: { in: string[] } } };
     } = {};
 
     if (availableParam === "true") {
@@ -31,7 +31,6 @@ export async function GET(req: NextRequest) {
     }
 
     const students = await prisma.student.findMany({
-      where,
       include: {
         user: true,
         skills: true,
@@ -40,14 +39,18 @@ export async function GET(req: NextRequest) {
         profilePicture: true,
       },
       orderBy: {
-        createdAt: 'desc',
-      }
+        createdAt: "desc",
+      },
     });
 
     return NextResponse.json(students, { status: 200 });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur lors de la récupération des étudiants" },
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la récupération des étudiants",
+      },
       { status: 500 }
     );
   }
@@ -102,7 +105,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(student, { status: 201 });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur lors de la création de l'étudiant" },
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la création de l'étudiant",
+      },
       { status: 500 }
     );
   }
