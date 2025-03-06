@@ -18,14 +18,19 @@ import Link from "next/link";
 
 interface AuthCardProps {
   variant?: "login" | "student" | "company";
+  handleAction: (formData: FormData) => Promise<void>;
+  handleRoute: () => void;
 }
 
 interface FormValues {
   email: string;
 }
 
-const AuthCard = ({ variant = "student" }: AuthCardProps) => {
-  const router = useRouter();
+const AuthCard = ({
+  variant = "student",
+  handleAction,
+  handleRoute,
+}: AuthCardProps) => {
   const form = useForm<FormValues>({
     defaultValues: {
       email: "",
@@ -33,8 +38,9 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log(data);
-    router.push("/auth/create-account");
+    const formData = new FormData();
+    formData.append("email", data.email);
+    handleAction(formData);
   };
 
   return (
@@ -94,7 +100,7 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
               </Link>
             </p>
             <div className="w-full flex justify-end">
-              <Button type="submit">
+              <Button type="submit" onClick={handleRoute}>
                 {variant === "login" ? "Login" : "Sign Up"}
               </Button>
             </div>

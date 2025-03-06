@@ -9,6 +9,17 @@ enum Role {
   admin
 }
 
+enum Apply_Status {
+  en_attente
+  accepte
+  refuse
+}
+
+enum Type {
+  stage
+  alternance
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -33,7 +44,7 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String?
+  name       String
   email      String   @unique
   emailVerified DateTime?
   role       Role     @default(student)
@@ -48,13 +59,11 @@ model User {
   @@map("user")
 }
 
-
-
 model Student {
   id              String   @id @default(cuid())
   firstName       String
   lastName        String
-  status          String
+  status          Type
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
@@ -128,6 +137,7 @@ model Student_apply {
   studentId      String
   companyOfferId String
   message        String
+  status         Apply_Status
 
   createdAt      DateTime       @default(now())
   modifiedAt     DateTime       @updatedAt
@@ -185,8 +195,8 @@ model Company_offer {
   description    String
   expectedSkills String
   startDate      DateTime
-  type           String
-  skills          Skill[]   
+  type           Type
+  skills         Skill[]   
 
 
   createdAt      DateTime        @default(now())
