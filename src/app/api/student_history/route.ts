@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const student_history = await prisma.student_history.findMany();
   return NextResponse.json(student_history, { status: 200 });
 }

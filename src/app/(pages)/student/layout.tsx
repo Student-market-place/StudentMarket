@@ -1,5 +1,4 @@
 import NavBar from "@/components/custom-ui/NavBar";
-import Link from "next/link";
 
 export default function PublicLayout({
   children,
@@ -7,7 +6,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       <NavBar menu={"Candidatures"} />
 
       {children}

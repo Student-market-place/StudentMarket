@@ -12,6 +12,13 @@ export async function GET(req: NextRequest, { params }: IParams) {
       where: {
         id: id,
       },
+      include: {
+        user: true,
+        skills: true,
+        school: true,
+        CV: true,
+        profilePicture: true,
+      },
     });
 
     if (!student) {
