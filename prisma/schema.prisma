@@ -15,7 +15,7 @@ enum Apply_Status {
   refuse
 }
 
-enum Type {
+enum EnumStatusTYpe {
   stage
   alternance
 }
@@ -63,7 +63,7 @@ model Student {
   id              String   @id @default(cuid())
   firstName       String
   lastName        String
-  status          Type
+  status          EnumStatusTYpe
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
@@ -194,7 +194,7 @@ model Company_offer {
   description    String
   expectedSkills String
   startDate      DateTime
-  type           Type
+  type           EnumStatusTYpe
   skills         Skill[]   
 
 

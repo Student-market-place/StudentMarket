@@ -1,9 +1,15 @@
-import { Student } from "@/types/student.type";
+import {
+  GetAllParams,
+  Student,
+  StudentWithRelation,
+} from "@/types/student.type";
 import axios from "axios";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/students`;
 
-async function fetchStudents(params: Student): Promise<Student[]> {
+async function fetchStudents(
+  params: GetAllParams
+): Promise<StudentWithRelation[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student`;
 

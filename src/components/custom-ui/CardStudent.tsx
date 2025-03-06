@@ -1,4 +1,4 @@
-import { Student } from "@/types/student.type";
+import { StudentWithRelation } from "@/types/student.type";
 import { Badge } from "../ui/badge";
 import {
   Card,
@@ -10,7 +10,7 @@ import {
 } from "../ui/card";
 
 interface CardStudentProps {
-  student: Student;
+  student: StudentWithRelation;
 }
 
 const CardStudent = ({ student }: CardStudentProps) => {
@@ -26,7 +26,9 @@ const CardStudent = ({ student }: CardStudentProps) => {
           <CardTitle className="text-md font-semibold">
             {student?.firstName} {student?.lastName}
           </CardTitle>
-          <CardDescription className="text-xs text-gray-500"></CardDescription>
+          <CardDescription className="text-xs text-gray-500">
+            {student?.school.name}
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="px-3 pb-3">

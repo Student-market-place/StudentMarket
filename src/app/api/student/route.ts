@@ -31,7 +31,6 @@ export async function GET(req: NextRequest) {
     }
 
     const students = await prisma.student.findMany({
-      where,
       include: {
         user: true,
         skills: true,
