@@ -187,13 +187,12 @@ export function SchoolTable() {
       </div>
 
       <div className="rounded-md border">
-        <div className="relative">
-          {/* Fixed Header */}
-          <div className="sticky top-0 z-10 bg-muted/50 border-b">
-            <Table>
-              <TableHeader>
-                <TableRow className="text-center">
-                  <TableHead className="px-4">
+        <div className="overflow-hidden">
+          <div className="overflow-hidden">
+            <Table className="table-fixed border-collapse">
+              <TableHeader className="sticky top-0 z-10 bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[25%]">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
@@ -211,7 +210,7 @@ export function SchoolTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="px-4">
+                  <TableHead className="w-[25%]">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
@@ -229,7 +228,7 @@ export function SchoolTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="px-4 text-center">
+                  <TableHead className="w-[20%] text-center">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
@@ -247,7 +246,7 @@ export function SchoolTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="px-4 text-center">
+                  <TableHead className="w-[15%] text-center">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
@@ -265,33 +264,36 @@ export function SchoolTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="px-4 text-center">Actions</TableHead>
+                  <TableHead className="w-[15%] text-center font-medium">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
             </Table>
           </div>
 
-          {/* Scrollable Body */}
           <div className="max-h-[350px] overflow-y-auto">
-            <Table>
+            <Table className="table-fixed border-collapse">
               <TableBody>
                 {filteredAndSortedData.length === 0 ? (
-                  <TableRow className="px-4">
+                  <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
                       No schools found starting with "{searchTerm}".
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredAndSortedData.map((school) => (
-                    <TableRow key={school.name} className="p-4">
-                      <TableCell className="font-medium">
+                    <TableRow key={school.name}>
+                      <TableCell className="w-[25%] font-medium">
                         {school.name}
                       </TableCell>
-                      <TableCell>{school.domainName}</TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="w-[25%]">
+                        {school.domainName}
+                      </TableCell>
+                      <TableCell className="w-[20%] text-center">
                         {school.students}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={school.isActive ? "success" : "secondary"}
                           className={
@@ -303,14 +305,14 @@ export function SchoolTable() {
                           {school.isActive ? "Yes" : "No"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="w-[15%] text-center">
                         <div className="flex justify-center gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 cursor-pointer"
                           >
-                            <Pencil className="h-4 w-4 " />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
