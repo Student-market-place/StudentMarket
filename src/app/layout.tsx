@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/custom-ui/NavBar";
+import { ReactQueryProvider } from "@/providers/ReactQueryProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col gap-20`}
       >
         {/* <NavBar menu={"Candidatures"} /> */}
-        <main className="p-8">{children}</main>
+        <main className="p-8">
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </main>
       </body>
     </html>
   );
