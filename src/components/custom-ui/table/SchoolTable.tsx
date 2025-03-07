@@ -1,5 +1,6 @@
 "use client";
-
+import { CreateSchool } from "@/components/custom-ui/CreateSchool";
+import { UpdateSchool } from "@/components/custom-ui/UpdateSchool";
 import { useState, useMemo } from "react";
 import {
   Pencil,
@@ -171,6 +172,12 @@ export function SchoolTable() {
 
   return (
     <div className="space-y-4 p-12">
+      <div className=" justify-items-center flex space-y-4 gap-7 p-7"></div>
+      <div className="flex justify-between items-center">
+        <CreateSchool />
+        <UpdateSchool />
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="relative w-full max-w-sm">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -184,9 +191,6 @@ export function SchoolTable() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="default" className="cursor-pointer">
-          New
-        </Button>
       </div>
 
       <div className="rounded-md border">
