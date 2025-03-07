@@ -9,6 +9,22 @@ enum Role {
   admin
 }
 
+enum Apply_Status {
+  en_attente
+  accepte
+  refuse
+}
+
+enum Offer_Status {
+  Open
+  Closed
+}
+
+enum EnumStatusTYpe {
+  stage
+  alternance
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -33,10 +49,13 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String
+  name       String?
   email      String   @unique
+  emailVerified DateTime?
   role       Role     @default(student)
   student    Student?
+  company    Company?
+  school     School?
 
   createdAt  DateTime @default(now())
   modifiedAt DateTime @updatedAt
@@ -49,7 +68,7 @@ model Student {
   id              String   @id @default(cuid())
   firstName       String
   lastName        String
-  status          String
+  status          EnumStatusTYpe
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
@@ -70,12 +89,15 @@ model Student {
   studentHistories Student_history[]
   studentApplies   Student_apply[]
   reviews          Review[]
+
+  @@map("student")
 }
 
 model Skill {
   id         String    @id @default(cuid())
   name       String
   students   Student[]
+  company_offers Company_offer[]
   createdAt  DateTime  @default(now())
   modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
@@ -121,6 +143,7 @@ model Student_apply {
   studentId      String
   companyOfferId String
   message        String
+  status         Apply_Status
 
   createdAt      DateTime       @default(now())
   modifiedAt     DateTime       @updatedAt
@@ -139,11 +162,13 @@ model School {
   isActive         Boolean    @default(true)
   students         Student[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime   @default(now())
   modifiedAt       DateTime   @updatedAt
   deletedAt        DateTime?
 
+  user             User       @relation(fields: [userId], references: [id])
   profilePicture   UploadFile @relation(fields: [profilePictureId], references: [id])
   
   @@map("school")
@@ -155,11 +180,13 @@ model Company {
   description      String
   companyOffers    Company_offer[]
   profilePictureId String
+  userId          String   @unique
 
   createdAt        DateTime        @default(now())
   modifiedAt       DateTime        @updatedAt
   deletedAt        DateTime?
 
+  user             User           @relation(fields: [userId], references: [id])
   profilePicture   UploadFile      @relation(fields: [profilePictureId], references: [id])
   studentHistories Student_history[]
   reviews          Review[]
@@ -174,7 +201,10 @@ model Company_offer {
   description    String
   expectedSkills String
   startDate      DateTime
-  type           String
+  status         Offer_Status
+  type           EnumStatusTYpe
+  skills         Skill[]   
+
 
   createdAt      DateTime        @default(now())
   modifiedAt     DateTime        @updatedAt

@@ -6,7 +6,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       <NavBar menu={"Candidatures"} />
 
       {children}

@@ -3,13 +3,54 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const students = await prisma.student.findMany();
+    const searchParams = req.nextUrl.searchParams;
+    const availableParam = searchParams.get("available");
+    const statusParam = searchParams.get("status");
+    const skillsParams = searchParams.getAll("skills");
+
+    const where: {
+      isAvailable?: boolean;
+      status?: string;
+      skills?: { some: { id: { in: string[] } } };
+    } = {};
+
+    if (availableParam === "true") {
+      where.isAvailable = true;
+    } else if (availableParam === "false") {
+      where.isAvailable = false;
+    }
+
+    if (statusParam) {
+      where.status = statusParam;
+    }
+
+    if (skillsParams.length > 0) {
+      where.skills = { some: { id: { in: skillsParams } } };
+    }
+
+    const students = await prisma.student.findMany({
+      include: {
+        user: true,
+        skills: true,
+        school: true,
+        CV: true,
+        profilePicture: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     return NextResponse.json(students, { status: 200 });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur lors de la récupération des étudiants" },
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la récupération des étudiants",
+      },
       { status: 500 }
     );
   }
@@ -30,7 +71,16 @@ export async function POST(req: NextRequest) {
       profilePictureId,
     } = await req.json();
 
-    if (!firstName || !lastName || !status || !userId || !skillsId || !schoolId || !CVId || !profilePictureId) {
+    if (
+      !firstName ||
+      !lastName ||
+      !status ||
+      !userId ||
+      !skillsId ||
+      !schoolId ||
+      !CVId ||
+      !profilePictureId
+    ) {
       return NextResponse.json(
         { error: "Veuillez renseigner tous les champs obligatoires" },
         { status: 400 }
@@ -55,7 +105,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(student, { status: 201 });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur lors de la création de l'étudiant" },
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la création de l'étudiant",
+      },
       { status: 500 }
     );
   }
