@@ -15,7 +15,7 @@ enum Apply_Status {
   refuse
 }
 
-enum Type {
+enum EnumStatusTYpe {
   stage
   alternance
 }
@@ -24,6 +24,29 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id String @id @default(cuid())
+
+  type String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider          String
+  providerAccountId String @map("provider_account_id")
+
+  refresh_token String? @db.Text
+  access_token  String? @db.Text
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String? @db.Text
+  session_state String?
+
+  @@unique([provider, providerAccountId])
+  @@map("account")
 }
 
 model UploadFile {
@@ -44,13 +67,15 @@ model UploadFile {
 
 model User {
   id         String   @id @default(cuid())
-  name       String
+  name       String?
   email      String   @unique
   emailVerified DateTime?
+  image         String?
   role       Role     @default(student)
   student    Student?
   company    Company?
   school     School?
+  accounts   Account[]
 
   createdAt  DateTime @default(now())
   modifiedAt DateTime @updatedAt
@@ -63,7 +88,7 @@ model Student {
   id              String   @id @default(cuid())
   firstName       String
   lastName        String
-  status          Type
+  status          EnumStatusTYpe
   description     String
   isAvailable     Boolean  @default(true)
   userId          String   @unique
@@ -72,7 +97,6 @@ model Student {
   profilePictureId String   @unique
 
   createdAt       DateTime @default(now())
-
   modifiedAt      DateTime @updatedAt
   deletedAt       DateTime?
 
@@ -85,6 +109,7 @@ model Student {
   studentHistories Student_history[]
   studentApplies   Student_apply[]
   reviews          Review[]
+  @@map("student")
 }
 
 model Skill {
@@ -195,7 +220,7 @@ model Company_offer {
   description    String
   expectedSkills String
   startDate      DateTime
-  type           Type
+  type           EnumStatusTYpe
   skills         Skill[]   
 
 

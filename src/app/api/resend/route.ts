@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { NextRequest } from "next/server";
 
-const resend = new Resend("re_5wduhsb7_N2PtL1orYuE7cWojCR2WEWKx");
+const resend = new Resend(process.env.NEXT_PUBLIC_AUTH_RESEND_KEY);
 
 export async function POST(req: NextRequest) {
   console.log("Resend auth");

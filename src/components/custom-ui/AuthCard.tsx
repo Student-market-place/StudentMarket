@@ -41,6 +41,7 @@ const AuthCard = ({
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const formData = new FormData();
     formData.append("email", data.email);
+    formData.append("role", variant);
     handleAction(formData);
   };
 

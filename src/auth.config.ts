@@ -1,3 +1,5 @@
+// src/auth.config.ts
+
 import { NextAuthConfig } from "next-auth";
 import Resend from "next-auth/providers/resend";
 import Google from "next-auth/providers/google";
@@ -19,8 +21,7 @@ export default {
       },
     }),
     Resend({
-      // If your environment variable is named differently than default
-      apiKey: "re_5wduhsb7_N2PtL1orYuE7cWojCR2WEWKx",
+      apiKey: process.env.NEXT_PUBLIC_AUTH_RESEND_KEY,
       from: "Dev <onboarding@resend.dev>",
       async sendVerificationRequest({ identifier, url, provider }) {
         console.log("sendVerificationRequest", identifier, url, provider);
