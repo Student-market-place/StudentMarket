@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import Link from "next/link";
+import Image from "next/image";
 
 interface CardStudentProps {
   student: StudentWithRelation;
@@ -18,7 +19,7 @@ const CardStudent = ({ student }: CardStudentProps) => {
   return (
     <Card className="flex flex-col h-fit gap-2 w-[250px] p-0 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0">
-        <img
+        <Image
           src={student.profilePicture.url}
           alt="Student"
           className="w-full h-35 object-cover"

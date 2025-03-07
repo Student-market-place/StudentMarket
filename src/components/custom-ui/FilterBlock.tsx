@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 const FilterBlock = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [availability, setAvailability] = useState("");
   const [contractType, setContractType] = useState("");
   const [skills, setSkills] = useState("");

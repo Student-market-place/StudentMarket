@@ -9,6 +9,7 @@ import StudentHistoryService from "@/services/studentHistory.service";
 import { ReviewWithRelation } from "@/types/review.type";
 import { StudentWithRelation } from "@/types/student.type";
 import { HistoryWithRelation } from "@/types/studentHistory.type";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -81,7 +82,7 @@ const StudentProfilPage = () => {
       </div>
       <div className="flex justify-between w-full py-10 px-30">
         <div className="flex flex-col gap-10  items-center">
-          <img
+          <Image
             src={student.profilePicture.url}
             className="w-[200px] h-[150px] rounded-xl object-cover shadow-lg"
             alt="Photo de profil"

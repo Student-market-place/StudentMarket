@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NavBar from "@/components/custom-ui/NavBar";
+
 import { ReactQueryProvider } from "@/providers/ReactQueryProviders";
 
 const geistSans = Geist({
@@ -34,7 +34,6 @@ export default function RootLayout({
         <main className="p-8">
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </main>
-
       </body>
     </html>
   );

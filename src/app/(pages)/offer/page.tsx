@@ -10,7 +10,7 @@ export const SingleOfferPage = () => {
           <h1 className="text-xl font-bold">Offre</h1>
 
           <h2 className="text-xl font-bold text-blue-600 text-center">
-            🚀 Offre d'Alternance – Développeur Next.js (H/F)
+            🚀 Offre d&apos;Alternance – Développeur Next.js (H/F)
           </h2>
 
           <p className="text-center">
@@ -24,27 +24,31 @@ export const SingleOfferPage = () => {
 
           <h3 className="text-lg font-semibold">👨‍💻 Qui sommes-nous ?</h3>
           <p className="text-center">
-            [Nom de l’entreprise] est une startup / entreprise spécialisée dans
-            **[secteur d’activité]**. Nous développons des applications web
-            modernes et performantes, en mettant l'accent sur l'expérience
-            utilisateur et la scalabilité.
+            [Nom de l&apos;entreprise] est une startup / entreprise spécialisée
+            dans **[secteur d&apos;activité]**. Nous développons des
+            applications web modernes et performantes, en mettant l&apos;accent
+            sur l&apos;expérience utilisateur et la scalabilité.
           </p>
 
           <h3 className="text-lg font-semibold">🎯 Tes missions</h3>
           <ul className="text-left list-disc list-inside">
-            <li>✅ Développement d’interfaces web en **React / Next.js**</li>
+            <li>
+              ✅ Développement d&apos;interfaces web en **React / Next.js**
+            </li>
             <li>
               ✅ Optimisation des performances (**SSR, SSG, ISR, API Routes**)
             </li>
             <li>
-              ✅ Intégration d’APIs et de bases de données (**Firebase,
+              ✅ Intégration d&apos;APIs et de bases de données (**Firebase,
               Supabase, PostgreSQL**)
             </li>
             <li>
-              ✅ Amélioration de l'expérience utilisateur avec des animations
-              avancées
+              ✅ Amélioration de l&apos;expérience utilisateur avec des
+              animations avancées
             </li>
-            <li>✅ Gestion de l’état avec **React Query, Zustand ou Redux**</li>
+            <li>
+              ✅ Gestion de l&apos;état avec **React Query, Zustand ou Redux**
+            </li>
             <li>
               ✅ Mise en place des bonnes pratiques (**SEO, accessibilité,
               tests**)
@@ -67,7 +71,9 @@ export const SingleOfferPage = () => {
             <li>📌 Bonne compréhension de **Git et des workflows CI/CD**</li>
           </ul>
 
-          <h3 className="text-lg font-semibold">🎁 Ce que nous t’offrons</h3>
+          <h3 className="text-lg font-semibold">
+            🎁 Ce que nous t&apos;offrons
+          </h3>
           <ul className="text-left list-disc list-inside">
             <li>
               🚀 Un environnement technique stimulant avec des projets concrets

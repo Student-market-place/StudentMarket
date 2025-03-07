@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -10,17 +11,17 @@ export default function Home() {
           </h1>
           <p>
             Student Market est une plateforme qui simplifie la mise en relation
-            entre étudiants en quête de stages ou d'alternances et entreprises à
-            la recherche de nouveaux talents. En facilitant le processus de
-            candidature et de recrutement, nous offrons un espace efficace et
-            intuitif pour connecter les besoins des uns avec les opportunités
-            des autres.
+            entre étudiants en quête de stages ou d&apos;alternances et
+            entreprises à la recherche de nouveaux talents. En facilitant le
+            processus de candidature et de recrutement, nous offrons un espace
+            efficace et intuitif pour connecter les besoins des uns avec les
+            opportunités des autres.
           </p>
           <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
-            S'inscrire
+            S&apos;inscrire
           </Button>
         </div>
-        <img
+        <Image
           src="/assets/home-img.jpg"
           alt=""
           className="w-[500px] h-[300px] object-cover shadow-lg rounded-xl"
@@ -63,14 +64,14 @@ export default function Home() {
               Créer mon profil
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"
           />
         </div>
         <div className="flex w-full justify-between ">
-          <img
+          <Image
             src="/assets/card-student.png"
             className="w-[250px] max-h-[300px] object-fit shadow-lg"
             alt="Aperçu d'une offre"
@@ -78,13 +79,14 @@ export default function Home() {
           <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les entreprises</h2>
             <p className="max-w-2xl">
-              Sur Student Market, vous avez l'opportunité de toucher directement
-              les talents les plus motivés et qualifiés. Publiez vos offres et
-              accédez à une sélection de profils d'étudiants détaillés, où vous
-              pouvez évaluer leurs compétences, leur expérience et leurs projets
-              réalisés. Gérez les candidatures en toute simplicité, consultez
-              les profils des étudiants qui postulent et suivez facilement
-              l’évolution de vos recrutements.
+              Sur Student Market, vous avez l&apos;opportunité de toucher
+              directement les talents les plus motivés et qualifiés. Publiez vos
+              offres et accédez à une sélection de profils d&apos;étudiants
+              détaillés, où vous pouvez évaluer leurs compétences, leur
+              expérience et leurs projets réalisés. Gérez les candidatures en
+              toute simplicité, consultez les profils des étudiants qui
+              postulent et suivez facilement l&apos;évolution de vos
+              recrutements.
               <br /> Student Market vous permet de gagner en efficacité et de
               trouver rapidement les talents qui feront la différence dans vos
               projets
@@ -99,19 +101,19 @@ export default function Home() {
             <h2 className="text-xl font-semibold">Pour les écoles</h2>
             <p className="max-w-2xl">
               Afin de garantir la qualité et la fiabilité des profils étudiants,
-              l'inscription sur Student Market est réservée aux écoles
+              l&apos;inscription sur Student Market est réservée aux écoles
               partenaires. Si vous êtes intéressé(e), vous devez nous contacter
               pour souscrire à une formule payante, permettant ainsi à vos
-              étudiants d'accéder aux offres et de postuler aux opportunités
-              proposées par les entreprises. <br /> Un accès vous sera dédié à
-              la plateforme, avec un tableau de bord incluant des visualisations
-              de données et la liste des étudiants inscrits.
+              étudiants d&apos;accéder aux offres et de postuler aux
+              opportunités proposées par les entreprises. <br /> Un accès vous
+              sera dédié à la plateforme, avec un tableau de bord incluant des
+              visualisations de données et la liste des étudiants inscrits.
             </p>
             <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
               Devenir Partenaire
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"

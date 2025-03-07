@@ -36,7 +36,7 @@ async function fetchReviewsByStudent(
   return response.data;
 }
 
-async function postReview(review: Review): Promise<Review> {
+async function postReview(): Promise<Review> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/review`;
   const response = await axios.get(url);

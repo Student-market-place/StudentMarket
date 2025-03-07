@@ -314,7 +314,7 @@ export const JobsOfferTable = () => {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-                      No job offers found matching "{searchTerm}".
+                      No job offers found matching &quot{searchTerm}&quot.
                     </TableCell>
                   </TableRow>
                 ) : (
