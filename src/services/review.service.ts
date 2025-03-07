@@ -9,7 +9,7 @@ async function fetchReviews(
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/review`;
 
-  const queryObject: Record<string, any> = {};
+  const queryObject: Record<string, number> = {};
   if (params.rating !== undefined) {
     queryObject.status = params.rating;
   }

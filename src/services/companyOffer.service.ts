@@ -8,7 +8,7 @@ async function fetchCompanyOffers(params: CompanyOffer): Promise<CompanyOffer[]>
   const url = `${baseUrl}/api/company_offer`;
 
     // Construction d'un objet de paramètres de requête
-    const queryObject: Record<string, any> = {};
+    const queryObject: Record<string, string> = {};
     if (params.status !== undefined) {
       queryObject.status = params.status;
     }

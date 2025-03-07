@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const where: Prisma.Company_offerWhereInput = {};
 
     if (typeParam) {
-      where.type = typeParam as Prisma.EnumTypeFilter<"Company_offer">;
+      where.type = typeParam as Prisma.Company_offerWhereInput["type"];
     }
 
     const companyOffers = await prisma.company_offer.findMany({

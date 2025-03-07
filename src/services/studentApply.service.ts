@@ -8,7 +8,7 @@ async function fetchStudentsApply(params: StudentApply): Promise<StudentApply[]>
   const url = `${baseUrl}/api/student_apply`;
 
     // Construction d'un objet de paramètres de requête
-    const queryObject: Record<string, any> = {};
+    const queryObject: Record<string, string> = {};
     if (params.status !== undefined) {
       queryObject.status = params.status;
     }

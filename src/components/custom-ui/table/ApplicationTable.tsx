@@ -255,7 +255,7 @@ export function ApplicationTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                      No applications found matching "{searchTerm}".
+                      No applications found matching &quot;{searchTerm}&quot;.
                     </TableCell>
                   </TableRow>
                 ) : (
