@@ -77,7 +77,7 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
                 <hr className="flex-grow border-gray-300" />
               </div>
               <Button variant="outline" className="flex items-center">
-                <Image src="/google.svg" alt="Google" width={20} height={20} />
+                <img src="/google.svg" alt="Google" width={20} height={20} />
                 <span>{variant === "login" ? "Sign In" : "Sign Up"}</span>
               </Button>
             </div>
