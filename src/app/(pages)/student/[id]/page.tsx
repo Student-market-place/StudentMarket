@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReviewService from "@/services/review.service";
 import StudentService from "@/services/student.service";
+import StudentHistoryService from "@/services/studentHistory.service";
 import { ReviewWithRelation } from "@/types/review.type";
 import { StudentWithRelation } from "@/types/student.type";
-import { Divide } from "lucide-react";
+import { HistoryWithRelation } from "@/types/studentHistory.type";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -15,6 +16,7 @@ const StudentProfilPage = () => {
   const { id } = useParams();
   const [student, setStudent] = useState<StudentWithRelation | null>(null);
   const [reviews, setReviews] = useState<ReviewWithRelation[]>([]);
+  const [history, setHistory] = useState<HistoryWithRelation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +37,19 @@ const StudentProfilPage = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (id) {
+      console.log("fetching history", id);
+      StudentHistoryService.fetchStudentsHistory({ studentId: id as string })
+        .then((data) => {
+          console.log("Historique récupéré :", data);
+          setHistory(data);
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -50,9 +65,6 @@ const StudentProfilPage = () => {
       </div>
     );
   }
-
-  console.log();
-
   return (
     <div className="flex flex-col gap-5 items-center w-full">
       <div className="flex flex-col items-center">
@@ -121,12 +133,24 @@ const StudentProfilPage = () => {
             </TabsContent>
 
             <TabsContent value="experience">
-              <h2>Expériences</h2>
-              {/* <ul className="flex flex-wrap gap-1 mt-1">
-                {student?.studentHistories.map((history, index) => (
-                  <li key={index}>{history?.startDate.toLocaleDateString()}</li>
+              <ul className="flex flex-col gap-1 mt-1">
+                {history?.map((history, index) => (
+                  <div key={index} className="flex flex-col gap-1 items-center">
+                    <h3 className="text-md font-semibold">
+                      {history?.company.name}
+                    </h3>
+                    <div className="flex gap-1 border-b-2 w-full pb-5">
+                      <p>{new Date(history?.startDate).toLocaleDateString()}</p>
+                      <p>-</p>
+                      <p>
+                        {history?.endDate
+                          ? new Date(history.endDate).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </ul> */}
+              </ul>
             </TabsContent>
 
             <TabsContent value="skills">
