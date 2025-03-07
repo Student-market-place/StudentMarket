@@ -5,6 +5,11 @@ enum Type {
     ALTERNANCE = 'Alternance',
 }
 
+enum Status {
+    OPEN = 'Open',
+    CLOSED = 'Closed',
+}
+
 
 export interface CompanyOffer {
     id: string;
@@ -12,6 +17,7 @@ export interface CompanyOffer {
     title: string;
     description: string;
     startDate: Date;
+    status: Status;
     type: Type;
     createdAt: Date;
     updatedAt: Date;

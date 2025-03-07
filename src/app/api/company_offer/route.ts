@@ -1,33 +1,34 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const company_offer = await prisma.company_offer.findMany();
-  return NextResponse.json(company_offer, { status: 200 });
-}
+export async function GET(req: NextRequest) {
+  try {
+    const searchParams = req.nextUrl.searchParams;
+    const typeParam = searchParams.get("type");
 
-export async function POST(req: NextRequest) {
-  const { companyId, title, description, expectedSkills, startDate, type } =
-    await req.json();
-    
-  if (!companyId || !title || !description || !expectedSkills || !startDate || !type) {
+    const where: Prisma.Company_offerWhereInput = {};
+
+    if (typeParam) {
+      where.type = typeParam as Prisma.Company_offerWhereInput["type"];
+    }
+
+    const companyOffers = await prisma.company_offer.findMany({
+      where,
+      include: {
+        company: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
+
+    return NextResponse.json(companyOffers, { status: 200 });
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: "companyId, title, description, expectedSkills, startDate, type are required" },
-      { status: 400 }
+      { error: (error as Error).message || "Erreur lors de la récupération des offres de l'entreprise" },
+      { status: 500 }
     );
   }
-
-  const company_offer = await prisma.company_offer.create({
-    data: {
-      company: { connect: { id: companyId } },
-      title,
-      description,
-      expectedSkills,
-      startDate,
-      type,
-    },
-  });
-  return NextResponse.json(company_offer, { status: 201 });
 }

@@ -3,18 +3,43 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const reviews = await prisma.review.findMany();
-  return NextResponse.json(reviews);
+export async function GET(req: NextRequest) {
+  try {
+    const searchParams = req.nextUrl.searchParams;
+    const studentParam = searchParams.get("student");
+
+    const where: {
+      studentId?: string;
+    } = {};
+
+    if (studentParam) {
+      where.studentId = studentParam;
+    }
+
+    const reviews = await prisma.review.findMany({
+      include: {
+        company: true,
+        student: true,
+      },
+      where,
+    });
+
+    return NextResponse.json(reviews, { status: 200 });
+  } catch (error: unknown) {
+    console.log("error", error);
+    return NextResponse.json(
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la récupération des étudiants",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const {
-    studentId,
-    companyId,
-    rating,
-    comment,
-  } = await req.json();
+  const { studentId, companyId, rating, comment } = await req.json();
 
   if (!studentId || !companyId || !rating || !comment) {
     return NextResponse.json(

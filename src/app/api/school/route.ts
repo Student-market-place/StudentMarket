@@ -11,7 +11,7 @@ export async function GET() {
 
 
 export async function POST(req: NextRequest) {
-  const { name, domainName, isActive, profilePictureId } = await req.json();
+  const { name, domainName, isActive, profilePictureId, user } = await req.json();
 
   if(!name || !domainName || !isActive || !profilePictureId) {
     return NextResponse.json(
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
 
   const school = await prisma.school.create({
     data: {
+      user,
       name,
       domainName,
       isActive,
