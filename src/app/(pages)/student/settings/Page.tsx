@@ -4,7 +4,9 @@ const SettingsStudentPage = () => {
   return (
     <div>
       <h1>Hello it's your profil</h1>
-      <StudentProfilCard />
+      <div className="flex justify-center items-center">
+        <StudentProfilCard />
+      </div>
     </div>
   );
 };
