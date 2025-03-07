@@ -82,7 +82,7 @@ const StudentProfilPage = () => {
       </div>
       <div className="flex justify-between w-full py-10 px-30">
         <div className="flex flex-col gap-10  items-center">
-          <Image
+          <img
             src={student.profilePicture.url}
             className="w-[200px] h-[150px] rounded-xl object-cover shadow-lg"
             alt="Photo de profil"

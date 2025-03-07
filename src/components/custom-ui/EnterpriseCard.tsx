@@ -22,7 +22,7 @@ export function EntrerpriseCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <Image
+        <img
           src="https://images.pexels.com/photos/4298629/pexels-photo-4298629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
           alt="Company"
           className="w-full h-40 object-cover"

@@ -82,7 +82,9 @@ const AuthCard = ({
                 </Label>
                 <hr className="flex-grow border-gray-300" />
               </div>
+
               <SigninWithGoogle />
+
             </div>
             <p className="text-center text-gray-400">
               {variant === "login"
