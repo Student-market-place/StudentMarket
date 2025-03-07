@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 export function EntrerpriseCard() {
   return (
@@ -29,7 +28,7 @@ export function EntrerpriseCard() {
         />
         <p className="p-4 text-black text-sm">
           Nous offrons une gamme complète de services, allant de la conception
-          de sites web et d'applications mobiles à l'optimisation des stratégies
+          de sites web et d&apos;applications mobiles à l&apos;optimisation des stratégies
           digitales et au marketing en ligne.
         </p>
       </CardContent>
