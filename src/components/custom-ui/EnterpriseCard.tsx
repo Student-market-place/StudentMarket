@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 
 export function EntrerpriseCard() {
   return (
@@ -21,15 +22,15 @@ export function EntrerpriseCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <img
+        <Image
           src="https://images.pexels.com/photos/4298629/pexels-photo-4298629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
           alt="Company"
           className="w-full h-40 object-cover"
         />
         <p className="p-4 text-black text-sm">
           Nous offrons une gamme complète de services, allant de la conception
-          de sites web et d&apos;applications mobiles à l&apos;optimisation des stratégies
-          digitales et au marketing en ligne.
+          de sites web et d&apos;applications mobiles à l&apos;optimisation des
+          stratégies digitales et au marketing en ligne.
         </p>
       </CardContent>
       <CardFooter className="p-4 flex justify-between items-center ">

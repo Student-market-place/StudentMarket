@@ -3,19 +3,17 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 export function CompanyProfilCard() {
   return (
     <Card className="relative py-0 flex bg-clip-border bg-white text-gray-700 shadow-md w-[72rem] flex-row">
       <div className="relative w-2/5 m-0 overflow-hidden text-gray-700 bg-white rounded-r-none bg-clip-border rounded-xl shrink-0">
-        <img
+        <Image
           src="https://images.pexels.com/photos/3183153/pexels-photo-3183153.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
           alt="Company"
           className="object-cover w-full h-full"
@@ -30,22 +28,23 @@ export function CompanyProfilCard() {
         </CardDescription>
         <p className="block mb-8 font-sans text-base antialiased font-normal leading-relaxed text-gray-700">
           🚀 **TechNova Solutions** est une entreprise innovante spécialisée
-          dans le développement de logiciels, l'intelligence artificielle et la
-          transformation digitale des entreprises. Nous croyons en l'importance
-          de la formation et du développement des jeunes talents.
+          dans le développement de logiciels, l&apos;intelligence artificielle
+          et la transformation digitale des entreprises. Nous croyons en
+          l&apos;importance de la formation et du développement des jeunes
+          talents.
           <br />
           <br />
           🔹 **Nos offres de stage :** - Développement Web et Mobile
           (**React.js, Next.js, Flutter**) 📱💻 - Intelligence Artificielle et
           Machine Learning 🤖 - Cybersécurité et protection des données 🔐 -
           Gestion de bases de données et Cloud Computing ☁️ - UX/UI Design et
-          conception d'interfaces modernes 🎨
+          conception d&apos;interfaces modernes 🎨
           <br />
           <br />
           🔹 **Pourquoi choisir TechNova Solutions ?** - Accès à des **projets
           concrets et innovants** 🏆 - Encadrement par des **experts du
-          domaine** 👩‍💻👨‍💻 - Opportunité d'apprentissage et d'évolution rapide 🚀
-          - Possibilité d'embauche à la fin du stage 🏢
+          domaine** 👩‍💻👨‍💻 - Opportunité d&apos;apprentissage et d&apos;évolution
+          rapide 🚀 - Possibilité d&apos;embauche à la fin du stage 🏢
           <br />
           💡 Nous recherchons des stagiaires passionnés, curieux et prêts à
           relever des défis techniques. Rejoignez-nous et participez à la
@@ -53,7 +52,7 @@ export function CompanyProfilCard() {
         </p>
         <div className="flex space-x-4 gap-4 p-4">
           <Button className="px-6 py-3 text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600">
-            Mes offres d'emploi
+            Mes offres d&apos;emploi
           </Button>
           <Button className="px-6 py-3 text-white bg-gray-500 rounded-lg shadow-md hover:bg-gray-600">
             Mettre à jour le profil

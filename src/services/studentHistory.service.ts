@@ -11,7 +11,7 @@ async function fetchStudentsHistory(
 
   console.log("fetchStudentsHistory params", params);
 
-  const queryObject: Record<string, any> = {};
+  const queryObject: Record<string, string> = {};
   if (params.studentId !== undefined) {
     queryObject.studentId = params.studentId;
   }

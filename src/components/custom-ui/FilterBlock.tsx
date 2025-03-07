@@ -5,8 +5,6 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 
 const FilterBlock = () => {
-  const [searchQuery] = useState("");
-
   const [availability, setAvailability] = useState("");
   const [contractType, setContractType] = useState("");
   const [skills, setSkills] = useState("");
