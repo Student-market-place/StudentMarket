@@ -1,7 +1,6 @@
 import { CompanyTable } from "@/components/custom-ui/table/CompanyTable";
 import { SchoolTable } from "@/components/custom-ui/table/SchoolTable";
 import { StudentTable } from "@/components/custom-ui/table/StudentTable";
-import { Button } from "@/components/ui/button";
 
 const DashboardAdminPage = () => {
   return (
