@@ -31,10 +31,9 @@ export default function RootLayout({
       >
         {/* <NavBar menu={"Candidatures"} /> */}
 
-        <main className="p-8">
+        <main className="py-2 px-4">
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </main>
-
       </body>
     </html>
   );
