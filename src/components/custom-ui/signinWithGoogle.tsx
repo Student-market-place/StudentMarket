@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const SigninWithGoogle = () => {
   const pathname = usePathname();

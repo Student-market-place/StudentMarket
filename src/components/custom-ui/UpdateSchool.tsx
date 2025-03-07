@@ -20,9 +20,9 @@ export function UpdateSchool() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Mise à jour l'école</DialogTitle>
+          <DialogTitle>Mise à jour l&apos;école</DialogTitle>
           <DialogDescription>
-            Remplissez tous les champs pour mettre à jour l'école
+            Remplissez tous les champs pour mettre à jour l&apos;école
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

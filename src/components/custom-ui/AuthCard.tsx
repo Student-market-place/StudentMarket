@@ -1,8 +1,6 @@
 "use client";
 
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "../ui/button";
 import SigninWithGoogle from "./signinWithGoogle";
 import {

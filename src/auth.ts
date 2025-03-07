@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import type { User } from "next-auth";
+
 
 declare module "next-auth" {
   interface User {
@@ -25,7 +25,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     verifyRequest: `http://localhost:3000/auth/verify-request`,
   },
   callbacks: {
-    async jwt({ token, user, account, trigger, profile }) {
+    async jwt({ token, user, account }) {
       if (account && user) {
         token.accessToken = account.access_token;
         token.id = user.id;

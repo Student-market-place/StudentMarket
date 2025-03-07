@@ -224,7 +224,7 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
           <Form {...companyForm}>
             <form onSubmit={companyForm.handleSubmit(onCompanySubmit)} className="space-y-8">
               <FormItem className="flex flex-col items-center">
-                <FormLabel>Logo de l'entreprise</FormLabel>
+                <FormLabel>Logo de l&apos;entreprise</FormLabel>
                 <AvatarUpload
                   fallback=" "
                   onUpload={async (file) => {
@@ -240,7 +240,7 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom de l'entreprise</FormLabel>
+                    <FormLabel>Nom de l&apos;entreprise</FormLabel>
                     <FormControl>
                       <Input placeholder="Nom de votre entreprise" {...field} />
                     </FormControl>
@@ -253,7 +253,7 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description de l'entreprise</FormLabel>
+                    <FormLabel>Description de l&apos;entreprise</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Décrivez votre entreprise..."
