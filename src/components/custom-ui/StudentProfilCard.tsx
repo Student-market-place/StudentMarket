@@ -53,6 +53,10 @@ export function StudentProfilCard() {
           un environnement stimulant où je pourrai mettre en pratique mes
           compétences et contribuer activement au succès de l’équipe. 🎯🔥
         </p>
+        <div className=" justify-items-center flex space-y-4 gap-7 p-7">
+          <Button>Ma candidature</Button>
+          <Button>Mettre à jour le profil</Button>
+        </div>
       </CardHeader>
     </Card>
   );
