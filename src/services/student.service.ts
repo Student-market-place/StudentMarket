@@ -38,32 +38,9 @@ async function fetchStudentById(id: string): Promise<StudentWithRelation> {
   return response.data;
 }
 
-async function downloadCV(cvId: string): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-  const url = `${baseUrl}/api/download?cvId=${cvId}`; // Assurez-vous que votre API est configurée pour accepter cette requête.
-
-  try {
-    const response = await axios.get(url, {
-      responseType: "blob", // Important pour télécharger le fichier en tant que binaire
-    });
-
-    // Crée un lien pour télécharger le fichier
-    const blob = response.data;
-    const urlObject = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = urlObject;
-    a.download = "CV.pdf"; // Vous pouvez modifier ce nom si nécessaire
-    a.click();
-    window.URL.revokeObjectURL(urlObject);
-  } catch (error) {
-    console.error("Erreur lors du téléchargement du fichier : ", error);
-  }
-}
-
 const StudentService = {
   fetchStudents,
   fetchStudentById,
-  downloadCV,
 };
 
 export default StudentService;

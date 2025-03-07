@@ -7,17 +7,10 @@ import { StudentWithRelation } from "@/types/student.type";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Remove the props interface since we'll be fetching the data directly
 const StudentProfilPage = () => {
   const { id } = useParams();
   const [student, setStudent] = useState<StudentWithRelation | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const handleDownload = async () => {
-    if (student?.CV?.url) {
-      await StudentService.downloadCV(student.CV.url);
-    }
-  };
 
   useEffect(() => {
     if (id) {
@@ -28,7 +21,6 @@ const StudentProfilPage = () => {
     }
   }, [id]);
 
-  // Show loading state while data is being fetched
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -37,7 +29,6 @@ const StudentProfilPage = () => {
     );
   }
 
-  // Handle case when student data couldn't be loaded
   if (!student) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -65,13 +56,12 @@ const StudentProfilPage = () => {
           <div className="flex flex-col gap-5 items-center">
             <h2 className="text-xl font-bold">Biographie</h2>
             <p className="max-w-[500px]">{student.description}</p>
-            <div className="flex justify-between w-full px-30">
-              <Button
-                onClick={handleDownload}
-                className="bg-blue-500 hover:bg-blue-700 w-fit"
-              >
-                Telecharger le CV
-              </Button>
+            <div className="flex justify-between w-full px-10">
+              <a href="" download={student.CV.url}>
+                <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+                  Telecharger le CV
+                </Button>
+              </a>
               <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
                 Contacter
               </Button>
