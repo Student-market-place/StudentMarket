@@ -1,14 +1,11 @@
 "use client";
-import CardJobOffer from "@/components/custom-ui/CardOffer";
-import CardStudent from "@/components/custom-ui/CardStudent";
+
 import FilterBlock from "@/components/custom-ui/FilterBlock";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import StudentService from "@/services/student.service";
-import { StudentWithRelation } from "@/types/student.type";
-import CompanyOfferService from "@/services/companyOffer.service";
-import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+
+import StudentList from "@/components/custom-ui/StudentList";
+import OffersList from "@/components/custom-ui/OffersList";
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
@@ -16,27 +13,6 @@ const HomePage = () => {
   const handleActive = (tab: "students" | "offers") => {
     setActiveTab(tab);
   };
-
-  const query = useQuery({
-    queryKey: ["students"],
-    queryFn: () =>
-      StudentService.fetchStudents({
-        isAvailable: true,
-      }),
-  });
-
-  const queryOffers = useQuery({
-    queryKey: ["company_offer"],
-    queryFn: () => CompanyOfferService.fetchCompanyOffers({}),
-  });
-
-  const students = query.data;
-  const offers = queryOffers.data;
-
-  console.log("query", query);
-  console.log("queryOffers", queryOffers);
-  console.log("students", students);
-  console.log("offers", offers);
 
   return (
     <div className="flex flex-col gap-10 w-full">
@@ -69,16 +45,10 @@ const HomePage = () => {
         <div className="grid grid-cols-4 gap-8">
           {activeTab === "students" ? (
             <>
-              {students?.map((student: StudentWithRelation) => (
-                <CardStudent key={student.id} student={student} />
-              ))}
+              <StudentList />
             </>
           ) : (
-            <>
-              {offers?.map((offer: CompanyOfferWithRelation) => (
-                <CardJobOffer key={offer.id} jobOffer={offer} />
-              ))}
-            </>
+            <OffersList />
           )}
         </div>
       </div>
