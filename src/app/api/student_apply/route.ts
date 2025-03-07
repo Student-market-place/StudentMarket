@@ -38,9 +38,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { studentId, companyOfferId, message } = await req.json();
+    const { studentId, companyOfferId, message, status } = await req.json();
 
-    if (!studentId || !companyOfferId || !message) {
+    if (!studentId || !companyOfferId || !message || !status) {
       return NextResponse.json(
         { error: "studentId, companyOfferId, and message are required" },
         { status: 400 }
@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
 
     const student_apply = await prisma.student_apply.create({
       data: {
+        status: "en_attente",
         student: { connect: { id: studentId } },
         companyOffer: { connect: { id: companyOfferId } },
         message,

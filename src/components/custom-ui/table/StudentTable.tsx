@@ -263,7 +263,7 @@ export function StudentTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      No students found matching "{searchTerm}".
+                      No students found matching &quot;{searchTerm}&quot;.
                     </TableCell>
                   </TableRow>
                 ) : (

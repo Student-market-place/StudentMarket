@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export const SingleOfferPage = () => {
+const SingleOfferPage = () => {
   return (
     <div className="flex justify-center ">
       <h1 className="text-2xl font-bold mb-6">Offer Company Page</h1>
@@ -10,7 +10,7 @@ export const SingleOfferPage = () => {
           <h1 className="text-xl font-bold">Offre</h1>
 
           <h2 className="text-xl font-bold text-blue-600 text-center">
-            🚀 Offre d'Alternance – Développeur Next.js (H/F)
+            🚀 Offre d&apos;Alternance – Développeur Next.js (H/F)
           </h2>
 
           <p className="text-center">
@@ -26,7 +26,7 @@ export const SingleOfferPage = () => {
           <p className="text-center">
             [Nom de l’entreprise] est une startup / entreprise spécialisée dans
             **[secteur d’activité]**. Nous développons des applications web
-            modernes et performantes, en mettant l'accent sur l'expérience
+            modernes et performantes, en mettant l&apos;accent sur l&apos;expérience
             utilisateur et la scalabilité.
           </p>
 
@@ -41,7 +41,7 @@ export const SingleOfferPage = () => {
               Supabase, PostgreSQL**)
             </li>
             <li>
-              ✅ Amélioration de l'expérience utilisateur avec des animations
+              ✅ Amélioration de l&apos;expérience utilisateur avec des animations
               avancées
             </li>
             <li>✅ Gestion de l’état avec **React Query, Zustand ou Redux**</li>
@@ -96,3 +96,5 @@ export const SingleOfferPage = () => {
     </div>
   );
 };
+
+export default SingleOfferPage;
