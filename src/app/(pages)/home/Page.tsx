@@ -5,9 +5,9 @@ import FilterBlock from "@/components/custom-ui/FilterBlock";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-
 import StudentService from "@/services/student.service";
 import { StudentWithRelation } from "@/types/student.type";
+
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");

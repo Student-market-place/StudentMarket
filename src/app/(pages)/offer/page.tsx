@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export const SingleOfferPage = () => {
+const SingleOfferPage = () => {
   return (
     <div className="flex justify-center ">
       <h1 className="text-2xl font-bold mb-6">Offer Company Page</h1>
@@ -43,11 +43,8 @@ export const SingleOfferPage = () => {
               Supabase, PostgreSQL**)
             </li>
             <li>
-              ✅ Amélioration de l&apos;expérience utilisateur avec des
-              animations avancées
-            </li>
-            <li>
-              ✅ Gestion de l&apos;état avec **React Query, Zustand ou Redux**
+              ✅ Amélioration de l&apos;expérience utilisateur avec des animations
+              avancées
             </li>
             <li>
               ✅ Mise en place des bonnes pratiques (**SEO, accessibilité,
@@ -102,3 +99,5 @@ export const SingleOfferPage = () => {
     </div>
   );
 };
+
+export default SingleOfferPage;

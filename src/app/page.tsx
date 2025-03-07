@@ -1,5 +1,9 @@
 import { Button } from "@/components/ui/button";
+
 import Image from "next/image";
+
+import Link from "next/link";
+
 
 export default function Home() {
   return (
@@ -79,14 +83,13 @@ export default function Home() {
           <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les entreprises</h2>
             <p className="max-w-2xl">
-              Sur Student Market, vous avez l&apos;opportunité de toucher
-              directement les talents les plus motivés et qualifiés. Publiez vos
-              offres et accédez à une sélection de profils d&apos;étudiants
-              détaillés, où vous pouvez évaluer leurs compétences, leur
-              expérience et leurs projets réalisés. Gérez les candidatures en
-              toute simplicité, consultez les profils des étudiants qui
-              postulent et suivez facilement l&apos;évolution de vos
-              recrutements.
+              Sur Student Market, vous avez l&apos;opportunité de toucher directement
+              les talents les plus motivés et qualifiés. Publiez vos offres et
+              accédez à une sélection de profils d&apos;étudiants détaillés, où vous
+              pouvez évaluer leurs compétences, leur expérience et leurs projets
+              réalisés. Gérez les candidatures en toute simplicité, consultez
+              les profils des étudiants qui postulent et suivez facilement
+              l’évolution de vos recrutements.
               <br /> Student Market vous permet de gagner en efficacité et de
               trouver rapidement les talents qui feront la différence dans vos
               projets
@@ -104,10 +107,12 @@ export default function Home() {
               l&apos;inscription sur Student Market est réservée aux écoles
               partenaires. Si vous êtes intéressé(e), vous devez nous contacter
               pour souscrire à une formule payante, permettant ainsi à vos
-              étudiants d&apos;accéder aux offres et de postuler aux
-              opportunités proposées par les entreprises. <br /> Un accès vous
-              sera dédié à la plateforme, avec un tableau de bord incluant des
-              visualisations de données et la liste des étudiants inscrits.
+
+              étudiants d&apos;accéder aux offres et de postuler aux opportunités
+              proposées par les entreprises. <br /> Un accès vous sera dédié à
+              la plateforme, avec un tableau de bord incluant des visualisations
+              de données et la liste des étudiants inscrits.
+
             </p>
             <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
               Devenir Partenaire
@@ -119,6 +124,10 @@ export default function Home() {
             alt="Aperçu d'une offre"
           />
         </div>
+      </div>
+      <div className="flex justify-center gap-10">
+        <Link href="/privacy-policy">Politique de confidentialité</Link>
+        <Link href="/terms-of-use">Conditions d&apos;utilisations</Link>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import {
   GetAllParams,
-  Student,
   StudentWithRelation,
 } from "@/types/student.type";
 import axios from "axios";
@@ -12,12 +11,12 @@ async function fetchStudents(
   const url = `${baseUrl}/api/student`;
 
   // Construction d'un objet de paramètres de requête
-  const queryObject: Record<string, any> = {};
+  const queryObject: Record<string, string[]> = {};
   if (params.isAvailable !== undefined) {
-    queryObject.available = params.isAvailable.toString();
+    queryObject.available = [params.isAvailable.toString()];
   }
   if (params.status) {
-    queryObject.status = params.status;
+    queryObject.status = [params.status.toString()];
   }
   if (params.skills && params.skills.length > 0) {
     // Axios va sérialiser le tableau en répétant le paramètre dans l'URL

@@ -9,7 +9,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, profilePictureId, description } = await req.json();
+  const { name, profilePictureId, description, user } = await req.json();
 
   if (!name || !profilePictureId || !description) {
     return NextResponse.json(
@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
 
   const company = await prisma.company.create({
     data: {
+      user,
       name,
       profilePicture: { connect: { id: profilePictureId } },
       description,

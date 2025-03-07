@@ -7,12 +7,11 @@ async function fetchReviews(
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/review`;
 
-  const queryObject: Record<string, any> = {};
-  if (params.studentId !== undefined) {
-    queryObject.student = params.studentId.toString();
-  }
-  if (params.companyId !== undefined) {
-    queryObject.company = params.companyId;
+
+  const queryObject: Record<string, number> = {};
+  if (params.rating !== undefined) {
+    queryObject.status = params.rating;
+
   }
 
   const response = await axios.get(url, { params: queryObject });

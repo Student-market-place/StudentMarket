@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "../ui/button";
 
 const FilterBlock = () => {
   const [searchQuery] = useState("");
+
   const [availability, setAvailability] = useState("");
   const [contractType, setContractType] = useState("");
   const [skills, setSkills] = useState("");
@@ -33,7 +35,6 @@ const FilterBlock = () => {
 
   const handleSearch = () => {
     // Logique de recherche ou de filtrage à ajouter ici
-    console.log("Recherche:", searchQuery);
     console.log("Disponibilité:", availability);
     console.log("Type de contrat:", contractType);
     console.log("Compétences:", skills);
