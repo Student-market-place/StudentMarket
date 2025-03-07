@@ -36,10 +36,12 @@ async function fetchReviewsByStudent(
   return response.data;
 }
 
-// async function postReview(review: Review): Promise<Review> {
-//   const response = await axios.post(END_POINT, review);
-//   return response.data;
-// }
+async function postReview(review: Review): Promise<Review> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/review`;
+  const response = await axios.get(url);
+  return response.data;
+}
 
 // async function putReview(review: Review): Promise<Review> {
 //   const response = await axios.put(`${END_POINT}/${review.id}`, review);
@@ -54,7 +56,7 @@ async function fetchReviewsByStudent(
 const ReviewService = {
   fetchReviews,
   fetchReview,
-  // postReview,
+  postReview,
   // putReview,
   // deleteReview,
   fetchReviewsByStudent,

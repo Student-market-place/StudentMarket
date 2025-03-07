@@ -1,4 +1,5 @@
 "use client";
+import DisplayRating from "@/components/custom-ui/RatingStar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -144,7 +145,7 @@ const StudentProfilPage = () => {
                     <h3 className="text-md font-semibold">
                       {review?.company.name}
                     </h3>
-
+                    <DisplayRating review={review} />
                     <p>{review?.comment}</p>
                   </div>
                 ))}
