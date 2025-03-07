@@ -4,7 +4,6 @@ import {
 } from "@/types/student.type";
 import axios from "axios";
 
-
 async function fetchStudents(
   params: GetAllParams
 ): Promise<StudentWithRelation[]> {
@@ -28,8 +27,17 @@ async function fetchStudents(
   return response.data;
 }
 
+async function fetchStudentById(id: string): Promise<StudentWithRelation> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/student/${id}`;
+
+  const response = await axios.get(url);
+  return response.data;
+}
+
 const StudentService = {
   fetchStudents,
+  fetchStudentById,
 };
 
 export default StudentService;

@@ -1,5 +1,9 @@
 import { Button } from "@/components/ui/button";
+
+import Image from "next/image";
+
 import Link from "next/link";
+
 
 export default function Home() {
   return (
@@ -11,17 +15,17 @@ export default function Home() {
           </h1>
           <p>
             Student Market est une plateforme qui simplifie la mise en relation
-            entre étudiants en quête de stages ou d&apos;alternances et entreprises à
-            la recherche de nouveaux talents. En facilitant le processus de
-            candidature et de recrutement, nous offrons un espace efficace et
-            intuitif pour connecter les besoins des uns avec les opportunités
-            des autres.
+            entre étudiants en quête de stages ou d&apos;alternances et
+            entreprises à la recherche de nouveaux talents. En facilitant le
+            processus de candidature et de recrutement, nous offrons un espace
+            efficace et intuitif pour connecter les besoins des uns avec les
+            opportunités des autres.
           </p>
           <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
             S&apos;inscrire
           </Button>
         </div>
-        <img
+        <Image
           src="/assets/home-img.jpg"
           alt=""
           className="w-[500px] h-[300px] object-cover shadow-lg rounded-xl"
@@ -64,14 +68,14 @@ export default function Home() {
               Créer mon profil
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"
           />
         </div>
         <div className="flex w-full justify-between ">
-          <img
+          <Image
             src="/assets/card-student.png"
             className="w-[250px] max-h-[300px] object-fit shadow-lg"
             alt="Aperçu d'une offre"
@@ -103,16 +107,18 @@ export default function Home() {
               l&apos;inscription sur Student Market est réservée aux écoles
               partenaires. Si vous êtes intéressé(e), vous devez nous contacter
               pour souscrire à une formule payante, permettant ainsi à vos
+
               étudiants d&apos;accéder aux offres et de postuler aux opportunités
               proposées par les entreprises. <br /> Un accès vous sera dédié à
               la plateforme, avec un tableau de bord incluant des visualisations
               de données et la liste des étudiants inscrits.
+
             </p>
             <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
               Devenir Partenaire
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"

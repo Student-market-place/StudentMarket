@@ -281,7 +281,9 @@ export function SchoolTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
+
                       No schools found starting with &quot;{searchTerm}&quot;.
+
                     </TableCell>
                   </TableRow>
                 ) : (

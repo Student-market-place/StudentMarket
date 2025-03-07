@@ -5,9 +5,9 @@ import FilterBlock from "@/components/custom-ui/FilterBlock";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { StudentWithRelation } from "@/types/student.type";
 import StudentService from "@/services/student.service";
-import { EnumStatusTYpe } from "@prisma/client";
+import { StudentWithRelation } from "@/types/student.type";
+
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
@@ -21,8 +21,6 @@ const HomePage = () => {
     queryFn: () =>
       StudentService.fetchStudents({
         isAvailable: true,
-        status: EnumStatusTYpe.stage,
-        skills: [],
       }),
   });
 

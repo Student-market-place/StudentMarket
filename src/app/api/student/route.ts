@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(students, { status: 200 });
   } catch (error: unknown) {
+    console.log("error", error);
     return NextResponse.json(
       {
         error:
