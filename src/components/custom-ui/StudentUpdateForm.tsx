@@ -35,12 +35,12 @@ interface FormValues {
   skills: string[];
 }
 
-interface UpdateFormProps {
+interface StudentUpdateFormProps {
   student: StudentWithRelation;
   allSkills: Skill[];
 }
 
-const StudentUpdateForm = ({ student, allSkills }: UpdateFormProps) => {
+const StudentUpdateForm = ({ student, allSkills }: StudentUpdateFormProps) => {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [firstNameError, setFirstNameError] = React.useState<string | null>(
@@ -61,7 +61,6 @@ const StudentUpdateForm = ({ student, allSkills }: UpdateFormProps) => {
     },
   });
 
-  // Fonction de validation pour les noms
   const validateName = (value: string) => {
     const nameRegex = /^[a-zA-ZÀ-ÿ\s-]+$/;
     return nameRegex.test(value) || "Caractères spéciaux non autorisés";
@@ -164,10 +163,11 @@ const StudentUpdateForm = ({ student, allSkills }: UpdateFormProps) => {
       <Card className="w-[900px] h-full ">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
-            Update your profile
+            Mettez à jour votre profil étudiant
           </CardTitle>
           <CardDescription>
-            Update your profile to make it more attractive to companies.
+            Mettez à jour votre profil pour le rendre plus attractif pour les
+            entreprises.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -368,7 +368,7 @@ const StudentUpdateForm = ({ student, allSkills }: UpdateFormProps) => {
                                     alt="Profile"
                                     className="object-cover opacity-50"
                                   />
-                                  <AvatarFallback>
+                                  <AvatarFallback className="opacity-50">
                                     {student.firstName?.[0]}
                                     {student.lastName?.[0]}
                                   </AvatarFallback>

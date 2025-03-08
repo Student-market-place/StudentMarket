@@ -4,7 +4,7 @@ import CompanyProfileCard from "@/components/custom-ui/CompanyProfileCard";
 import CompanyService from "@/services/company.service";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import UpdateForm from "@/components/custom-ui/StudentUpdateForm";
+import CompanyUpdateForm from "@/components/custom-ui/CompanyUpdateForm";
 
 const CompanyUpdateProfile = () => {
   const { id } = useParams() as { id: string };
@@ -29,7 +29,7 @@ const CompanyUpdateProfile = () => {
   return (
     <div className="py-2 gap-x-28 flex justify-center items-center ">
       <CompanyProfileCard key={company.id} company={company} />
-      {/* <CompanyUpdateForm company={company} /> */}
+      <CompanyUpdateForm company={company} />
     </div>
   );
 };

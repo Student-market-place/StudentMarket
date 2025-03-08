@@ -1,6 +1,6 @@
 "use client";
 
-import { Company } from "@prisma/client";
+import CompanyService from "@/services/company.service";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -16,41 +16,65 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import React from "react";
+import { CompanyWithRelation } from "@/types/company.type";
+import { useQueryClient } from "@tanstack/react-query";
 
-// interface FormValues {
-//   name: string;
-//   description: string;
-//   email: string;
-// }
-
+interface FormValues {
+  name: string;
+  description: string;
+  profilePicture: string;
+  email: string;
+}
 interface CompanyUpdateFormProps {
-  company: Company;
+  company: CompanyWithRelation;
 }
 
 const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [emailError, setEmailError] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     defaultValues: {
       name: company.name,
       description: company.description || "",
-      sector: company.sector || "",
-      location: company.location || "",
-      website: company.website || "",
-      email: company.email || "",
-      phone: company.phone || "",
-      logo: company.logo || "",
+      email: company.user.email || "",
+      profilePicture: company.profilePicture?.url || "",
     },
   });
+
+  const validateEmail = (value: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value) || "Format d'email invalide";
+  };
+
+  const checkEmailInput = (value: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError("Format d'email invalide");
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmitting(true);
-      // TODO: Implement company update logic
-      toast.success("Profil de l'entreprise mis à jour avec succès");
-    } catch (error) {
+
+      const updateData = {
+        name: data.name,
+        description: data.description,
+        email: data.email,
+      };
+
+      await CompanyService.putCompany(company.id, updateData);
+      queryClient.invalidateQueries({ queryKey: ["company", company.id] });
+      toast.success("Votre profil a été mis à jour avec succès");
+    } catch (error: any) {
       console.error("Failed to update company:", error);
-      toast.error("Une erreur est survenue lors de la mise à jour du profil");
+      toast.error(
+        "Une erreur est survenue lors de la mise à jour de votre profil"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -70,8 +94,8 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
                   name="name"
@@ -87,48 +111,7 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
 
                 <FormField
                   control={form.control}
-                  name="sector"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Secteur d'activité</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Localisation</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site web</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="logo"
+                  name="profilePicture"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Logo</FormLabel>
@@ -137,16 +120,21 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
                           {field.value && (
                             <Avatar className="h-16 w-16">
                               <AvatarImage
-                                src={field.value}
+                                src={field.value || "/default-company-logo.svg"}
                                 alt="Company logo"
-                                className="object-cover"
+                                className="object-cover opacity-50"
+                                onError={(e) => {
+                                  const img = e.target as HTMLImageElement;
+                                  img.src = "/default-company-logo.svg";
+                                }}
                               />
-                              <AvatarFallback>{company.name[0]}</AvatarFallback>
+                              <AvatarFallback className="text-2xl bg-gray-100 opacity-50">
+                                {company.name[0].toUpperCase()}
+                              </AvatarFallback>
                             </Avatar>
                           )}
                           <Input
                             type="file"
-                            accept="image/*"
                             className="cursor-not-allowed opacity-50"
                             disabled
                           />
@@ -155,7 +143,9 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
                     </FormItem>
                   )}
                 />
+              </div>
 
+              <div className="grid grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
                   name="email"
@@ -163,21 +153,21 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" />
+                        <Input
+                          {...field}
+                          type="email"
+                          className={emailError ? "border-red-500" : ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            checkEmailInput(e.target.value);
+                          }}
+                        />
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Téléphone</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="tel" />
-                      </FormControl>
+                      {emailError && (
+                        <div className="text-xs text-red-500 h-5">
+                          {emailError}
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -189,7 +179,7 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea {...field} className="h-[41px] resize-none" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -197,11 +187,11 @@ const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
               </div>
             </div>
 
-            <div className="flex justify-end pt-8">
+            <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="cursor-pointer"
+                disabled={isSubmitting || !!emailError}
+                className={`cursor-pointer ${emailError ? "opacity-50" : ""}`}
               >
                 {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
               </Button>

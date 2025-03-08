@@ -31,7 +31,7 @@ const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
         </Avatar>
 
         <div className="p-3 text-center">
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-xl font-bold">
             {student?.firstName} {student?.lastName}
           </CardTitle>
           <CardDescription className="text-xs text-gray-500">

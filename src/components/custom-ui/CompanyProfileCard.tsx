@@ -1,7 +1,13 @@
 "use client";
 
 import { CompanyWithRelation } from "@/types/company.type";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
 
@@ -23,8 +29,12 @@ const CompanyProfileCard = ({ company }: CompanyProfileCardProps) => {
             {company.name[0]}
           </AvatarFallback>
         </Avatar>
-
-        <CardTitle className="text-2xl font-bold">{company.name}</CardTitle>
+        <div className="p-3 text-center">
+          <CardTitle className="text-xl font-bold">{company.name}</CardTitle>
+          <CardDescription className="text-xs text-gray-500">
+            {company?.user.email}
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="px-3 pb-3">
         <Label>Decription : </Label>
