@@ -1,21 +1,30 @@
-import { CompanyOffer } from "@/types/companyOffer.type";
+import {
+  CompanyOffer,
+  CompanyOfferWithRelation,
+  GetAllParams,
+} from "@/types/companyOffer.type";
 import axios from "axios";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company_offer`;
 
 async function fetchCompanyOffers(
-  params: CompanyOffer
-): Promise<CompanyOffer[]> {
+  params: GetAllParams
+): Promise<CompanyOfferWithRelation[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/company_offer`;
 
-
-    // Construction d'un objet de paramètres de requête
-    const queryObject: Record<string, string> = {};
-    if (params.status !== undefined) {
-      queryObject.status = params.status;
-    }
-
+  // Construction d'un objet de paramètres de requête
+  const queryObject: Record<string, string[]> = {};
+  if (params.status !== undefined) {
+    queryObject.status = [params.status.toString()];
+  }
+  if (params.skills && params.skills.length > 0) {
+    // Axios va sérialiser le tableau en répétant le paramètre dans l'URL
+    queryObject.skills = params.skills;
+  }
+  if (params.type) {
+    queryObject.type = [params.type];
+  }
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;

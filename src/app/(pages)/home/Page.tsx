@@ -1,13 +1,11 @@
 "use client";
-import CardJobOffer from "@/components/custom-ui/CardOffer";
-import CardStudent from "@/components/custom-ui/CardStudent";
+
 import FilterBlock from "@/components/custom-ui/FilterBlock";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import StudentService from "@/services/student.service";
-import { StudentWithRelation } from "@/types/student.type";
 
+import StudentList from "@/components/custom-ui/StudentList";
+import OffersList from "@/components/custom-ui/OffersList";
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
@@ -15,18 +13,6 @@ const HomePage = () => {
   const handleActive = (tab: "students" | "offers") => {
     setActiveTab(tab);
   };
-
-  const query = useQuery({
-    queryKey: ["students"],
-    queryFn: () =>
-      StudentService.fetchStudents({
-        isAvailable: true,
-      }),
-  });
-
-  const students = query.data;
-
-  console.log("students", students);
 
   return (
     <div className="flex flex-col gap-10 w-full">
@@ -54,27 +40,15 @@ const HomePage = () => {
         </Button>
       </div>
 
-      {/* Contenu dynamique selon l'onglet actif */}
       <div className="flex gap-8">
         <FilterBlock />
         <div className="grid grid-cols-4 gap-8">
           {activeTab === "students" ? (
-            // Affichage des étudiants
             <>
-              {students?.map((student: StudentWithRelation) => (
-                <CardStudent key={student.id} student={student} />
-              ))}
+              <StudentList />
             </>
           ) : (
-            <>
-              <CardJobOffer />
-              <CardJobOffer />
-              <CardJobOffer />
-              <CardJobOffer />
-              <CardJobOffer />
-              <CardJobOffer />
-              <CardJobOffer />
-            </>
+            <OffersList />
           )}
         </div>
       </div>
