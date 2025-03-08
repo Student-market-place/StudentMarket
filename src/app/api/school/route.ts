@@ -4,11 +4,21 @@ import { NextRequest, NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
 export async function GET() {
-    const schools = await prisma.school.findMany(); 
-    return NextResponse.json(schools);
+  try {
+    const schools = await prisma.school.findMany({
+      orderBy: {
+        name: 'asc'
+      }
+    });
+    return NextResponse.json(schools, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des écoles:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des écoles" },
+      { status: 500 }
+    );
+  }
 }
-
-
 
 export async function POST(req: NextRequest) {
   const { name, domainName, isActive, profilePictureId, user } = await req.json();

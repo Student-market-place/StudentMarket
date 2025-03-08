@@ -3,9 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const user = await prisma.user.findMany();
-  return NextResponse.json(user, { status: 200 });
+// Récupérer tous les utilisateurs
+export async function GET(req: NextRequest) {
+  try {
+    // Vérifier si on demande le dernier utilisateur
+    const { searchParams } = new URL(req.url);
+    const getLatest = searchParams.get('latest');
+
+    if (getLatest === 'true') {
+      const latestUser = await prisma.user.findFirst({
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      if (!latestUser) {
+        return NextResponse.json({ error: "Aucun utilisateur trouvé" }, { status: 404 });
+      }
+
+      return NextResponse.json(latestUser, { status: 200 });
+    }
+
+    // Sinon, retourner tous les utilisateurs
+    const users = await prisma.user.findMany();
+    return NextResponse.json(users, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -17,7 +42,6 @@ export async function POST(req: NextRequest) {
     // Créer un utilisateur temporaire avec le rôle spécifié
     const user = await prisma.user.create({
       data: {
-        role: role as "student" | "company",
         email: `temp_${Date.now()}@temp.com`, // Email temporaire
         name: "Temporary User"
       },

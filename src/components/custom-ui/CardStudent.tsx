@@ -20,8 +20,10 @@ const CardStudent = ({ student }: CardStudentProps) => {
     <Card className="flex flex-col h-fit gap-2 w-[250px] p-0 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0">
         <Image
-          src={student.profilePicture.url}
+          src={student.profilePicture?.url ?? "/default-avatar.png"}
           alt="Student"
+          width={250}
+          height={140}
           className="w-full h-35 object-cover"
         />
         <div className="p-3 text-center">

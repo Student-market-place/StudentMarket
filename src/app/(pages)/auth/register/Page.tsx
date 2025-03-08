@@ -34,26 +34,12 @@ const RegisterPage = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <Tabs defaultValue="student" className="w-[350px]">
-        <TabsList className="w-full">
-          <TabsTrigger value="student">Student</TabsTrigger>
-          <TabsTrigger value="company">Company</TabsTrigger>
-        </TabsList>
-        <TabsContent value="student">
+
           <AuthCard 
             variant="student" 
             handleAction={handleSignUp}
             handleRoute={goToVerifyRequest}
           />
-        </TabsContent>
-        <TabsContent value="company">
-          <AuthCard 
-            variant="company" 
-            handleAction={handleSignUp}
-            handleRoute={goToVerifyRequest}
-          />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

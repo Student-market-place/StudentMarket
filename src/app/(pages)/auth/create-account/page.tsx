@@ -1,22 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import CreateAccountCard from "@/components/custom-ui/CreateAccountCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const CreateAccountPage = () => {
-  const [role, setRole] = useState<"student" | "company">("student");
-
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setRole(user?.role || "student");
-    }
-  }, []);
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
-      <CreateAccountCard role={role} />
+      <Tabs defaultValue="student" className="w-[350px]">
+        <TabsList className="w-full">
+          <TabsTrigger value="student">Student</TabsTrigger>
+          <TabsTrigger value="company">Company</TabsTrigger>
+        </TabsList>
+        <TabsContent value="student">
+          <CreateAccountCard role="student" />
+        </TabsContent>
+        <TabsContent value="company">
+          <CreateAccountCard role="company" />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

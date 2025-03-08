@@ -1,12 +1,11 @@
-import { School } from "@/types/school.type";
 import axios from "axios";
+import { School } from "@prisma/client";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/students`;
 
-async function fetchSchools(
-): Promise<School[]> {
+async function fetchSchools(): Promise<School[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-  const url = `${baseUrl}/api/schools`;
+  const url = `${baseUrl}/api/school`;
 
   const response = await axios.get(url);
   return response.data;
