@@ -15,8 +15,10 @@ export function StudentProfilCard() {
       <div className="relative w-2/5 m-0 overflow-hidden text-gray-700 bg-white rounded-r-none bg-clip-border rounded-xl shrink-0">
         <Image
           src="https://images.pexels.com/photos/4298629/pexels-photo-4298629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          alt="Company"
-          className="object-cover w-full h-full"
+          alt="Student Profile"
+          width={1260}
+          height={750}
+          className="w-full h-full object-cover"
         />
       </div>
       <CardHeader className=" p-6 bg-gradient-to-r text-black">
