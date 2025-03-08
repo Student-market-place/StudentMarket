@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const SigninWithGoogle = () => {
   const pathname = usePathname();
@@ -21,15 +22,16 @@ const SigninWithGoogle = () => {
   return (
     <Button
       onClick={handleGoogleSignIn}
-      className="inline-flex items-center rounded-md bg-white text-sm font-medium text-neutral-500 shadow-sm transition-colors hover:bg-[#357AE8] focus:outline-none focus:ring-2 focus:ring-[#4285F4] hover:text-white focus:ring-offset-2 h-auto px-4 py-2"
+      className="flex items-center gap-2 bg-white text-black hover:bg-gray-100"
     >
-      <img
+      <Image
+        src="/google.svg"
+        alt="Google"
         width={20}
         height={20}
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png"
-        alt=""
+        className="w-5 h-5"
       />
-      <span className="ml-2">Connexion avec google</span>
+      Se connecter avec Google
     </Button>
   );
 };

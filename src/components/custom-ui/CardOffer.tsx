@@ -1,7 +1,4 @@
-import {
-  CompanyOffer,
-  CompanyOfferWithRelation,
-} from "@/types/companyOffer.type";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import { Badge } from "../ui/badge";
 import {
   Card,

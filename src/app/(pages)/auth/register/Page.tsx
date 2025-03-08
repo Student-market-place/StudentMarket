@@ -1,7 +1,6 @@
 "use client";
 
 import AuthCard from "@/components/custom-ui/AuthCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 
 const RegisterPage = () => {

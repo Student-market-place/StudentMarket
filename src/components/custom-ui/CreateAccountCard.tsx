@@ -57,7 +57,6 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
   const [latestUser, setLatestUser] = useState<User | null>(null);
   const [schools, setSchools] = useState<School[]>([]);
   const isStudent = role === "student";
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
 
   useEffect(() => {
     const fetchLatestUser = async () => {
@@ -155,7 +154,6 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
     } else {
       companyForm.setValue("profilePicture", imageUrl);
     }
-    setProfilePictureUrl(imageUrl);
   };
 
   return (

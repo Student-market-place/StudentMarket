@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma, EnumStatusTYpe } from "@prisma/client";
+import { PrismaClient, EnumStatusTYpe } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
