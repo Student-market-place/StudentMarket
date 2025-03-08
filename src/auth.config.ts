@@ -77,7 +77,6 @@ export default {
       console.log("🔄 Redirection URL:", url);
       
       // Vérifier si l'utilisateur existe déjà
-      const token = url.split('token=')[1]?.split('&')[0];
       const email = url.split('email=')[1]?.split('&')[0];
       
       // Si c'est un callback de vérification d'email
@@ -118,6 +117,7 @@ export default {
           }
           return `${baseUrl}/auth/create-account`;
         } catch (error) {
+          console.error("Erreur lors de la vérification de l'utilisateur:", error);
           return `${baseUrl}/auth/create-account`;
         }
       }
