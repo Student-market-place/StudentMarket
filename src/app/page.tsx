@@ -24,10 +24,12 @@ export default function Home() {
             S&apos;inscrire
           </Button>
         </div>
-        <img
+        <Image
           src="/assets/home-img.jpg"
           alt=""
-          className="w-[500px] h-[300px] object-cover shadow-lg rounded-xl"
+          width={500}
+          height={300}
+          className="w-full h-full object-cover shadow-lg rounded-xl"
         />
       </div>
       <div className="flex justify-between px-40 border-b-2 pb-20">
@@ -67,17 +69,21 @@ export default function Home() {
               Créer mon profil
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"
+            width={300}
+            height={300}
           />
         </div>
         <div className="flex w-full justify-between ">
-          <img
+          <Image
             src="/assets/card-student.png"
             className="w-[250px] max-h-[300px] object-fit shadow-lg"
             alt="Aperçu d'une offre"
+            width={250}
+            height={300}
           />
           <div className="flex flex-col justify-between py-5">
             <h2 className="text-xl font-semibold">Pour les entreprises</h2>
@@ -88,7 +94,7 @@ export default function Home() {
               détaillés, où vous pouvez évaluer leurs compétences, leur
               expérience et leurs projets réalisés. Gérez les candidatures en
               toute simplicité, consultez les profils des étudiants qui
-              postulent et suivez facilement l’évolution de vos recrutements.
+              postulent et suivez facilement l&apos;évolution de vos recrutements.
               <br /> Student Market vous permet de gagner en efficacité et de
               trouver rapidement les talents qui feront la différence dans vos
               projets
@@ -115,10 +121,12 @@ export default function Home() {
               Devenir Partenaire
             </Button>
           </div>
-          <img
+          <Image
             src="/assets/card-job-offer.png"
             className="w-[300px] h-[300px] object-cover shadow-lg"
             alt="Aperçu d'une offre"
+            width={300}
+            height={300}
           />
         </div>
       </div>

@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useCallback } from "react";
 
 const scrollbarHideClass = `
   .scrollbar-hide::-webkit-scrollbar {
@@ -21,38 +22,78 @@ const scrollbarHideClass = `
   }
 `;
 
-const initialFrameworks = [
-  { value: "next.js", label: "Next.js" },
-  { value: "sveltekit", label: "SvelteKit" },
-  { value: "nuxt.js", label: "Nuxt.js" },
-  { value: "remix", label: "Remix" },
-  { value: "astro", label: "Astro" },
-];
+interface Skill {
+  value: string;
+  label: string;
+}
 
-export function SkillsCombobox() {
+interface SkillsComboboxProps {
+  onSkillsChange: (skills: string[]) => void;
+  defaultSkills?: string[];
+}
+
+export function SkillsCombobox({ onSkillsChange, defaultSkills = [] }: SkillsComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
-  const [frameworks, setFrameworks] = React.useState(initialFrameworks);
+  const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultSkills);
+  const [skills, setSkills] = React.useState<Skill[]>([]);
   const [inputValue, setInputValue] = React.useState("");
 
-  const filteredFrameworks = frameworks.filter(
-    (framework) =>
-      framework.label.toLowerCase().includes(inputValue.toLowerCase()) ||
-      framework.value.toLowerCase().includes(inputValue.toLowerCase())
+  // Charger les skills depuis l'API au montage du composant
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await fetch('/api/skill');
+        const data = await response.json();
+        const formattedSkills = data.map((skill: { id: string; name: string }) => ({
+          value: skill.id,
+          label: skill.name,
+        }));
+        setSkills(formattedSkills);
+      } catch (error) {
+        console.error("Erreur lors du chargement des skills:", error);
+      }
+    };
+    fetchSkills();
+  }, []);
+
+  // Gérer les changements de sélection
+  const handleSelectionChange = useCallback((newValues: string[]) => {
+    setSelectedValues(newValues);
+    onSkillsChange(newValues);
+  }, [onSkillsChange]);
+
+  const filteredSkills = skills.filter(
+    (skill) =>
+      skill.label.toLowerCase().includes(inputValue.toLowerCase()) ||
+      skill.value.toLowerCase().includes(inputValue.toLowerCase())
   );
 
-  const handleCreateNew = () => {
+  const handleCreateNew = async () => {
     if (!inputValue.trim()) return;
 
-    const newValue = inputValue.trim().toLowerCase().replace(/\s+/g, "-");
-    const newLabel = inputValue.trim();
+    try {
+      const response = await fetch('/api/skill', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: inputValue.trim() }),
+      });
 
-    if (frameworks.some((f) => f.value === newValue)) return;
+      if (!response.ok) throw new Error('Erreur lors de la création du skill');
 
-    const newFramework = { value: newValue, label: newLabel };
-    setFrameworks((prev) => [...prev, newFramework]);
-    setSelectedValues((prev) => [...prev, newValue]);
-    setInputValue("");
+      const newSkill = await response.json();
+      const formattedSkill = {
+        value: newSkill.id,
+        label: newSkill.name,
+      };
+
+      setSkills((prev) => [...prev, formattedSkill]);
+      handleSelectionChange([...selectedValues, formattedSkill.value]);
+      setInputValue("");
+    } catch (error) {
+      console.error("Erreur lors de la création du skill:", error);
+    }
   };
 
   return (
@@ -72,8 +113,8 @@ export function SkillsCombobox() {
             >
               {selectedValues.length > 0 ? (
                 selectedValues.map((selectedValue) => {
-                  const framework = frameworks.find(
-                    (f) => f.value === selectedValue
+                  const skill = skills.find(
+                    (s) => s.value === selectedValue
                   );
                   return (
                     <Badge
@@ -81,24 +122,34 @@ export function SkillsCombobox() {
                       variant="secondary"
                       className="shrink-0"
                     >
-                      {framework?.label}
-                      <button
-                        className="ml-1 rounded-full focus:ring-2"
+                      {skill?.label}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        className="ml-1 rounded-full focus:ring-2 cursor-pointer"
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          setSelectedValues((prev) =>
-                            prev.filter((v) => v !== selectedValue)
+                          handleSelectionChange(
+                            selectedValues.filter((v) => v !== selectedValue)
                           );
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSelectionChange(
+                              selectedValues.filter((v) => v !== selectedValue)
+                            );
+                          }
                         }}
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </span>
                     </Badge>
                   );
                 })
               ) : (
                 <span className="text-muted-foreground">
-                  Select frameworks...
+                  Sélectionnez vos compétences...
                 </span>
               )}
             </div>
@@ -108,31 +159,31 @@ export function SkillsCombobox() {
         <PopoverContent className="w-[200px] p-2 space-y-2">
           <input
             type="text"
-            placeholder="Search framework..."
+            placeholder="Rechercher une compétence..."
             className="w-full p-2 border rounded"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
           <div className="max-h-40 overflow-y-auto scrollbar-hide">
-            {filteredFrameworks.length > 0 ? (
-              filteredFrameworks.map((framework) => (
+            {filteredSkills.length > 0 ? (
+              filteredSkills.map((skill) => (
                 <div
-                  key={framework.value}
+                  key={skill.value}
                   className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-100 rounded"
                   onClick={() => {
-                    setSelectedValues((prev) =>
-                      prev.includes(framework.value)
-                        ? prev.filter((v) => v !== framework.value)
-                        : [...prev, framework.value]
+                    handleSelectionChange(
+                      selectedValues.includes(skill.value)
+                        ? selectedValues.filter((v) => v !== skill.value)
+                        : [...selectedValues, skill.value]
                     );
                     setInputValue("");
                   }}
                 >
-                  {framework.label}
+                  {skill.label}
                   <Check
                     className={cn(
                       "h-4 w-4",
-                      selectedValues.includes(framework.value)
+                      selectedValues.includes(skill.value)
                         ? "opacity-100"
                         : "opacity-0"
                     )}
@@ -141,7 +192,7 @@ export function SkillsCombobox() {
               ))
             ) : (
               <div className="text-center text-sm text-muted-foreground p-2">
-                <p>No framework found.</p>
+                <p>Aucune compétence trouvée.</p>
                 {inputValue.trim() && (
                   <Button
                     variant="outline"
@@ -150,7 +201,7 @@ export function SkillsCombobox() {
                     onClick={handleCreateNew}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Create &quot;{inputValue}&quot;
+                    Créer &quot;{inputValue}&quot;
                   </Button>
                 )}
               </div>

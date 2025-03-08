@@ -1,59 +1,58 @@
 "use client";
 
 import AuthCard from "@/components/custom-ui/AuthCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const RegisterPage = () => {
   const router = useRouter();
 
   const handleSignUp = async (formData: FormData) => {
     try {
-      const response = await fetch("/api/user", {
+      const email = formData.get("email") as string;
+      const role = formData.get("role") as string;
+      console.log("📧 Tentative d'inscription avec:", { email, role });
+
+      // Appeler l'API pour créer l'utilisateur
+      const response = await fetch("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({
-          email: formData.get("email"),
-          role: formData.get("role"),
-        }),
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ email, role }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur lors de l'inscription");
+      }
+
+      // Si l'utilisateur existe déjà ou vient d'être créé, envoyer l'email
+      const result = await signIn("resend", {
+        email,
+        redirect: false,
+        callbackUrl: "/auth/create-account"
+      });
+
+      if (result?.ok) {
+        console.log("✅ Email de vérification envoyé");
         router.push("/auth/verify-request");
+      } else {
+        console.error("❌ Erreur lors de l'envoi de l'email:", result?.error);
       }
     } catch (error) {
-      console.error("Error during registration:", error);
+      console.error("❌ Erreur lors de l'inscription:", error);
     }
-  };
-
-  const goToVerifyRequest = () => {
-    router.push("/auth/verify-request");
   };
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <Tabs defaultValue="student" className="w-[350px]">
-        <TabsList className="w-full">
-          <TabsTrigger value="student">Student</TabsTrigger>
-          <TabsTrigger value="company">Company</TabsTrigger>
-        </TabsList>
-        <TabsContent value="student">
-          <AuthCard 
-            variant="student" 
-            handleAction={handleSignUp}
-            handleRoute={goToVerifyRequest}
-          />
-        </TabsContent>
-        <TabsContent value="company">
-          <AuthCard 
-            variant="company" 
-            handleAction={handleSignUp}
-            handleRoute={goToVerifyRequest}
-          />
-        </TabsContent>
-      </Tabs>
+      <AuthCard 
+        variant="student" 
+        handleAction={handleSignUp}
+        handleRoute={() => {}}
+      />
     </div>
   );
 };

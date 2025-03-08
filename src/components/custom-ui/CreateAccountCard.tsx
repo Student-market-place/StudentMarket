@@ -17,6 +17,19 @@ import { Switch } from "../ui/switch";
 import { SkillsCombobox } from "./SkillsCombobox";
 import { AvatarUpload } from "./AvatarUpload";
 import { Textarea } from "../ui/textarea";
+import { useEffect, useState } from "react";
+import UserService from "@/services/user.service";
+import SchoolService from "@/services/school.service";
+import { User, School } from "@prisma/client";
+import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { FileUpload } from "./FileUpload";
 
 interface StudentFormValues {
   profilePicture: string;
@@ -24,9 +37,10 @@ interface StudentFormValues {
   lastName: string;
   status: string;
   isAvailable: boolean;
-  CVId: string;
+  CV: string;
   skills: string[];
   description: string;
+  schoolId: string;
 }
 
 interface CompanyFormValues {
@@ -40,7 +54,39 @@ interface CreateAccountCardProps {
 }
 
 const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
+  const [latestUser, setLatestUser] = useState<User | null>(null);
+  const [schools, setSchools] = useState<School[]>([]);
   const isStudent = role === "student";
+
+  useEffect(() => {
+    const fetchLatestUser = async () => {
+      try {
+        const user = await UserService.fetchLatestUser();
+        setLatestUser(user);
+        if (user) {
+          await UserService.updateUserRole({
+            userId: user.id,
+            role: role
+          });
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'utilisateur:", error);
+      }
+    };
+    fetchLatestUser();
+  }, [role]);
+
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const schoolsList = await SchoolService.fetchSchools();
+        setSchools(schoolsList);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des écoles:", error);
+      }
+    };
+    fetchSchools();
+  }, []);
 
   const studentForm = useForm<StudentFormValues>({
     defaultValues: {
@@ -49,9 +95,10 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
       lastName: "",
       status: "",
       isAvailable: false,
-      CVId: "",
+      CV: "",
       skills: [],
       description: "",
+      schoolId: "",
     },
   });
 
@@ -64,13 +111,49 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
   });
 
   const onStudentSubmit: SubmitHandler<StudentFormValues> = async (data) => {
-    console.log("Student form data:", data);
-    // TODO: Implémenter la logique de soumission pour les étudiants
+    try {
+      if (!latestUser) {
+        console.error("Aucun utilisateur trouvé");
+        return;
+      }
+
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+      await axios.post(`${baseUrl}/api/student`, {
+        ...data,
+        userId: latestUser.id
+      });
+
+      console.log("Profil étudiant créé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la création du profil étudiant:", error);
+    }
   };
 
   const onCompanySubmit: SubmitHandler<CompanyFormValues> = async (data) => {
-    console.log("Company form data:", data);
-    // TODO: Implémenter la logique de soumission pour les entreprises
+    try {
+      if (!latestUser) {
+        console.error("Aucun utilisateur trouvé");
+        return;
+      }
+
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+      await axios.post(`${baseUrl}/api/company`, {
+        ...data,
+        userId: latestUser.id
+      });
+
+      console.log("Profil entreprise créé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la création du profil entreprise:", error);
+    }
+  };
+
+  const handleImageUploadComplete = (imageUrl: string) => {
+    if (isStudent) {
+      studentForm.setValue("profilePicture", imageUrl);
+    } else {
+      companyForm.setValue("profilePicture", imageUrl);
+    }
   };
 
   return (
@@ -93,12 +176,8 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                 <FormItem className="w-1/3 flex flex-col items-center">
                   <FormLabel>Photo de profil</FormLabel>
                   <AvatarUpload
-                    fallback=" "
-                    onUpload={async (file) => {
-                      console.log("Uploading file:", file.name);
-                      await new Promise((resolve) => setTimeout(resolve, 1500));
-                      console.log("Upload complete!");
-                    }}
+                    fallback={isStudent ? "S" : "C"}
+                    onUploadComplete={handleImageUploadComplete}
                   />
                 </FormItem>
 
@@ -124,6 +203,29 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                         <FormControl>
                           <Input placeholder="Doe" {...field} />
                         </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={studentForm.control}
+                    name="schoolId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>École</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionnez votre école" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {schools.map((school) => (
+                              <SelectItem key={school.id} value={school.id}>
+                                {school.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
@@ -182,20 +284,34 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                 <div className="w-2/3 flex flex-col space-y-4">
                   <FormField
                     control={studentForm.control}
-                    name="CVId"
+                    name="CV"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>CV</FormLabel>
                         <FormControl>
-                          <Input type="file" {...field} />
+                          <FileUpload
+                            accept=".pdf,.doc,.docx"
+                            onUploadComplete={(url) => field.onChange(url)}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
                   />
-                  <FormItem>
-                    <FormLabel>Compétences</FormLabel>
-                    <SkillsCombobox />
-                  </FormItem>
+                  <FormField
+                    control={studentForm.control}
+                    name="skills"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Compétences</FormLabel>
+                        <FormControl>
+                          <SkillsCombobox
+                            onSkillsChange={(skills) => field.onChange(skills)}
+                            defaultSkills={field.value}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
 
@@ -226,12 +342,8 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
               <FormItem className="flex flex-col items-center">
                 <FormLabel>Logo de l&apos;entreprise</FormLabel>
                 <AvatarUpload
-                  fallback=" "
-                  onUpload={async (file) => {
-                    console.log("Uploading file:", file.name);
-                    await new Promise((resolve) => setTimeout(resolve, 1500));
-                    console.log("Upload complete!");
-                  }}
+                  fallback={isStudent ? "S" : "C"}
+                  onUploadComplete={handleImageUploadComplete}
                 />
               </FormItem>
 

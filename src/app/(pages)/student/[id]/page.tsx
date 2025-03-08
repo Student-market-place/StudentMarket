@@ -82,8 +82,10 @@ const StudentProfilPage = () => {
       </div>
       <div className="flex justify-between w-full py-10 px-30">
         <div className="flex flex-col gap-10  items-center">
-          <img
-            src={student.profilePicture.url}
+          <Image
+            src={student?.profilePicture?.url || "/default-avatar.png"}
+            width={200}
+            height={150}
             className="w-[200px] h-[150px] rounded-xl object-cover shadow-lg"
             alt="Photo de profil"
           />
@@ -92,11 +94,13 @@ const StudentProfilPage = () => {
             <h2 className="text-xl font-bold">Biographie</h2>
             <p className="max-w-[500px]">{student.description}</p>
             <div className="flex justify-between w-full px-10">
-              <a href="" download={student.CV.url}>
-                <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
-                  Telecharger le CV
-                </Button>
-              </a>
+              {student?.CV?.url && (
+                <a href={student.CV.url} download>
+                  <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
+                    Telecharger le CV
+                  </Button>
+                </a>
+              )}
               <a href={`mailto:${student.user.email}`}>
                 <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
                   Contacter
