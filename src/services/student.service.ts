@@ -38,9 +38,32 @@ async function fetchStudentById(id: string): Promise<StudentWithRelation> {
   return response.data;
 }
 
+interface UpdateStudentData {
+  firstName?: string;
+  lastName?: string;
+  status?: string;
+  isAvailable?: boolean;
+  description?: string;
+  skillIds?: string[];
+  profilePictureId?: string;
+  CVId?: string;
+}
+
+async function updateStudent(
+  id: string,
+  data: UpdateStudentData
+): Promise<StudentWithRelation> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/student/${id}`;
+
+  const response = await axios.put(url, data);
+  return response.data;
+}
+
 const StudentService = {
   fetchStudents,
   fetchStudentById,
+  updateStudent,
 };
 
 export default StudentService;

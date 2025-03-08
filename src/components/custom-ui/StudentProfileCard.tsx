@@ -5,19 +5,16 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import Link from "next/link";
-import { User } from "lucide-react";
 import { Label } from "../ui/label";
 
-interface ProfileCardProps {
+interface StudentProfileCardProps {
   student: StudentWithRelation;
 }
 
-const ProfileCard = ({ student }: ProfileCardProps) => {
+const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
   return (
     <Card className="flex flex-col h-fit gap-2 w-[300px] pt-0 shadow-lg rounded-2xl overflow-hidden border-2  transition-all">
       <CardHeader className="p-4 items-center">
@@ -27,13 +24,14 @@ const ProfileCard = ({ student }: ProfileCardProps) => {
             className="object-cover "
             alt="Student"
           />
-          <AvatarFallback>
-            <User className="size-10" />
+          <AvatarFallback className="text-2xl">
+            {student.firstName[0]}
+            {student.lastName[0]}
           </AvatarFallback>
         </Avatar>
 
         <div className="p-3 text-center">
-          <CardTitle className="text-md font-semibold">
+          <CardTitle className="text-2xl font-bold">
             {student?.firstName} {student?.lastName}
           </CardTitle>
           <CardDescription className="text-xs text-gray-500">
@@ -70,7 +68,7 @@ const ProfileCard = ({ student }: ProfileCardProps) => {
         </div>
         <div>
           <Label>Decription : </Label>
-          <Card className="mt-2 p-1 bg-gray-100 ">
+          <Card className="mt-2 p-1 bg-gray-100 rounded-sm ">
             <CardContent className="text-sm text-gray-700 p-1">
               {student?.description.length > 100
                 ? student?.description.slice(0, 100) + "..."
@@ -83,4 +81,4 @@ const ProfileCard = ({ student }: ProfileCardProps) => {
   );
 };
 
-export default ProfileCard;
+export default StudentProfileCard;

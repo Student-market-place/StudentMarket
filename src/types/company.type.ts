@@ -1,11 +1,19 @@
-import { UploadFile, User } from "@prisma/client";
+import { UploadFile, User, Prisma } from "@prisma/client";
+
 export interface Company {
-    id: string;
-    name: string;
-    description: string;
-    profilePictureId: string | UploadFile;
-    userId: string | User;
-    createdAt: Date;
-    modifiedAt: Date;
-    deletedAt: Date;
+  id: string;
+  name: string;
+  description: string;
+  profilePictureId: string | UploadFile;
+  userId: string | User;
+  createdAt: Date;
+  modifiedAt: Date;
+  deletedAt: Date;
 }
+
+export type CompanyWithRelation = Prisma.CompanyGetPayload<{
+  include: {
+    profilePicture: true;
+    user: true;
+  };
+}>;

@@ -10,6 +10,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Skill } from "@prisma/client";
+import SkillService from "@/services/skill.service";
+import { useQueryClient } from "@tanstack/react-query";
 
 const scrollbarHideClass = `
   .scrollbar-hide::-webkit-scrollbar {
@@ -21,38 +24,63 @@ const scrollbarHideClass = `
   }
 `;
 
-const initialFrameworks = [
-  { value: "next.js", label: "Next.js" },
-  { value: "sveltekit", label: "SvelteKit" },
-  { value: "nuxt.js", label: "Nuxt.js" },
-  { value: "remix", label: "Remix" },
-  { value: "astro", label: "Astro" },
-];
+interface SkillsComboboxProps {
+  selectedSkills: string[];
+  onSkillsChange: (skills: string[]) => void;
+  availableSkills?: Skill[];
+}
 
-export function SkillsCombobox() {
+export function SkillsCombobox({
+  selectedSkills,
+  onSkillsChange,
+  availableSkills = [],
+}: SkillsComboboxProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
-  const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
-  const [frameworks, setFrameworks] = React.useState(initialFrameworks);
+  const [skills, setSkills] = React.useState(availableSkills);
   const [inputValue, setInputValue] = React.useState("");
+  const [isCreating, setIsCreating] = React.useState(false);
 
-  const filteredFrameworks = frameworks.filter(
-    (framework) =>
-      framework.label.toLowerCase().includes(inputValue.toLowerCase()) ||
-      framework.value.toLowerCase().includes(inputValue.toLowerCase())
+  // Update skills when availableSkills changes
+  React.useEffect(() => {
+    setSkills(availableSkills);
+  }, [availableSkills]);
+
+  const filteredSkills = skills.filter((skill) =>
+    skill.name.toLowerCase().includes(inputValue.toLowerCase())
   );
 
-  const handleCreateNew = () => {
-    if (!inputValue.trim()) return;
+  const handleCreateNew = async () => {
+    if (!inputValue.trim() || isCreating) return;
 
-    const newValue = inputValue.trim().toLowerCase().replace(/\s+/g, "-");
-    const newLabel = inputValue.trim();
+    const newSkillName = inputValue.trim();
 
-    if (frameworks.some((f) => f.value === newValue)) return;
+    if (skills.some((s) => s.name.toLowerCase() === newSkillName.toLowerCase()))
+      return;
 
-    const newFramework = { value: newValue, label: newLabel };
-    setFrameworks((prev) => [...prev, newFramework]);
-    setSelectedValues((prev) => [...prev, newValue]);
-    setInputValue("");
+    try {
+      setIsCreating(true);
+      // Create the skill in the database
+      const newSkill = await SkillService.postSkill({
+        name: newSkillName,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+        deletedAt: null,
+        id: `temp-${Date.now()}`, // This will be replaced by the server
+      });
+
+      // Update the local state
+      setSkills((prev) => [...prev, newSkill]);
+      onSkillsChange([...selectedSkills, newSkill.id]);
+      setInputValue("");
+
+      // Refresh the skills list in React Query cache
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
+    } catch (error) {
+      console.error("Failed to create skill:", error);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -70,35 +98,44 @@ export function SkillsCombobox() {
               className="flex items-center gap-1 overflow-x-auto scrollbar-hide"
               style={{ maxWidth: "calc(100% - 20px)" }}
             >
-              {selectedValues.length > 0 ? (
-                selectedValues.map((selectedValue) => {
-                  const framework = frameworks.find(
-                    (f) => f.value === selectedValue
-                  );
+              {selectedSkills.length > 0 ? (
+                selectedSkills.map((selectedId) => {
+                  const skill = skills.find((s) => s.id === selectedId);
                   return (
                     <Badge
-                      key={selectedValue}
+                      key={selectedId}
                       variant="secondary"
                       className="shrink-0"
                     >
-                      {framework?.label}
-                      <button
-                        className="ml-1 rounded-full focus:ring-2"
-                        onMouseDown={(e) => {
+                      {skill?.name || "Compétence inconnue"}
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="ml-1 rounded-full focus:ring-2 cursor-pointer"
+                        onClick={(e) => {
                           e.preventDefault();
-                          setSelectedValues((prev) =>
-                            prev.filter((v) => v !== selectedValue)
+                          e.stopPropagation();
+                          onSkillsChange(
+                            selectedSkills.filter((id) => id !== selectedId)
                           );
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onSkillsChange(
+                              selectedSkills.filter((id) => id !== selectedId)
+                            );
+                          }
                         }}
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </div>
                     </Badge>
                   );
                 })
               ) : (
                 <span className="text-muted-foreground">
-                  Select frameworks...
+                  Sélectionner des compétences...
                 </span>
               )}
             </div>
@@ -108,31 +145,31 @@ export function SkillsCombobox() {
         <PopoverContent className="w-[200px] p-2 space-y-2">
           <input
             type="text"
-            placeholder="Search framework..."
+            placeholder="Rechercher une compétence..."
             className="w-full p-2 border rounded"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
           <div className="max-h-40 overflow-y-auto scrollbar-hide">
-            {filteredFrameworks.length > 0 ? (
-              filteredFrameworks.map((framework) => (
+            {filteredSkills.length > 0 ? (
+              filteredSkills.map((skill) => (
                 <div
-                  key={framework.value}
+                  key={skill.id}
                   className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-100 rounded"
                   onClick={() => {
-                    setSelectedValues((prev) =>
-                      prev.includes(framework.value)
-                        ? prev.filter((v) => v !== framework.value)
-                        : [...prev, framework.value]
+                    onSkillsChange(
+                      selectedSkills.includes(skill.id)
+                        ? selectedSkills.filter((id) => id !== skill.id)
+                        : [...selectedSkills, skill.id]
                     );
                     setInputValue("");
                   }}
                 >
-                  {framework.label}
+                  {skill.name}
                   <Check
                     className={cn(
                       "h-4 w-4",
-                      selectedValues.includes(framework.value)
+                      selectedSkills.includes(skill.id)
                         ? "opacity-100"
                         : "opacity-0"
                     )}
@@ -141,16 +178,17 @@ export function SkillsCombobox() {
               ))
             ) : (
               <div className="text-center text-sm text-muted-foreground p-2">
-                <p>No framework found.</p>
+                <p>Aucune compétence trouvée.</p>
                 {inputValue.trim() && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="mt-2 w-full"
                     onClick={handleCreateNew}
+                    disabled={isCreating}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Create &quot;{inputValue}&quot;
+                    {isCreating ? "Création..." : `Créer "${inputValue}"`}
                   </Button>
                 )}
               </div>
