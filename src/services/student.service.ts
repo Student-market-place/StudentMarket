@@ -5,10 +5,11 @@ import {
 } from "@/types/student.type";
 import axios from "axios";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
 async function fetchStudents(
   params: GetAllParams
 ): Promise<StudentWithRelation[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student`;
 
   // Construction d'un objet de paramètres de requête
@@ -29,7 +30,6 @@ async function fetchStudents(
 }
 
 async function fetchStudentById(id: string): Promise<StudentWithRelation> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.get(url);
@@ -45,13 +45,13 @@ interface UpdateStudentData {
   skillIds?: string[];
   profilePictureId?: string;
   CVId?: string;
+  email?: string;
 }
 
 async function updateStudent(
   id: string,
   data: UpdateStudentData
 ): Promise<StudentWithRelation> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.put(url, data);
@@ -61,7 +61,6 @@ async function updateStudent(
 async function createStudent(
   data: StudentFormData
 ): Promise<StudentWithRelation> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student`;
 
   const response = await axios.post(url, data);
