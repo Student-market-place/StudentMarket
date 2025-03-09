@@ -7,7 +7,7 @@ export default function PublicLayout({
 }>) {
   return (
     <div>
-      <NavBar menu={"Offres"} />
+      <NavBar />
 
       {children}
     </div>

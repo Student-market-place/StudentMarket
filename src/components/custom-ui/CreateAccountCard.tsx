@@ -20,6 +20,8 @@ import { Textarea } from "../ui/textarea";
 import { useEffect, useState } from "react";
 import UserService from "@/services/user.service";
 import SchoolService from "@/services/school.service";
+import StudentService from "@/services/student.service";
+import CompanyService from "@/services/company.service";
 import SkillService from "@/services/skill.service";
 import { School, Skill } from "@prisma/client";
 import {
@@ -31,8 +33,6 @@ import {
 } from "../ui/select";
 import { FileUpload } from "./FileUpload";
 import { useRouter } from "next/navigation";
-import StudentService from "@/services/student.service";
-import CompanyService from "@/services/company.service";
 
 interface StudentFormValues {
   profilePicture: string;
@@ -74,30 +74,12 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
       // Vérifier si un profil étudiant ou entreprise existe déjà
       const checkExistingProfile = async () => {
         try {
-          // Vérifier si un profil étudiant existe
-          const studentResponse = await fetch(
-            `/api/student?userId=${storedUserId}`
-          );
-          const companyResponse = await fetch(
-            `/api/company?userId=${storedUserId}`
-          );
-
-          // Vérifier si les réponses sont vides
-          const studentText = await studentResponse.text();
-          const companyText = await companyResponse.text();
-
-          // Convertir en JSON si non vide
-          const studentData = studentText ? JSON.parse(studentText) : null;
-          const companyData = companyText ? JSON.parse(companyText) : null;
-
-          // Vérifier si les données contiennent réellement un profil pour cet userId
-          const hasStudentProfile =
-            Array.isArray(studentData) &&
-            studentData.some((student) => student.userId === storedUserId);
-          const hasCompanyProfile =
-            Array.isArray(companyData) &&
-            companyData.some((company) => company.userId === storedUserId);
-
+          const studentData = await StudentService.fetchStudents({ userId: storedUserId });
+          const companyData = await CompanyService.fetchCompanies();
+          
+          const hasStudentProfile = Array.isArray(studentData) && studentData.some(student => student.userId === storedUserId);
+          const hasCompanyProfile = Array.isArray(companyData) && companyData.some(company => company.userId === storedUserId);
+          
           if (hasStudentProfile || hasCompanyProfile) {
             router.push("/home");
             return;
@@ -108,8 +90,7 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
       };
 
       checkExistingProfile();
-
-      // Mettre à jour le rôle de l'utilisateur
+      
       UserService.updateUserRole({
         userId: storedUserId,
         role: role,
