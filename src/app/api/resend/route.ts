@@ -4,12 +4,10 @@ import { NextRequest } from "next/server";
 const resend = new Resend(process.env.NEXT_PUBLIC_AUTH_RESEND_KEY);
 
 export async function POST(req: NextRequest) {
-  console.log("📧 Début de l'envoi d'email");
   
   try {
     const body = await req.json();
     const { from, to, subject, url } = body;
-    console.log("📝 Données reçues:", { from, to, subject });
 
     if (!to || !url) {
       console.error("❌ Données manquantes");
@@ -36,8 +34,6 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     });
-
-    console.log("✅ Email envoyé avec succès", data);
 
     if (error) {
       console.error("❌ Erreur Resend:", error);

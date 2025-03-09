@@ -1,10 +1,9 @@
-import { Company } from "@/types/company.type";
+import { Company, CompanyFormData } from "@/types/company.type";
 import axios from "axios";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company`;
 
-async function fetchCompanies(
-): Promise<Company[]> {
+async function fetchCompanies(): Promise<Company[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/company`;
 
@@ -17,8 +16,11 @@ async function fetchCompany(id: string): Promise<Company> {
   return response.data;
 } 
 
-async function postCompany(company: Company): Promise<Company> {
-  const response = await axios.post(END_POINT, company);
+async function createCompany(companyFormData: CompanyFormData): Promise<Company> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/company`;
+  
+  const response = await axios.post(url, companyFormData);
   return response.data;
 }
 
@@ -32,11 +34,10 @@ async function deleteCompany(company: Company): Promise<Company> {
   return response.data;
 }
 
-
 const CompanyService = {
   fetchCompanies,
   fetchCompany,
-  postCompany,
+  createCompany,
   putCompany,
   deleteCompany,
 };

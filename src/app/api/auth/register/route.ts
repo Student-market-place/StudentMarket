@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const { email, role } = await req.json();
-    console.log("📧 API - Tentative d'inscription:", { email, role });
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findUnique({
@@ -13,7 +12,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      console.log("👤 API - Utilisateur existant");
       return NextResponse.json({ exists: true }, { status: 200 });
     }
 
@@ -24,8 +22,6 @@ export async function POST(req: NextRequest) {
         role: (role as Role) || "student"
       }
     });
-
-    console.log("✅ API - Nouvel utilisateur créé:", newUser);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error("❌ API - Erreur lors de l'inscription:", error);

@@ -47,3 +47,16 @@ export type StudentWithRelation = Prisma.StudentGetPayload<{
     CV: true;
   };
 }>;
+
+export interface StudentFormData {
+  userId: string;
+  profilePicture: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+  isAvailable: boolean;
+  CV: string;
+  skills: string[];
+  description: string;
+  schoolId: string;
+}

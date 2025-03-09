@@ -8,8 +8,6 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const studentIdParam = searchParams.get("studentId");
 
-    console.log("studentIdParam", studentIdParam);
-
     const where: {
       studentId?: string;
     } = {};
@@ -28,7 +26,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(history, { status: 200 });
   } catch (error: unknown) {
-    console.log("error", error);
     return NextResponse.json(
       {
         error:

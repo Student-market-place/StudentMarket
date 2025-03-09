@@ -10,12 +10,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("🟦 Début de la création d'une entreprise");
     const data = await req.json();
-    console.log("📥 Données reçues:", data);
 
     if (!data.userId) {
-      console.log("❌ Erreur: userId manquant");
       return NextResponse.json(
         { error: "userId est requis" },
         { status: 400 }
@@ -28,14 +25,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      console.log("❌ Erreur: Utilisateur non trouvé pour l'ID:", data.userId);
       return NextResponse.json(
         { error: "Utilisateur non trouvé" },
         { status: 404 }
       );
     }
-
-    console.log("✅ Utilisateur trouvé:", user);
 
     // Créer d'abord l'entreprise sans la photo de profil
     const companyData: Prisma.CompanyCreateInput = {
@@ -48,8 +42,6 @@ export async function POST(req: NextRequest) {
       }
     };
 
-    console.log("📝 Création de l'entreprise avec les données:", companyData);
-
     try {
       // Créer l'entreprise
       const company = await prisma.company.create({
@@ -60,11 +52,8 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      console.log("✅ Entreprise créée avec succès:", company);
-
       // Si une photo de profil est fournie, la créer et mettre à jour l'entreprise
       if (data.profilePicture) {
-        console.log("📸 Création de l'entrée pour la photo de profil");
         const profilePicture = await prisma.uploadFile.create({
           data: {
             url: data.profilePicture,
@@ -75,8 +64,6 @@ export async function POST(req: NextRequest) {
             }
           }
         });
-
-        console.log("✅ Photo de profil créée avec succès:", profilePicture);
 
         // Mettre à jour l'entreprise avec la photo de profil
         const updatedCompany = await prisma.company.update({
@@ -92,7 +79,6 @@ export async function POST(req: NextRequest) {
           }
         });
 
-        console.log("✅ Entreprise mise à jour avec la photo de profil:", updatedCompany);
         return NextResponse.json(updatedCompany);
       }
 

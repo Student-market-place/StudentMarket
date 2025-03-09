@@ -8,12 +8,8 @@ import Image from "next/image";
 const SigninWithGoogle = () => {
   const pathname = usePathname();
   const role = pathname.includes("student") ? "student" : "company";
-  
-  console.log("SigninWithGoogle - Current pathname:", pathname);
-  console.log("SigninWithGoogle - Selected role:", role);
 
   const handleGoogleSignIn = () => {
-    console.log("SigninWithGoogle - Initiating sign in with role:", role);
     signIn("google", { 
       callbackUrl: `/api/auth/callback/google?role=${role}`
     });

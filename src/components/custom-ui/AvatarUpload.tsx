@@ -20,21 +20,12 @@ export function AvatarUpload({ fallback, onUploadComplete }: AvatarUploadProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    console.log('📸 Fichier image sélectionné:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
-
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
-    console.log('🖼️ Preview URL créée:', objectUrl);
 
     try {
       setIsUploading(true);
-      console.log('⏳ Début de l\'upload de l\'image de profil...');
       const { url } = await UploadService.uploadFile(file, 'profile-pictures');
-      console.log('✅ Image uploadée avec succès:', url);
       onUploadComplete(url);
     } catch (error) {
       console.error('❌ Erreur lors de l\'upload de l\'image:', error);

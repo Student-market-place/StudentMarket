@@ -14,17 +14,9 @@ export function FileUpload({ onUploadComplete, accept = "*/*" }: FileUploadProps
     const file = e.target.files?.[0];
     if (!file) return;
 
-    console.log('📄 Fichier CV sélectionné:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
-
     try {
       setIsUploading(true);
-      console.log('⏳ Début de l\'upload du CV...');
       const { url } = await UploadService.uploadFile(file, 'cv');
-      console.log('✅ CV uploadé avec succès:', url);
       onUploadComplete(url);
     } catch (error) {
       console.error('❌ Erreur lors de l\'upload du CV:', error);

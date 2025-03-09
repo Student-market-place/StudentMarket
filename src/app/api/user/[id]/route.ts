@@ -56,6 +56,7 @@ export async function PATCH(
     const { id } = await params;
     const { role } = await req.json();
     
+    // Vérifier que le rôle est valide selon le schéma Prisma
     if (!role || !["student", "company"].includes(role)) {
       return NextResponse.json(
         { error: "Rôle invalide" },
@@ -63,9 +64,12 @@ export async function PATCH(
       );
     }
 
+    // On utilise une conversion explicite pour le type
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { role: role as "student" | "company" }
+      data: { 
+        role: role 
+      }
     });
 
     return NextResponse.json(updatedUser, { status: 200 });
