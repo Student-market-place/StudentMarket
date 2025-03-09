@@ -7,7 +7,7 @@ export default function PublicLayout({
 }>) {
   return (
     <div className="flex flex-col gap-5">
-      <NavBar menu={"Candidatures"} />
+      <NavBar/>
 
       {children}
     </div>

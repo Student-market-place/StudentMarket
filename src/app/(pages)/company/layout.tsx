@@ -1,4 +1,4 @@
-import { NavBar } from "@/components/custom-ui/NavBar";
+import NavBar from "@/components/custom-ui/NavBar";
 
 export default function PublicLayout({
   children,
