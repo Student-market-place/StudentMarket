@@ -31,7 +31,7 @@ const StudentProfilPage = () => {
 
   useEffect(() => {
     if (id) {
-      ReviewService.fetchReviews({ studentId: id as string })
+      ReviewService.fetchReviewsByStudent(id as string)
         .then((data) => setReviews(data))
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
