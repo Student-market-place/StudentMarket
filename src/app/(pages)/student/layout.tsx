@@ -1,4 +1,3 @@
-import NavBar from "@/components/custom-ui/NavBar";
 
 export default function PublicLayout({
   children,
@@ -7,8 +6,6 @@ export default function PublicLayout({
 }>) {
   return (
     <div className="flex flex-col gap-5">
-      <NavBar/>
-
       {children}
     </div>
   );

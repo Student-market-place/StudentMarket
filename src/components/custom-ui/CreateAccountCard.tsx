@@ -113,6 +113,9 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
             SchoolService.fetchSchools(),
             SkillService.fetchSkills(),
           ]);
+
+          console.log(schoolsData);
+          console.log(skillsData);
           setSchools(schoolsData);
           setAvailableSkills(skillsData);
         }

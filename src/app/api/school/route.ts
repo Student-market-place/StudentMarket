@@ -14,10 +14,6 @@ export async function GET() {
       where: {
         deletedAt: null,
       },
-      orderBy: {
-        name: "asc",
-        createdAt: "desc",
-      },
     });
     return NextResponse.json(schools, { status: 200 });
   } catch (error) {
