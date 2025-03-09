@@ -34,9 +34,10 @@ async function createCompany(
 }
 
 interface UpdateCompanyData {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   email?: string;
+  profilePictureId?: string;
 }
 
 async function putCompany(
