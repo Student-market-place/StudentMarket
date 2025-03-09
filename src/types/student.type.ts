@@ -31,10 +31,9 @@ export interface Student {
 
 export interface GetAllParams {
   isAvailable?: boolean;
-  status?: EnumStatusTYpe;
+  status?: string;
   skills?: string[];
-  studentHistories?: string[];
-  CV?: string[];
+  userId?: string;
 }
 
 export type StudentWithRelation = Prisma.StudentGetPayload<{
