@@ -17,6 +17,7 @@ declare module "next-auth" {
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET,
   pages: {
     verifyRequest: `http://localhost:3000/auth/verify-request`,
   },
