@@ -1,4 +1,8 @@
-import { Company, CompanyWithRelation } from "@/types/company.type";
+import {
+  Company,
+  CompanyFormData,
+  CompanyWithRelation,
+} from "@/types/company.type";
 import axios from "axios";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company`;
@@ -19,8 +23,13 @@ async function fetchCompany(id: string): Promise<CompanyWithRelation> {
   return response.data;
 }
 
-async function postCompany(company: Company): Promise<Company> {
-  const response = await axios.post(END_POINT, company);
+async function createCompany(
+  companyFormData: CompanyFormData
+): Promise<Company> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/company`;
+
+  const response = await axios.post(url, companyFormData);
   return response.data;
 }
 
@@ -48,7 +57,7 @@ async function deleteCompany(company: Company): Promise<Company> {
 const CompanyService = {
   fetchCompanies,
   fetchCompany,
-  postCompany,
+  createCompany,
   putCompany,
   deleteCompany,
 };

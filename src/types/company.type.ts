@@ -17,3 +17,10 @@ export type CompanyWithRelation = Prisma.CompanyGetPayload<{
     user: true;
   };
 }>;
+
+export interface CompanyFormData {
+  userId: string;
+  profilePicture: string;
+  name: string;
+  description: string;
+}

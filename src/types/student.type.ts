@@ -8,8 +8,8 @@ import {
 } from "@prisma/client";
 
 enum Type {
-  STAGIAIRE = "Stage",
-  ALTERNANT = "Alternance",
+  STAGIAIRE = "stage",
+  ALTERNANT = "alternance",
 }
 
 export interface Student {
@@ -33,6 +33,8 @@ export interface GetAllParams {
   isAvailable?: boolean;
   status?: EnumStatusTYpe;
   skills?: string[];
+  studentHistories?: string[];
+  CV?: string[];
 }
 
 export type StudentWithRelation = Prisma.StudentGetPayload<{
@@ -41,5 +43,20 @@ export type StudentWithRelation = Prisma.StudentGetPayload<{
     user: true;
     profilePicture: true;
     skills: true;
+    studentHistories: true;
+    CV: true;
   };
 }>;
+
+export interface StudentFormData {
+  userId: string;
+  profilePicture: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+  isAvailable: boolean;
+  CV: string;
+  skills: string[];
+  description: string;
+  schoolId: string;
+}

@@ -5,8 +5,14 @@ import { StudentTable } from "@/components/custom-ui/table/StudentTable";
 const DashboardAdminPage = () => {
   return (
     <div>
+      <h1 className="text-4xl font-extrabold text-center text-gray-800 dark:text-white mt-6 mb-4 tracking-wide">
+        📊 Dashboard Admin
+      </h1>
+
       <SchoolTable />
+
       <CompanyTable />
+
       <StudentTable />
     </div>
   );

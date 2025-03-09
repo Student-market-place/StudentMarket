@@ -31,8 +31,6 @@ export async function GET(req: NextRequest, { params }: IParams) {
 }
 
 export async function DELETE(req: NextRequest, { params }: IParams) {
-  console.log("DELETE ONE student_apply");
-  console.log("DELETE req", req);
   const { id } = await params;
 
   try {

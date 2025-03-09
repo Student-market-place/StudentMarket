@@ -170,7 +170,9 @@ export function CompanyTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3} className="h-24 text-center">
-                      No companies found starting with "{searchTerm}".
+
+                      No companies found starting with &quot;{searchTerm}&quot;.
+
                     </TableCell>
                   </TableRow>
                 ) : (

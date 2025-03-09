@@ -1,5 +1,5 @@
-import { School } from "@/types/school.type";
 import axios from "axios";
+import { School } from "@prisma/client";
 
 const baseUrl = process.env.NEXT_PUBLIC_MAIN_URL || "";
 

@@ -15,10 +15,11 @@ export async function GET() {
         deletedAt: null,
       },
       orderBy: {
+        name: "asc",
         createdAt: "desc",
       },
     });
-    return NextResponse.json(schools);
+    return NextResponse.json(schools, { status: 200 });
   } catch (error) {
     console.error("Error fetching schools:", error);
     return NextResponse.json(

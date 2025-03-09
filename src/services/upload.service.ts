@@ -1,32 +1,57 @@
-import axios from "axios";
+import { supabase } from "@/lib/supabase";
+import { StorageError } from "@supabase/storage-js";
 
-async function uploadToStorage(file: File): Promise<string> {
-  // TODO: Implement actual file upload to a storage service
-  // For now, we'll use a mock URL
-  return new Promise((resolve) => {
-    // Simulate file upload delay
-    setTimeout(() => {
-      const mockUrl = `https://storage.example.com/files/${file.name}`;
-      resolve(mockUrl);
-    }, 1000);
-  });
+interface UploadResponse {
+  url: string;
 }
 
-async function createFileRecord(url: string) {
-  const response = await axios.post("/api/uploadFile", { url });
-  return response.data;
+async function uploadFile(
+  file: File,
+  folder: "profile-pictures" | "cv"
+): Promise<UploadResponse> {
+  try {
+    const fileName = `${folder}/${Date.now()}-${file.name}`;
+
+    // Configuration de l'upload public avec l'API anonyme
+    const { error: uploadError } = await supabase.storage
+      .from("files")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      console.error("❌ Erreur Supabase lors de l'upload:", {
+        message: uploadError.message,
+        name: uploadError.name,
+      });
+      throw uploadError;
+    }
+
+    // Génération de l'URL publique
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("files").getPublicUrl(fileName);
+
+    return {
+      url: publicUrl,
+    };
+  } catch (error) {
+    if (error instanceof StorageError) {
+      console.error("❌ Erreur détaillée lors de l'upload:", {
+        message: error.message,
+        name: error.name,
+      });
+    } else {
+      console.error("❌ Erreur inconnue lors de l'upload:", error);
+    }
+    throw error;
+  }
 }
 
 const UploadService = {
-  async uploadFile(file: File) {
-    // First upload to storage
-    const url = await uploadToStorage(file);
-
-    // Then create a record in the database
-    const fileRecord = await createFileRecord(url);
-
-    return fileRecord;
-  },
+  uploadFile,
 };
 
 export default UploadService;

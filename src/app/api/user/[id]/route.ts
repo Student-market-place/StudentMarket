@@ -47,3 +47,37 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: IParams
+) {
+  try {
+    const { id } = await params;
+    const { role } = await req.json();
+    
+    // Vérifier que le rôle est valide selon le schéma Prisma
+    if (!role || !["student", "company"].includes(role)) {
+      return NextResponse.json(
+        { error: "Rôle invalide" },
+        { status: 400 }
+      );
+    }
+
+    // On utilise une conversion explicite pour le type
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { 
+        role: role 
+      }
+    });
+
+    return NextResponse.json(updatedUser, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du rôle:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la mise à jour du rôle" },
+      { status: 500 }
+    );
+  }
+}
