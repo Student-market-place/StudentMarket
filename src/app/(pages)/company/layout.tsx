@@ -1,4 +1,4 @@
-import NavBar from "@/components/custom-ui/NavBar";
+import { NavBar } from "@/components/custom-ui/NavBar";
 
 export default function PublicLayout({
   children,
@@ -7,7 +7,7 @@ export default function PublicLayout({
 }>) {
   return (
     <div>
-      <NavBar menu={"Offres"} />
+      <NavBar />
 
       {children}
     </div>

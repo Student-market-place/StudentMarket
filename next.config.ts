@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const config: NextConfig = {
   images: {
-    domains: ['images.pexels.com']
-  }
+    domains: [
+      'storage.example.com',
+      'shyueiubgibnztmjcbqs.supabase.co',
+      'images.pexels.com'
+    ],
+  },
 };
 
-export default nextConfig;
+export default config;

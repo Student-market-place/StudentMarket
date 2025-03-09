@@ -6,12 +6,32 @@ const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
+  const { searchParams } = new URL(req.url);
+  const include = searchParams.get('include')?.split(',');
 
   try {
     const user = await prisma.user.findUnique({
       where: {
         id: id,
       },
+      include: {
+        student: include?.includes('student') ? {
+          include: {
+            profilePicture: true,
+            CV: true
+          }
+        } : false,
+        company: include?.includes('company') ? {
+          include: {
+            profilePicture: true
+          }
+        } : false,
+        school: include?.includes('school') ? {
+          include: {
+            profilePicture: true
+          }
+        } : false
+      }
     });
 
     if (!user) {
@@ -56,7 +76,6 @@ export async function PATCH(
     const { id } = await params;
     const { role } = await req.json();
     
-    // Vérifier que le rôle est valide selon le schéma Prisma
     if (!role || !["student", "company"].includes(role)) {
       return NextResponse.json(
         { error: "Rôle invalide" },
@@ -64,11 +83,28 @@ export async function PATCH(
       );
     }
 
-    // On utilise une conversion explicite pour le type
     const updatedUser = await prisma.user.update({
       where: { id },
       data: { 
         role: role 
+      },
+      include: {
+        student: {
+          include: {
+            profilePicture: true,
+            CV: true
+          }
+        },
+        company: {
+          include: {
+            profilePicture: true
+          }
+        },
+        school: {
+          include: {
+            profilePicture: true
+          }
+        }
       }
     });
 
