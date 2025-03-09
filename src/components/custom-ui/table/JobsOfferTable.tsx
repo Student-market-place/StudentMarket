@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import CreateOffer from "./CreateOffer";
 
 const jobOffers = [
   {
@@ -181,9 +182,7 @@ export const JobsOfferTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="default" className="cursor-pointer">
-          New
-        </Button>
+        <CreateOffer />
       </div>
 
       <div className="rounded-md border">
@@ -314,9 +313,7 @@ export const JobsOfferTable = () => {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-
                       No job offers found matching &quot;{searchTerm}&quot;.
-
                     </TableCell>
                   </TableRow>
                 ) : (
