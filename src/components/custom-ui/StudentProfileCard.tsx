@@ -20,13 +20,13 @@ const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
       <CardHeader className="p-4 items-center">
         <Avatar className="w-35 h-35 relative">
           <AvatarImage
-            src={student.profilePicture.url}
-            className="object-cover "
+            src={student.profilePicture?.url || "/default-avatar.png"}
+            className="object-cover"
             alt="Student"
           />
-          <AvatarFallback className="text-2xl">
-            {student.firstName[0]}
-            {student.lastName[0]}
+          <AvatarFallback>
+            {student.firstName?.[0]}
+            {student.lastName?.[0]}
           </AvatarFallback>
         </Avatar>
 

@@ -1,206 +1,175 @@
 "use client";
 
-import CompanyService from "@/services/company.service";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "../ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import React from "react";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { CompanyWithRelation } from "@/types/company.type";
+import { useRouter } from "next/navigation";
+import CompanyService from "@/services/company.service";
+import { toast } from "sonner";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 
-interface FormValues {
-  name: string;
-  description: string;
-  profilePicture: string;
-  email: string;
-}
 interface CompanyUpdateFormProps {
   company: CompanyWithRelation;
 }
 
-const CompanyUpdateForm = ({ company }: CompanyUpdateFormProps) => {
-  const queryClient = useQueryClient();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [emailError, setEmailError] = React.useState<string | null>(null);
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Le nom doit contenir au moins 2 caractères.",
+  }),
+  email: z.string().email({
+    message: "L&apos;email doit être valide.",
+  }),
+  description: z.string().optional(),
+});
 
-  const form = useForm<FormValues>({
+type FormData = z.infer<typeof formSchema>;
+
+export default function CompanyUpdateForm({ company }: CompanyUpdateFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: company.name,
-      description: company.description || "",
       email: company.user.email || "",
-      profilePicture: company.profilePicture?.url || "",
+      description: company.description || "",
     },
   });
 
-  const validateEmail = (value: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value) || "Format d'email invalide";
-  };
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const checkEmailInput = (value: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
-      setEmailError("Format d'email invalide");
-    } else {
-      setEmailError(null);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l&apos;upload du fichier");
+      }
+
+      const data = await response.json();
+
+      await CompanyService.putCompany(company.id, {
+        profilePictureId: data.fileId,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["company", company.id] });
+      toast.success("Photo de profil mise à jour avec succès");
+    } catch (error) {
+      console.error("Erreur lors de l&apos;upload:", error);
+      toast.error("Erreur lors de la mise à jour de la photo de profil");
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
+  async function onSubmit(values: FormData) {
     try {
       setIsSubmitting(true);
-
-      const updateData = {
-        name: data.name,
-        description: data.description,
-        email: data.email,
-      };
-
-      await CompanyService.putCompany(company.id, updateData);
+      await CompanyService.putCompany(company.id, values);
       queryClient.invalidateQueries({ queryKey: ["company", company.id] });
-      toast.success("Votre profil a été mis à jour avec succès");
-    } catch (error: any) {
-      console.error("Failed to update company:", error);
-      toast.error(
-        "Une erreur est survenue lors de la mise à jour de votre profil"
-      );
+      toast.success("Profil mis à jour avec succès");
+      router.push(`/company/${company.id}`);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error);
+      toast.error("Erreur lors de la mise à jour du profil");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
-    <Card className="w-[900px]">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">
-          Mettre à jour le profil de l'entreprise
-        </CardTitle>
-        <CardDescription>
-          Mettez à jour les informations de votre entreprise pour attirer les
-          meilleurs talents.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom de l'entreprise</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="profilePicture"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Logo</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-4">
-                          {field.value && (
-                            <Avatar className="h-16 w-16">
-                              <AvatarImage
-                                src={field.value || "/default-company-logo.svg"}
-                                alt="Company logo"
-                                className="object-cover opacity-50"
-                                onError={(e) => {
-                                  const img = e.target as HTMLImageElement;
-                                  img.src = "/default-company-logo.svg";
-                                }}
-                              />
-                              <AvatarFallback className="text-2xl bg-gray-100 opacity-50">
-                                {company.name[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                          <Input
-                            type="file"
-                            className="cursor-not-allowed opacity-50"
-                            disabled
-                          />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          className={emailError ? "border-red-500" : ""}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            checkEmailInput(e.target.value);
-                          }}
-                        />
-                      </FormControl>
-                      {emailError && (
-                        <div className="text-xs text-red-500 h-5">
-                          {emailError}
-                        </div>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} className="h-[41px] resize-none" />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={isSubmitting || !!emailError}
-                className={`cursor-pointer ${emailError ? "opacity-50" : ""}`}
-              >
-                {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-96">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom de l&apos;entreprise</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="space-y-2">
+          <FormLabel>Logo</FormLabel>
+          <div className="flex items-center gap-4">
+            {company.profilePicture && (
+              <Image
+                src={`/api/file/${company.profilePicture.id}`}
+                alt="Logo de l'entreprise"
+                width={100}
+                height={100}
+                className="rounded-full object-cover"
+              />
+            )}
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-3/5"
+            />
+          </div>
+        </div>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting || !form.formState.isValid}
+        >
+          {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
+        </Button>
+      </form>
+    </Form>
   );
-};
-
-export default CompanyUpdateForm;
+}
