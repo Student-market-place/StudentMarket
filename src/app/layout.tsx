@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/providers/ReactQueryProviders";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,9 +31,10 @@ export default function RootLayout({
       >
         {/* <NavBar menu={"Candidatures"} /> */}
 
-        <main className="p-8">
+        <main className="py-2 px-4">
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </main>
+        <Toaster />
       </body>
     </html>
   );

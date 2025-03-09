@@ -43,8 +43,8 @@ const SingleOfferPage = () => {
               Supabase, PostgreSQL**)
             </li>
             <li>
-              ✅ Amélioration de l&apos;expérience utilisateur avec des animations
-              avancées
+              ✅ Amélioration de l&apos;expérience utilisateur avec des
+              animations avancées
             </li>
             <li>
               ✅ Mise en place des bonnes pratiques (**SEO, accessibilité,

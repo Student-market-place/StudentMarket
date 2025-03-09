@@ -22,10 +22,7 @@ export async function GET(req: NextRequest, { params }: IParams) {
     });
 
     if (!student) {
-      return NextResponse.json(
-        { error: "student not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "student not found" }, { status: 404 });
     }
 
     return NextResponse.json(student, { status: 200 });
@@ -36,7 +33,7 @@ export async function GET(req: NextRequest, { params }: IParams) {
 
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
-  const {       
+  const {
     firstName,
     lastName,
     status,
@@ -46,10 +43,19 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     skillsId,
     schoolId,
     CVId,
-    profilePictureId, 
+    profilePictureId,
   } = await req.json();
 
-  if (!firstName || !lastName || !status || !userId || !skillsId || !schoolId || !CVId || !profilePictureId) {
+  if (
+    !firstName ||
+    !lastName ||
+    !status ||
+    !userId ||
+    !skillsId ||
+    !schoolId ||
+    !CVId ||
+    !profilePictureId
+  ) {
     return NextResponse.json(
       { error: "Veuillez renseigner tous les champs obligatoires" },
       { status: 400 }
@@ -68,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: IParams) {
         description,
         isAvailable,
         user: { connect: { id: userId } },
-        skills: { connect: skillsId.map((id: string) => ({ id })) },
+        skills: { set: skillsId.map((id: string) => ({ id })) },
         school: { connect: { id: schoolId } },
         CV: { connect: { id: CVId } },
         profilePicture: { connect: { id: profilePictureId } },
@@ -81,7 +87,6 @@ export async function PUT(req: NextRequest, { params }: IParams) {
   }
 }
 
-
 export async function DELETE(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
@@ -92,10 +97,7 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
       },
     });
     if (!student) {
-      return NextResponse.json(
-        { error: "student not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "student not found" }, { status: 404 });
     }
     return NextResponse.json(student, { status: 200 });
   } catch (error) {
