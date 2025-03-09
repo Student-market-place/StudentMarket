@@ -11,7 +11,6 @@ const RegisterPage = () => {
     try {
       const email = formData.get("email") as string;
       const role = formData.get("role") as string;
-      console.log("📧 Tentative d'inscription avec:", { email, role });
 
       // Appeler l'API pour créer l'utilisateur
       const response = await fetch("/api/auth/register", {
@@ -36,7 +35,6 @@ const RegisterPage = () => {
       });
 
       if (result?.ok) {
-        console.log("✅ Email de vérification envoyé");
         router.push("/auth/verify-request");
       } else {
         console.error("❌ Erreur lors de l'envoi de l'email:", result?.error);

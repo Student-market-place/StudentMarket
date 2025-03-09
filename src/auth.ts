@@ -22,12 +22,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     verifyRequest: `http://localhost:3000/auth/verify-request`,
   },
   events: {
-    async signIn({ user, account }) {
-      console.log("SignIn Event - User:", user);
-      console.log("SignIn Event - Account:", account);
+    async signIn() {
     },
     async signOut() {
-      console.log("User signed out");
     },
   },
   ...authConfig,

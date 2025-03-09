@@ -45,7 +45,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(students, { status: 200 });
   } catch (error: unknown) {
-    console.log("error", error);
     return NextResponse.json(
       {
         error:
@@ -59,12 +58,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("🟦 Début de la création d'un étudiant");
     const data = await req.json();
-    console.log("📥 Données reçues:", data);
 
     if (!data.userId) {
-      console.log("❌ Erreur: userId manquant");
       return NextResponse.json(
         { error: "userId est requis" },
         { status: 400 }
@@ -77,14 +73,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      console.log("❌ Erreur: Utilisateur non trouvé pour l'ID:", data.userId);
       return NextResponse.json(
         { error: "Utilisateur non trouvé" },
         { status: 404 }
       );
     }
-
-    console.log("✅ Utilisateur trouvé:", user);
 
     // Convertir le status en français pour correspondre à l'enum
     const statusMapping = {
@@ -102,7 +95,6 @@ export async function POST(req: NextRequest) {
 
     // Vérifier et formater les skills
     const skillIds = Array.isArray(data.skills) ? data.skills : [];
-    console.log("📝 Skills à connecter:", skillIds);
 
     // Créer d'abord l'étudiant
     const studentData: Prisma.StudentCreateInput = {
@@ -130,8 +122,6 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    console.log("📝 Création de l'étudiant avec les données:", studentData);
-
     const student = await prisma.student.create({
       data: studentData,
       include: {
@@ -141,13 +131,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    console.log("✅ Étudiant créé avec succès (avant fichiers):", student);
-
     // Mettre à jour l'étudiant avec les fichiers si nécessaire
     const updateData: Prisma.StudentUpdateInput = {};
 
     if (data.CV) {
-      console.log("📝 Création de l'entrée pour le CV:", data.CV);
       const cvUpload = await prisma.uploadFile.create({
         data: { url: data.CV }
       });
@@ -155,7 +142,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (data.profilePicture) {
-      console.log("📝 Création de l'entrée pour la photo de profil:", data.profilePicture);
       const profilePicture = await prisma.uploadFile.create({
         data: { url: data.profilePicture }
       });
@@ -163,7 +149,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (Object.keys(updateData).length > 0) {
-      console.log("📝 Mise à jour de l'étudiant avec les fichiers:", updateData);
       const updatedStudent = await prisma.student.update({
         where: { id: student.id },
         data: updateData,
@@ -175,11 +160,9 @@ export async function POST(req: NextRequest) {
           profilePicture: true
         }
       });
-      console.log("✅ Étudiant mis à jour avec succès:", updatedStudent);
       return NextResponse.json(updatedStudent, { status: 201 });
     }
 
-    console.log("✅ Étudiant créé avec succès (sans fichiers):", student);
     return NextResponse.json(student, { status: 201 });
   } catch (error) {
     console.error("❌ Erreur lors de la création de l'étudiant:", error);

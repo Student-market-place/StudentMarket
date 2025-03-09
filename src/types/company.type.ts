@@ -9,3 +9,10 @@ export interface Company {
     modifiedAt: Date;
     deletedAt: Date;
 }
+
+export interface CompanyFormData {
+  userId: string;
+  profilePicture: string;
+  name: string;
+  description: string;
+}

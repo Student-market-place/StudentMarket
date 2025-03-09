@@ -28,7 +28,6 @@ export default {
       apiKey: process.env.NEXT_PUBLIC_AUTH_RESEND_KEY,
       from: "onboarding@resend.dev",
       async sendVerificationRequest({ identifier, url, provider }) {
-        console.log("📧 Envoi de l'email de vérification", { identifier, url });
         try {
           const response = await fetch(`${baseUrl}/api/resend`, {
             method: "POST",
@@ -48,7 +47,6 @@ export default {
             throw new Error(`Erreur HTTP: ${response.status}`);
           }
 
-          console.log("✅ Email de vérification envoyé avec succès");
         } catch (error) {
           console.error("❌ Erreur lors de l'envoi de l'email:", error);
           throw error;
@@ -77,14 +75,10 @@ export default {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log("🔄 Redirection URL:", url);
-      
-      // Pour le suivi de débogage
-      console.log("🔑 Base URL:", baseUrl);
       
       try {
         // Récupérer l'email depuis les paramètres de l'URL s'il existe déjà
-        let email = url.split('email=')[1]?.split('&')[0];
+        const email = url.split('email=')[1]?.split('&')[0];
         
         // Si on redirige vers la page de création de compte, on s'assure d'avoir l'email
         if (url.includes('/auth/create-account')) {
@@ -92,7 +86,6 @@ export default {
           if (url.includes('/api/auth/callback/google')) {
             // Remarque: Nous n'avons pas accès au token ici directement,
             // L'email sera ajouté via le middleware ou directement dans les routes spécifiques
-            console.log("⚠️ Callback Google détecté, l'email sera ajouté ultérieurement");
           }
           
           // Vérifier si l'utilisateur existe déjà (si email est disponible)

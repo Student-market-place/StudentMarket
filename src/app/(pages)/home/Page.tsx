@@ -8,7 +8,6 @@ import StudentList from "@/components/custom-ui/StudentList";
 import OffersList from "@/components/custom-ui/OffersList";
 
 const HomePage = () => {
-  console.log("HomePage");
   const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
 
   const handleActive = (tab: "students" | "offers") => {

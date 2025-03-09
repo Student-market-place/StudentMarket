@@ -11,13 +11,11 @@ export async function middleware(request: NextRequest) {
     
     // Si le paramètre email est absent ou vide, nous pouvons essayer de le récupérer des cookies
     if (!hasEmail || (email && email.trim() === '')) {
-      console.log("🍪 Tentative de récupération de l'email depuis les cookies");
       
       // Récupérer le cookie d'email personnalisé
       const userEmailCookie = request.cookies.get('user-email')?.value;
       
       if (userEmailCookie) {
-        console.log("📧 Email trouvé dans le cookie:", userEmailCookie);
         
         // Construire une nouvelle URL avec l'email
         const url = new URL(request.url);
@@ -26,7 +24,6 @@ export async function middleware(request: NextRequest) {
         // Rediriger vers la nouvelle URL avec l'email
         return NextResponse.redirect(url);
       } else {
-        console.log("❓ Aucun email trouvé dans les cookies");
         
         // Si nous n'avons pas l'email dans les cookies, essayons de faire une requête à notre API
         try {
@@ -41,7 +38,6 @@ export async function middleware(request: NextRequest) {
           if (response.ok) {
             const data = await response.json();
             if (data.email) {
-              console.log("📧 Email récupéré via l'API:", data.email);
               
               // Construire une nouvelle URL avec l'email
               const url = new URL(request.url);

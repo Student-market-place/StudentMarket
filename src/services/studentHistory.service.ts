@@ -9,8 +9,6 @@ async function fetchStudentsHistory(
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student_history`;
 
-  console.log("fetchStudentsHistory params", params);
-
   const queryObject: Record<string, string> = {};
   if (params.studentId !== undefined) {
     queryObject.studentId = params.studentId;
@@ -18,9 +16,6 @@ async function fetchStudentsHistory(
   if (params.companyId !== undefined) {
     queryObject.companyId = params.companyId;
   }
-
-  console.log("fetchStudentsHistory queryObject", queryObject);
-  console.log("fetchStudentsHistory url", url);
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;

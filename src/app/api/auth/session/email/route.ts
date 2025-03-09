@@ -1,9 +1,8 @@
 import { auth } from "@/auth";
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 // Route pour récupérer l'email de la session
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Récupérer la session via auth
     const session = await auth();
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Route pour stocker l'email dans un cookie dédié
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Récupérer la session via auth
     const session = await auth();

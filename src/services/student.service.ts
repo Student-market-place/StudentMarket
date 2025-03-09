@@ -1,6 +1,7 @@
 import {
   GetAllParams,
   StudentWithRelation,
+  StudentFormData
 } from "@/types/student.type";
 import axios from "axios";
 
@@ -35,9 +36,18 @@ async function fetchStudentById(id: string): Promise<StudentWithRelation> {
   return response.data;
 }
 
+async function createStudent(data: StudentFormData): Promise<StudentWithRelation> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/student`;
+
+  const response = await axios.post(url, data);
+  return response.data;
+}
+
 const StudentService = {
   fetchStudents,
   fetchStudentById,
+  createStudent
 };
 
 export default StudentService;

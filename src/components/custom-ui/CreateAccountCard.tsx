@@ -20,8 +20,7 @@ import { Textarea } from "../ui/textarea";
 import { useEffect, useState } from "react";
 import UserService from "@/services/user.service";
 import SchoolService from "@/services/school.service";
-import { User, School } from "@prisma/client";
-import axios from "axios";
+import { School } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -30,6 +29,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { FileUpload } from "./FileUpload";
+import { useRouter } from "next/navigation";
+import StudentService from "@/services/student.service";
+import CompanyService from "@/services/company.service";
 
 interface StudentFormValues {
   profilePicture: string;
@@ -54,39 +56,74 @@ interface CreateAccountCardProps {
 }
 
 const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
-  const [latestUser, setLatestUser] = useState<User | null>(null);
   const [schools, setSchools] = useState<School[]>([]);
   const isStudent = role === "student";
+  const [userId, setUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchLatestUser = async () => {
-      try {
-        const user = await UserService.fetchLatestUser();
-        setLatestUser(user);
-        if (user) {
-          await UserService.updateUserRole({
-            userId: user.id,
-            role: role
-          });
+    // Récupérer l'ID utilisateur depuis le localStorage
+    const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+    
+    if (storedUserId) {
+      setUserId(storedUserId);
+      
+      // Vérifier si un profil étudiant ou entreprise existe déjà
+      const checkExistingProfile = async () => {
+        try {
+          // Vérifier si un profil étudiant existe
+          const studentResponse = await fetch(`/api/student?userId=${storedUserId}`);
+          const companyResponse = await fetch(`/api/company?userId=${storedUserId}`);
+
+          // Vérifier si les réponses sont vides
+          const studentText = await studentResponse.text();
+          const companyText = await companyResponse.text();
+
+          // Convertir en JSON si non vide
+          const studentData = studentText ? JSON.parse(studentText) : null;
+          const companyData = companyText ? JSON.parse(companyText) : null;
+          
+          // Vérifier si les données contiennent réellement un profil pour cet userId
+          const hasStudentProfile = Array.isArray(studentData) && studentData.some(student => student.userId === storedUserId);
+          const hasCompanyProfile = Array.isArray(companyData) && companyData.some(company => company.userId === storedUserId);
+          
+          if (hasStudentProfile || hasCompanyProfile) {
+            router.push('/home');
+            return;
+          }
+        } catch (error) {
+          console.error("Erreur lors de la vérification du profil:", error);
         }
-      } catch (error) {
-        console.error("Erreur lors de la récupération de l'utilisateur:", error);
-      }
-    };
-    fetchLatestUser();
-  }, [role]);
+      };
+      
+      checkExistingProfile();
+      
+      // Mettre à jour le rôle de l'utilisateur
+      UserService.updateUserRole({
+        userId: storedUserId,
+        role: role
+      }).catch(error => {
+        console.error("Erreur lors de la mise à jour du rôle de l'utilisateur:", error);
+      });
+    } else {
+      console.error("❌ Aucun ID utilisateur trouvé dans le localStorage");
+    }
+  }, [role, router]);
 
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const schoolsList = await SchoolService.fetchSchools();
-        setSchools(schoolsList);
+        const schoolsData = await SchoolService.fetchSchools();
+        setSchools(schoolsData);
       } catch (error) {
         console.error("Erreur lors de la récupération des écoles:", error);
       }
     };
-    fetchSchools();
-  }, []);
+    
+    if (isStudent) {
+      fetchSchools();
+    }
+  }, [isStudent]);
 
   const studentForm = useForm<StudentFormValues>({
     defaultValues: {
@@ -112,18 +149,20 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
 
   const onStudentSubmit: SubmitHandler<StudentFormValues> = async (data) => {
     try {
-      if (!latestUser) {
-        console.error("Aucun utilisateur trouvé");
+      if (!userId) {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-      await axios.post(`${baseUrl}/api/student`, {
+      const studentData = {
         ...data,
-        userId: latestUser.id
-      });
+        userId: userId
+      };
 
-      console.log("Profil étudiant créé avec succès");
+      await StudentService.createStudent(studentData);
+      
+      setTimeout(() => {
+        router.push('/home');
+      }, 1500);
     } catch (error) {
       console.error("Erreur lors de la création du profil étudiant:", error);
     }
@@ -131,18 +170,20 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
 
   const onCompanySubmit: SubmitHandler<CompanyFormValues> = async (data) => {
     try {
-      if (!latestUser) {
-        console.error("Aucun utilisateur trouvé");
+      if (!userId) {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-      await axios.post(`${baseUrl}/api/company`, {
+      const companyData = {
         ...data,
-        userId: latestUser.id
-      });
+        userId: userId
+      };
 
-      console.log("Profil entreprise créé avec succès");
+      await CompanyService.createCompany(companyData);
+      
+      setTimeout(() => {
+        router.push('/home');
+      }, 1500);
     } catch (error) {
       console.error("Erreur lors de la création du profil entreprise:", error);
     }

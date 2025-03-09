@@ -1,7 +1,6 @@
 import { StudentProfilCard } from "@/components/custom-ui/StudentProfilCard";
 
 const SettingsStudentPage = () => {
-  console.log("🚀 ~ SettingsStudentPage ~ SettingsStudentPage:");
   return (
     <div>
       <h1 className="text-4xl p-6 font-bold text-center text-gray-800 dark:text-white mt-6 mb-4 tracking-wide">
