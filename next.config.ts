@@ -1,13 +1,15 @@
 import type { NextConfig } from "next";
 
-const config: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig: NextConfig = {
   images: {
     domains: [
-      'storage.example.com',
-      'shyueiubgibnztmjcbqs.supabase.co',
-      'images.pexels.com'
+      "images.pexels.com",
+      "storage.googleapis.com",
+      "shyueiubgibnztmjcbqs.supabase.co",
+      "storage.example.com",
     ],
   },
 };
 
-export default config;
+export default nextConfig;

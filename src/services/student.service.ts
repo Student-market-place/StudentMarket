@@ -1,14 +1,15 @@
 import {
   GetAllParams,
   StudentWithRelation,
-  StudentFormData
+  StudentFormData,
 } from "@/types/student.type";
 import axios from "axios";
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchStudents(
   params: GetAllParams
 ): Promise<StudentWithRelation[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student`;
 
   // Construction d'un objet de paramètres de requête
@@ -32,15 +33,37 @@ async function fetchStudents(
 }
 
 async function fetchStudentById(id: string): Promise<StudentWithRelation> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.get(url);
   return response.data;
 }
 
-async function createStudent(data: StudentFormData): Promise<StudentWithRelation> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+interface UpdateStudentData {
+  firstName?: string;
+  lastName?: string;
+  status?: string;
+  isAvailable?: boolean;
+  description?: string;
+  skillIds?: string[];
+  profilePictureId?: string;
+  CVId?: string;
+  email?: string;
+}
+
+async function updateStudent(
+  id: string,
+  data: UpdateStudentData
+): Promise<StudentWithRelation> {
+  const url = `${baseUrl}/api/student/${id}`;
+
+  const response = await axios.put(url, data);
+  return response.data;
+}
+
+async function createStudent(
+  data: StudentFormData
+): Promise<StudentWithRelation> {
   const url = `${baseUrl}/api/student`;
 
   const response = await axios.post(url, data);
@@ -50,7 +73,8 @@ async function createStudent(data: StudentFormData): Promise<StudentWithRelation
 const StudentService = {
   fetchStudents,
   fetchStudentById,
-  createStudent
+  updateStudent,
+  createStudent,
 };
 
 export default StudentService;
