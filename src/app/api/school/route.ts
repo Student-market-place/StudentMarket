@@ -6,38 +6,58 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const schools = await prisma.school.findMany({
-      orderBy: {
-        name: 'asc'
-      }
+      include: {
+        user: true,
+        profilePicture: true,
+        students: true,
+      },
+      where: {
+        deletedAt: null,
+      },
     });
     return NextResponse.json(schools, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la récupération des écoles:", error);
+    console.error("Error fetching schools:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des écoles" },
+      { error: "Failed to fetch schools" },
       { status: 500 }
     );
   }
 }
 
 export async function POST(req: NextRequest) {
-  const { name, domainName, isActive, profilePictureId, user } = await req.json();
+  try {
+    const { name, domainName, isActive, profilePictureId, userId } =
+      await req.json();
 
-  if(!name || !domainName || !isActive || !profilePictureId) {
+    if (!name || !domainName || !profilePictureId || !userId) {
+      return NextResponse.json(
+        {
+          error: "name, domainName, profilePictureId, and userId are required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const school = await prisma.school.create({
+      data: {
+        name,
+        domainName,
+        isActive: isActive ?? true,
+        profilePicture: { connect: { id: profilePictureId } },
+        user: { connect: { id: userId } },
+      },
+      include: {
+        user: true,
+        profilePicture: true,
+      },
+    });
+    return NextResponse.json(school, { status: 201 });
+  } catch (error) {
+    console.error("Error creating school:", error);
     return NextResponse.json(
-      { error: "name, domainName, isActive, profilePictureId are required" },
-      { status: 400 }
+      { error: "Failed to create school" },
+      { status: 500 }
     );
   }
-
-  const school = await prisma.school.create({
-    data: {
-      user,
-      name,
-      domainName,
-      isActive,
-      profilePicture: { connect: { id: profilePictureId }},
-    },
-  });
-  return NextResponse.json(school, { status: 201 });
 }

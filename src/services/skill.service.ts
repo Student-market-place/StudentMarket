@@ -4,7 +4,7 @@ import axios from "axios";
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/skill`;
 
 async function fetchSkills(): Promise<Skill[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_MAIN_URL || "";
   const url = `${baseUrl}/api/skill`;
   const response = await axios.get(url);
   return response.data;

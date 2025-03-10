@@ -10,7 +10,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useCallback } from "react";
+import { Skill } from "@prisma/client";
+import SkillService from "@/services/skill.service";
+import { useQueryClient } from "@tanstack/react-query";
 
 const scrollbarHideClass = `
   .scrollbar-hide::-webkit-scrollbar {
@@ -22,77 +24,62 @@ const scrollbarHideClass = `
   }
 `;
 
-interface Skill {
-  value: string;
-  label: string;
-}
-
 interface SkillsComboboxProps {
+  selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
-  defaultSkills?: string[];
+  availableSkills?: Skill[];
 }
 
-export function SkillsCombobox({ onSkillsChange, defaultSkills = [] }: SkillsComboboxProps) {
+export function SkillsCombobox({
+  selectedSkills,
+  onSkillsChange,
+  availableSkills = [],
+}: SkillsComboboxProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
-  const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultSkills);
-  const [skills, setSkills] = React.useState<Skill[]>([]);
+  const [skills, setSkills] = React.useState(availableSkills);
   const [inputValue, setInputValue] = React.useState("");
+  const [isCreating, setIsCreating] = React.useState(false);
 
-  // Charger les skills depuis l'API au montage du composant
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        const response = await fetch('/api/skill');
-        const data = await response.json();
-        const formattedSkills = data.map((skill: { id: string; name: string }) => ({
-          value: skill.id,
-          label: skill.name,
-        }));
-        setSkills(formattedSkills);
-      } catch (error) {
-        console.error("Erreur lors du chargement des skills:", error);
-      }
-    };
-    fetchSkills();
-  }, []);
+  // Update skills when availableSkills changes
+  React.useEffect(() => {
+    setSkills(availableSkills);
+  }, [availableSkills]);
 
-  // Gérer les changements de sélection
-  const handleSelectionChange = useCallback((newValues: string[]) => {
-    setSelectedValues(newValues);
-    onSkillsChange(newValues);
-  }, [onSkillsChange]);
-
-  const filteredSkills = skills.filter(
-    (skill) =>
-      skill.label.toLowerCase().includes(inputValue.toLowerCase()) ||
-      skill.value.toLowerCase().includes(inputValue.toLowerCase())
+  const filteredSkills = skills.filter((skill) =>
+    skill.name.toLowerCase().includes(inputValue.toLowerCase())
   );
 
   const handleCreateNew = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isCreating) return;
+
+    const newSkillName = inputValue.trim();
+
+    if (skills.some((s) => s.name.toLowerCase() === newSkillName.toLowerCase()))
+      return;
 
     try {
-      const response = await fetch('/api/skill', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: inputValue.trim() }),
+      setIsCreating(true);
+      // Create the skill in the database
+      const newSkill = await SkillService.postSkill({
+        name: newSkillName,
+        id: `temp-${Date.now()}`,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+        deletedAt: null,
       });
 
-      if (!response.ok) throw new Error('Erreur lors de la création du skill');
-
-      const newSkill = await response.json();
-      const formattedSkill = {
-        value: newSkill.id,
-        label: newSkill.name,
-      };
-
-      setSkills((prev) => [...prev, formattedSkill]);
-      handleSelectionChange([...selectedValues, formattedSkill.value]);
+      // Update the local state
+      setSkills((prev) => [...prev, newSkill]);
+      onSkillsChange([...selectedSkills, newSkill.id]);
       setInputValue("");
+
+      // Refresh the skills list in React Query cache
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
     } catch (error) {
-      console.error("Erreur lors de la création du skill:", error);
+      console.error("Failed to create skill:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -111,45 +98,44 @@ export function SkillsCombobox({ onSkillsChange, defaultSkills = [] }: SkillsCom
               className="flex items-center gap-1 overflow-x-auto scrollbar-hide"
               style={{ maxWidth: "calc(100% - 20px)" }}
             >
-              {selectedValues.length > 0 ? (
-                selectedValues.map((selectedValue) => {
-                  const skill = skills.find(
-                    (s) => s.value === selectedValue
-                  );
+              {selectedSkills.length > 0 ? (
+                selectedSkills.map((selectedId) => {
+                  const skill = skills.find((s) => s.id === selectedId);
                   return (
                     <Badge
-                      key={selectedValue}
+                      key={selectedId}
                       variant="secondary"
                       className="shrink-0"
                     >
-                      {skill?.label}
-                      <span
+                      {skill?.name || "Compétence inconnue"}
+                      <div
                         role="button"
                         tabIndex={0}
                         className="ml-1 rounded-full focus:ring-2 cursor-pointer"
-                        onMouseDown={(e) => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          handleSelectionChange(
-                            selectedValues.filter((v) => v !== selectedValue)
+                          e.stopPropagation();
+                          onSkillsChange(
+                            selectedSkills.filter((id) => id !== selectedId)
                           );
                         }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
+                          if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            handleSelectionChange(
-                              selectedValues.filter((v) => v !== selectedValue)
+                            onSkillsChange(
+                              selectedSkills.filter((id) => id !== selectedId)
                             );
                           }
                         }}
                       >
                         <X className="h-3 w-3" />
-                      </span>
+                      </div>
                     </Badge>
                   );
                 })
               ) : (
                 <span className="text-muted-foreground">
-                  Sélectionnez vos compétences...
+                  Sélectionner des compétences...
                 </span>
               )}
             </div>
@@ -168,22 +154,22 @@ export function SkillsCombobox({ onSkillsChange, defaultSkills = [] }: SkillsCom
             {filteredSkills.length > 0 ? (
               filteredSkills.map((skill) => (
                 <div
-                  key={skill.value}
+                  key={skill.id}
                   className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-100 rounded"
                   onClick={() => {
-                    handleSelectionChange(
-                      selectedValues.includes(skill.value)
-                        ? selectedValues.filter((v) => v !== skill.value)
-                        : [...selectedValues, skill.value]
+                    onSkillsChange(
+                      selectedSkills.includes(skill.id)
+                        ? selectedSkills.filter((id) => id !== skill.id)
+                        : [...selectedSkills, skill.id]
                     );
                     setInputValue("");
                   }}
                 >
-                  {skill.label}
+                  {skill.name}
                   <Check
                     className={cn(
                       "h-4 w-4",
-                      selectedValues.includes(skill.value)
+                      selectedSkills.includes(skill.id)
                         ? "opacity-100"
                         : "opacity-0"
                     )}
@@ -199,9 +185,10 @@ export function SkillsCombobox({ onSkillsChange, defaultSkills = [] }: SkillsCom
                     size="sm"
                     className="mt-2 w-full"
                     onClick={handleCreateNew}
+                    disabled={isCreating}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Créer &quot;{inputValue}&quot;
+                    {isCreating ? "Création..." : `Créer "${inputValue}"`}
                   </Button>
                 )}
               </div>

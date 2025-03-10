@@ -11,6 +11,10 @@ export async function GET(req: NextRequest, { params }: IParams) {
       where: {
         id: id,
       },
+      include: {
+        profilePicture: true,
+        user: true,
+      },
     });
 
     if (!company) {
@@ -44,11 +48,11 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
-  const { name, profilePictureId, description } = await req.json();
+  const { name, profilePictureId, description, email } = await req.json();
 
-  if (!name || !profilePictureId || !description) {
+  if (!name || !description) {
     return NextResponse.json(
-      { error: "name, profilePictureId, description are required" },
+      { error: "name and description are required" },
       { status: 400 }
     );
   }
@@ -60,8 +64,21 @@ export async function PUT(req: NextRequest, { params }: IParams) {
       },
       data: {
         name,
-        profilePicture: { connect: { id: profilePictureId } },
         description,
+        ...(profilePictureId && {
+          profilePicture: { connect: { id: profilePictureId } },
+        }),
+        ...(email && {
+          user: {
+            update: {
+              email,
+            },
+          },
+        }),
+      },
+      include: {
+        profilePicture: true,
+        user: true,
       },
     });
     return NextResponse.json(company, { status: 200 });

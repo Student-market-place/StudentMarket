@@ -1,36 +1,37 @@
 import axios from "axios";
 import { School } from "@prisma/client";
 
-const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/students`;
+const baseUrl = process.env.NEXT_PUBLIC_MAIN_URL || "";
 
 async function fetchSchools(): Promise<School[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/school`;
-
   const response = await axios.get(url);
   return response.data;
 }
 
 async function fetchSchool(id: string): Promise<School> {
-  const response = await axios.get(`${END_POINT}/${id}`);
+  const url = `${baseUrl}/api/school/${id}`;
+  const response = await axios.get(url);
   return response.data;
-} 
+}
 
 async function postSchool(school: School): Promise<School> {
-  const response = await axios.post(END_POINT, school);
+  const url = `${baseUrl}/api/school`;
+  const response = await axios.post(url, school);
   return response.data;
 }
 
 async function putSchool(school: School): Promise<School> {
-  const response = await axios.put(`${END_POINT}/${school.id}`, school);
+  const url = `${baseUrl}/api/school/${school.id}`;
+  const response = await axios.put(url, school);
   return response.data;
 }
 
 async function deleteSchool(school: School): Promise<School> {
-  const response = await axios.delete(`${END_POINT}/${school.id}`);
+  const url = `${baseUrl}/api/school/${school.id}`;
+  const response = await axios.delete(url);
   return response.data;
 }
-
 
 const SchoolService = {
   fetchSchools,

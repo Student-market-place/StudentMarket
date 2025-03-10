@@ -20,7 +20,10 @@ import { Textarea } from "../ui/textarea";
 import { useEffect, useState } from "react";
 import UserService from "@/services/user.service";
 import SchoolService from "@/services/school.service";
-import { School } from "@prisma/client";
+import StudentService from "@/services/student.service";
+import CompanyService from "@/services/company.service";
+import SkillService from "@/services/skill.service";
+import { School, Skill } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -30,8 +33,6 @@ import {
 } from "../ui/select";
 import { FileUpload } from "./FileUpload";
 import { useRouter } from "next/navigation";
-import StudentService from "@/services/student.service";
-import CompanyService from "@/services/company.service";
 
 interface StudentFormValues {
   profilePicture: string;
@@ -57,53 +58,47 @@ interface CreateAccountCardProps {
 
 const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
   const [schools, setSchools] = useState<School[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const isStudent = role === "student";
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // Récupérer l'ID utilisateur depuis le localStorage
-    const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-    
+    const storedUserId =
+      typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+
     if (storedUserId) {
       setUserId(storedUserId);
-      
+
       // Vérifier si un profil étudiant ou entreprise existe déjà
       const checkExistingProfile = async () => {
         try {
-          // Vérifier si un profil étudiant existe
-          const studentResponse = await fetch(`/api/student?userId=${storedUserId}`);
-          const companyResponse = await fetch(`/api/company?userId=${storedUserId}`);
-
-          // Vérifier si les réponses sont vides
-          const studentText = await studentResponse.text();
-          const companyText = await companyResponse.text();
-
-          // Convertir en JSON si non vide
-          const studentData = studentText ? JSON.parse(studentText) : null;
-          const companyData = companyText ? JSON.parse(companyText) : null;
+          const studentData = await StudentService.fetchStudents({ userId: storedUserId });
+          const companyData = await CompanyService.fetchCompanies();
           
-          // Vérifier si les données contiennent réellement un profil pour cet userId
           const hasStudentProfile = Array.isArray(studentData) && studentData.some(student => student.userId === storedUserId);
           const hasCompanyProfile = Array.isArray(companyData) && companyData.some(company => company.userId === storedUserId);
           
           if (hasStudentProfile || hasCompanyProfile) {
-            router.push('/home');
+            router.push("/home");
             return;
           }
         } catch (error) {
           console.error("Erreur lors de la vérification du profil:", error);
         }
       };
-      
+
       checkExistingProfile();
       
-      // Mettre à jour le rôle de l'utilisateur
       UserService.updateUserRole({
         userId: storedUserId,
-        role: role
-      }).catch(error => {
-        console.error("Erreur lors de la mise à jour du rôle de l'utilisateur:", error);
+        role: role,
+      }).catch((error) => {
+        console.error(
+          "Erreur lors de la mise à jour du rôle de l'utilisateur:",
+          error
+        );
       });
     } else {
       console.error("❌ Aucun ID utilisateur trouvé dans le localStorage");
@@ -111,18 +106,25 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
   }, [role, router]);
 
   useEffect(() => {
-    const fetchSchools = async () => {
+    const fetchData = async () => {
       try {
-        const schoolsData = await SchoolService.fetchSchools();
-        setSchools(schoolsData);
+        if (isStudent) {
+          const [schoolsData, skillsData] = await Promise.all([
+            SchoolService.fetchSchools(),
+            SkillService.fetchSkills(),
+          ]);
+
+          console.log(schoolsData);
+          console.log(skillsData);
+          setSchools(schoolsData);
+          setAvailableSkills(skillsData);
+        }
       } catch (error) {
-        console.error("Erreur lors de la récupération des écoles:", error);
+        console.error("Erreur lors de la récupération des données:", error);
       }
     };
-    
-    if (isStudent) {
-      fetchSchools();
-    }
+
+    fetchData();
   }, [isStudent]);
 
   const studentForm = useForm<StudentFormValues>({
@@ -155,13 +157,13 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
 
       const studentData = {
         ...data,
-        userId: userId
+        userId: userId,
       };
 
       await StudentService.createStudent(studentData);
-      
+
       setTimeout(() => {
-        router.push('/home');
+        router.push("/home");
       }, 1500);
     } catch (error) {
       console.error("Erreur lors de la création du profil étudiant:", error);
@@ -176,13 +178,13 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
 
       const companyData = {
         ...data,
-        userId: userId
+        userId: userId,
       };
 
       await CompanyService.createCompany(companyData);
-      
+
       setTimeout(() => {
-        router.push('/home');
+        router.push("/home");
       }, 1500);
     } catch (error) {
       console.error("Erreur lors de la création du profil entreprise:", error);
@@ -201,10 +203,12 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
     <Card>
       <CardHeader>
         <CardTitle className="text-2xl font-bold">
-          {isStudent ? "Complétez votre profil étudiant" : "Complétez votre profil entreprise"}
+          {isStudent
+            ? "Complétez votre profil étudiant"
+            : "Complétez votre profil entreprise"}
         </CardTitle>
         <CardDescription>
-          {isStudent 
+          {isStudent
             ? "Remplissez vos informations pour que les entreprises puissent vous connaître."
             : "Remplissez les informations de votre entreprise pour commencer à recruter."}
         </CardDescription>
@@ -212,7 +216,10 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
       <CardContent>
         {isStudent ? (
           <Form {...studentForm}>
-            <form onSubmit={studentForm.handleSubmit(onStudentSubmit)} className="space-y-8">
+            <form
+              onSubmit={studentForm.handleSubmit(onStudentSubmit)}
+              className="space-y-8"
+            >
               <div className="flex justify-end gap-7">
                 <FormItem className="w-1/3 flex flex-col items-center">
                   <FormLabel>Photo de profil</FormLabel>
@@ -253,7 +260,10 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>École</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez votre école" />
@@ -286,14 +296,18 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                             <div className="flex items-center space-x-2">
                               <Checkbox
                                 checked={field.value === "internship"}
-                                onCheckedChange={() => field.onChange("internship")}
+                                onCheckedChange={() =>
+                                  field.onChange("internship")
+                                }
                               />
                               <Label>Stage</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Checkbox
                                 checked={field.value === "apprenticeship"}
-                                onCheckedChange={() => field.onChange("apprenticeship")}
+                                onCheckedChange={() =>
+                                  field.onChange("apprenticeship")
+                                }
                               />
                               <Label>Alternance</Label>
                             </div>
@@ -347,7 +361,8 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                         <FormControl>
                           <SkillsCombobox
                             onSkillsChange={(skills) => field.onChange(skills)}
-                            defaultSkills={field.value}
+                            selectedSkills={field.value}
+                            availableSkills={availableSkills}
                           />
                         </FormControl>
                       </FormItem>
@@ -379,7 +394,10 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
           </Form>
         ) : (
           <Form {...companyForm}>
-            <form onSubmit={companyForm.handleSubmit(onCompanySubmit)} className="space-y-8">
+            <form
+              onSubmit={companyForm.handleSubmit(onCompanySubmit)}
+              className="space-y-8"
+            >
               <FormItem className="flex flex-col items-center">
                 <FormLabel>Logo de l&apos;entreprise</FormLabel>
                 <AvatarUpload
