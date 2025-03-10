@@ -6,11 +6,12 @@ import { useState } from "react";
 
 import StudentList from "@/components/custom-ui/StudentList";
 import OffersList from "@/components/custom-ui/OffersList";
+import CompanyList from "@/components/custom-ui/CompanyList";
 
 const HomePage = () => {
-  const [activeTab, setActiveTab] = useState<"students" | "offers">("students");
+  const [activeTab, setActiveTab] = useState<"students" | "offers" | "companies">("students");
 
-  const handleActive = (tab: "students" | "offers") => {
+  const handleActive = (tab: "students" | "offers" | "companies") => {
     setActiveTab(tab);
   };
 
@@ -38,6 +39,16 @@ const HomePage = () => {
         >
           Offres
         </Button>
+        <Button
+          className={`px-6 py-2 border-2 rounded-md transition-colors ${
+            activeTab === "companies"
+              ? " bg-blue-500 text-white border-transparent hover:bg-blue-500"
+              : "bg-white text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+          }`}
+          onClick={() => handleActive("companies")}
+        >
+          Entreprises
+        </Button>
       </div>
 
       <div className="flex gap-8">
@@ -47,8 +58,10 @@ const HomePage = () => {
             <>
               <StudentList />
             </>
-          ) : (
+          ) : activeTab === "offers" ? (
             <OffersList />
+          ) : (
+            <CompanyList />
           )}
         </div>
       </div>
