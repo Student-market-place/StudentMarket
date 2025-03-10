@@ -26,7 +26,7 @@ export default {
     }),
     Resend({
       apiKey: process.env.NEXT_PUBLIC_AUTH_RESEND_KEY,
-      from: "onboarding@resend.dev",
+      from: "no-reply@1ucas1eveque.fr",
       async sendVerificationRequest({ identifier, url, provider }) {
         try {
           const response = await fetch(`${baseUrl}/api/resend`, {
@@ -44,8 +44,13 @@ export default {
           });
 
           if (!response.ok) {
+            console.error("❌ Échec de l'envoi d'email. Status:", response.status);
+            const errorData = await response.json();
+            console.error("📛 Détails de l'erreur:", errorData);
             throw new Error(`Erreur HTTP: ${response.status}`);
           }
+
+          const responseData = await response.json();
 
         } catch (error) {
           console.error("❌ Erreur lors de l'envoi de l'email:", error);
@@ -56,69 +61,79 @@ export default {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+
       if (account && user) {
         token.accessToken = account.access_token;
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        
-        // Stocker l'information que c'est un nouvel utilisateur
         token.isNewUser = account.isNewUser;
       }
       return token;
     },
     async session({ session, token }) {
+
       session.accessToken = token.accessToken as string;
       session.user.id = token.id as string;
       session.user.email = (token.email as string) ?? null;
       session.user.name = (token.name as string) ?? null;
+
       return session;
     },
     async redirect({ url, baseUrl }) {
       
       try {
-        // Récupérer l'email depuis les paramètres de l'URL s'il existe déjà
-        const email = url.split('email=')[1]?.split('&')[0];
+        let email;
         
-        // Si on redirige vers la page de création de compte, on s'assure d'avoir l'email
+        // Cas spécial pour le callback Resend
+        if (url.includes('/api/auth/callback/resend')) {
+          const params = new URLSearchParams(url.split('?')[1]);
+          email = params.get('email');
+          return `${baseUrl}/auth/create-account?email=${email}`;
+        }
+        
+        // Pour les autres cas
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        email = urlParams.get('email');
+        
         if (url.includes('/auth/create-account')) {
-          // Si on vient d'un callback Google
+          
           if (url.includes('/api/auth/callback/google')) {
-            // Remarque: Nous n'avons pas accès au token ici directement,
-            // L'email sera ajouté via le middleware ou directement dans les routes spécifiques
           }
           
-          // Vérifier si l'utilisateur existe déjà (si email est disponible)
           if (email) {
             const decodedEmail = decodeURIComponent(email);
             try {
               const user = await prisma.user.findUnique({
                 where: { email: decodedEmail },
                 include: { student: true, company: true }
-              });
+              })
               
-              // Si l'utilisateur a déjà un profil, rediriger vers home
               if (user?.student || user?.company) {
                 return `${baseUrl}/home?email=${email}`;
               }
             } catch (error) {
-              console.error("❌ Erreur lors de la vérification de l'utilisateur:", error);
+              console.error("❌ Erreur vérification utilisateur:", error);
             }
           }
           
-          // Ajout de l'email à l'URL de création de compte si disponible
-          return email ? `${baseUrl}/auth/create-account?email=${email}` : `${baseUrl}/auth/create-account`;
+          const redirectUrl = email ? `${baseUrl}/auth/create-account?email=${email}` : `${baseUrl}/auth/create-account`;
+          return redirectUrl;
         }
         
-        // Si l'URL est la page de connexion ou l'accueil
         if (url.includes('/auth/signin') || url === baseUrl || url === `${baseUrl}/`) {
           return `${baseUrl}/home`;
         }
         
-        // Pour les autres URLs, on ne modifie rien
+        // Si l'URL contient un email, le préserver dans la redirection
+        if (email) {
+          const finalUrl = url.includes('?') ? `${url}&email=${email}` : `${url}?email=${email}`;
+          return finalUrl;
+        }
+        
         return url;
       } catch (error) {
-        console.error("❌ Erreur dans le callback redirect:", error);
+        console.error("❌ Erreur dans redirect:", error);
         return url;
       }
     },
