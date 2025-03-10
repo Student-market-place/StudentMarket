@@ -20,10 +20,12 @@ function NavBar() {
         .then(data => setUser(data))
         .catch(err => console.error("Erreur lors du chargement de l'utilisateur:", err));
     }
+    console.log("🔍 Utilisateur chargé:", user);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('userId');
+    document.cookie = 'user-email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     setUser(null);
     router.push('/');
   };
@@ -101,7 +103,15 @@ function NavBar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  <Link href={`/${user.role}/${user.id}`}>Mon Profil</Link>
+                  {user.role === 'company' && (
+                    <Link href={`/${user.role}/${user.company?.id}`}>Mon Profil</Link>
+                  )}
+                  {user.role === 'student' && (
+                    <Link href={`/${user.role}/${user.student?.id}`}>Mon Profil</Link>
+                  )}
+                  {user.role === 'school' && (
+                    <Link href={`/${user.role}/${user.school?.id}`}>Mon Profil</Link>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Déconnexion

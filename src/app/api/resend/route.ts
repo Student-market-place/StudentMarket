@@ -1,49 +1,37 @@
 import { Resend } from "resend";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const resend = new Resend(process.env.NEXT_PUBLIC_AUTH_RESEND_KEY);
 
 export async function POST(req: NextRequest) {
-  
   try {
-    const body = await req.json();
-    const { from, to, subject, url } = body;
-
-    if (!to || !url) {
-      console.error("❌ Données manquantes");
-      return Response.json(
-        { error: "Email et URL sont requis" },
-        { status: 400 }
-      );
-    }
+    const { from, to, subject, url } = await req.json();
 
     const { data, error } = await resend.emails.send({
-      from,
+      from: "no-reply@1ucas1eveque.fr",
       to: [to],
-      subject,
+      subject: subject,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563eb;">Bienvenue sur Student Market</h1>
-          <p>Bonjour,</p>
-          <p>Cliquez sur le lien ci-dessous pour vous connecter à votre compte :</p>
-          <a href="${url}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">
-            Se connecter
-          </a>
-          <p style="color: #666;">Ce lien expire dans 24 heures.</p>
-          <p style="color: #666;">Si vous n'avez pas demandé ce lien, vous pouvez ignorer cet email.</p>
+        <div>
+          <h1>Bienvenue sur Student Market</h1>
+          <p>Cliquez sur le lien ci-dessous pour vous connecter :</p>
+          <a href="${url}">Se connecter</a>
         </div>
       `,
     });
 
     if (error) {
       console.error("❌ Erreur Resend:", error);
-      return Response.json({ error }, { status: 500 });
+      return NextResponse.json(
+        { error: "Erreur lors de l'envoi de l'email" },
+        { status: 500 }
+      );
     }
 
-    return Response.json({ data, url });
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("❌ Erreur inattendue:", error);
-    return Response.json(
+    console.error("❌ Erreur lors de l'envoi de l'email:", error);
+    return NextResponse.json(
       { error: "Erreur lors de l'envoi de l'email" },
       { status: 500 }
     );
