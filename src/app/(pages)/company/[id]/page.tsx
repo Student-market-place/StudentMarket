@@ -1,6 +1,7 @@
 "use client";
 import CardJobOffer from "@/components/custom-ui/CardOffer";
 import CompanyProfilCard from "@/components/custom-ui/CompanyProfileUpdateCard";
+import { Button } from "@/components/ui/button";
 import CompanyService from "@/services/company.service";
 import CompanyOfferService from "@/services/companyOffer.service";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
@@ -40,7 +41,12 @@ const CompanyPublicPage = () => {
 
   return (
     <div className="flex items-start justify-center gap-30 p-8">
-      <CompanyProfilCard key={company.id} company={company} />
+      <div className="flex flex-col gap-4 items-center">
+        <CompanyProfilCard key={company.id} company={company} />
+        <a href={`mailto:${company.user.email}`}>
+          <Button>Contacter</Button>
+        </a>
+      </div>
       <div className="flex flex-col gap-4">
         <div className="flex justify-center items-center">
           <h1>Offres publiées</h1>
