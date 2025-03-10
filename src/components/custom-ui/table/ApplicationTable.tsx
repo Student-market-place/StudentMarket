@@ -23,6 +23,7 @@ import {
 import { fetchStudentsApply } from "@/services/studentApply.service";
 import axios from "axios";
 import { StudentApply } from "@/types/studentApply.type";
+import { CompanyOffer } from "@/types/companyOffer.type";
 
 const applicationsFix = [
   {
@@ -101,9 +102,6 @@ export function ApplicationTable() {
     loadApplications();
   }, []);
 
-  type StudentApply = {
-    companyOffer: CompanyOffer;
-  };
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Ongoing";
 
@@ -138,9 +136,16 @@ export function ApplicationTable() {
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       } else {
-        return sortDirection === "asc"
-          ? a.companyOffer[sortField].localeCompare(b.companyOffer[sortField])
-          : b.companyOffer[sortField].localeCompare(a.companyOffer[sortField]);
+        const fieldA = a.companyOffer[sortField];
+        const fieldB = b.companyOffer[sortField];
+
+        if (typeof fieldA === "string" && typeof fieldB === "string") {
+          return sortDirection === "asc"
+            ? fieldA.localeCompare(fieldB)
+            : fieldB.localeCompare(fieldA);
+        } else {
+          return 0; // or handle other types if necessary
+        }
       }
     });
   }, [searchTerm, sortField, sortDirection, applications]);
@@ -289,12 +294,12 @@ export function ApplicationTable() {
                       <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={
-                            application.companyOffer.type === "Internship"
+                            application.companyOffer.type === "stage"
                               ? "default"
                               : "secondary"
                           }
                           className={
-                            application.companyOffer.type === "Internship"
+                            application.companyOffer.type === "stage"
                               ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                           }
