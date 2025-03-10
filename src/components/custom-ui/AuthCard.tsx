@@ -1,9 +1,8 @@
 "use client";
 
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "../ui/button";
+import SigninWithGoogle from "./signinWithGoogle";
 import {
   Card,
   CardContent,
@@ -18,14 +17,19 @@ import Link from "next/link";
 
 interface AuthCardProps {
   variant?: "login" | "student" | "company";
+  handleAction: (formData: FormData) => Promise<void>;
+  handleRoute: () => void;
 }
 
 interface FormValues {
   email: string;
 }
 
-const AuthCard = ({ variant = "student" }: AuthCardProps) => {
-  const router = useRouter();
+const AuthCard = ({
+  variant = "student",
+  handleAction,
+  handleRoute,
+}: AuthCardProps) => {
   const form = useForm<FormValues>({
     defaultValues: {
       email: "",
@@ -33,8 +37,10 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log(data);
-    router.push("/auth/create-account");
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("role", variant);
+    handleAction(formData);
   };
 
   return (
@@ -76,10 +82,9 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
                 </Label>
                 <hr className="flex-grow border-gray-300" />
               </div>
-              <Button variant="outline" className="flex items-center">
-                <Image src="/google.svg" alt="Google" width={20} height={20} />
-                <span>{variant === "login" ? "Sign In" : "Sign Up"}</span>
-              </Button>
+
+              <SigninWithGoogle />
+
             </div>
             <p className="text-center text-gray-400">
               {variant === "login"
@@ -94,7 +99,7 @@ const AuthCard = ({ variant = "student" }: AuthCardProps) => {
               </Link>
             </p>
             <div className="w-full flex justify-end">
-              <Button type="submit">
+              <Button type="submit" onClick={handleRoute}>
                 {variant === "login" ? "Login" : "Sign Up"}
               </Button>
             </div>

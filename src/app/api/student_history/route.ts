@@ -3,9 +3,38 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const student_history = await prisma.student_history.findMany();
-  return NextResponse.json(student_history, { status: 200 });
+export async function GET(req: NextRequest) {
+  try {
+    const searchParams = req.nextUrl.searchParams;
+    const studentIdParam = searchParams.get("studentId");
+
+    const where: {
+      studentId?: string;
+    } = {};
+
+    if (studentIdParam) {
+      where.studentId = studentIdParam;
+    }
+
+    const history = await prisma.student_history.findMany({
+      include: {
+        company: true,
+        student: true,
+      },
+      where,
+    });
+
+    return NextResponse.json(history, { status: 200 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        error:
+          (error as Error).message ||
+          "Erreur lors de la récupération des étudiants",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
