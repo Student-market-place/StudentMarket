@@ -10,7 +10,6 @@ import {
 } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
-import { Button } from "../ui/button";
 
 interface CompanyProfilCardProps {
   company: CompanyWithRelation;
@@ -45,9 +44,6 @@ const CompanyProfilCard = ({ company }: CompanyProfilCardProps) => {
           </CardContent>
         </Card>
       </CardContent>
-      <a href={`mailto:${company.user.email}`}>
-        <Button>Contacter</Button>
-      </a>
     </Card>
   );
 };
