@@ -35,6 +35,15 @@ async function fetchCompanyOffer(id: string): Promise<CompanyOffer> {
   return response.data;
 }
 
+async function fetchCompanyOffersByCompany(
+  companyId: string
+): Promise<CompanyOfferWithRelation[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/company_offer/company/${companyId}`;
+  const response = await axios.get(url);
+  return response.data;
+}
+
 async function postCompanyOffer(
   companyOffer: CompanyOffer
 ): Promise<CompanyOffer> {
@@ -65,6 +74,7 @@ const CompanyOfferService = {
   postCompanyOffer,
   putCompanyOffer,
   deleteCompanyOffer,
+  fetchCompanyOffersByCompany,
 };
 
 export default CompanyOfferService;

@@ -1,12 +1,13 @@
 "use client";
-
-import CompanyProfileCard from "@/components/custom-ui/CompanyProfileCard";
+import CardJobOffer from "@/components/custom-ui/CardOffer";
+import CompanyProfilCard from "@/components/custom-ui/CompanyProfileUpdateCard";
 import CompanyService from "@/services/company.service";
+import CompanyOfferService from "@/services/companyOffer.service";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import CompanyUpdateForm from "@/components/custom-ui/CompanyUpdateForm";
 
-const CompanyUpdateProfile = () => {
+const CompanyPublicPage = () => {
   const { id } = useParams() as { id: string };
 
   const {
@@ -18,6 +19,15 @@ const CompanyUpdateProfile = () => {
     queryFn: () => CompanyService.fetchCompany(id),
   });
 
+  const query = useQuery({
+    queryKey: ["company_offer", id],
+    queryFn: async () => {
+      const data = await CompanyOfferService.fetchCompanyOffersByCompany(id);
+      console.log("Fetched offers:", data);
+      return data;
+    },
+  });
+
   if (isLoadingCompany || isErrorCompany) {
     return <div>Loading...</div>;
   }
@@ -26,12 +36,18 @@ const CompanyUpdateProfile = () => {
     return <div>No data found.</div>;
   }
 
+  const offers = query.data;
+
   return (
-    <div className="py-2 gap-x-28 flex justify-center items-center ">
-      <CompanyProfileCard key={company.id} company={company} />
-      <CompanyUpdateForm company={company} />
+    <div className="flex items-center justify-center gap-30 p-8">
+      <CompanyProfilCard key={company.id} company={company} />
+      <div className="flex flex-col gap-4">
+        {offers?.map((offer: CompanyOfferWithRelation) => (
+          <CardJobOffer key={offer.id} jobOffer={offer} />
+        ))}
+      </div>
     </div>
   );
 };
 
-export default CompanyUpdateProfile;
+export default CompanyPublicPage;
