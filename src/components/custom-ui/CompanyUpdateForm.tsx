@@ -91,7 +91,7 @@ export default function CompanyUpdateForm({ company }: CompanyUpdateFormProps) {
       await CompanyService.putCompany(company.id, values);
       queryClient.invalidateQueries({ queryKey: ["company", company.id] });
       toast.success("Profil mis à jour avec succès");
-      router.push(`/company/${company.id}`);
+      router.push(`/company/${company.id}/update`);
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
       toast.error("Erreur lors de la mise à jour du profil");

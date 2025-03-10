@@ -11,13 +11,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
 
-interface CompanyProfileCardProps {
+interface CompanyProfilCardProps {
   company: CompanyWithRelation;
 }
 
-const CompanyProfileCard = ({ company }: CompanyProfileCardProps) => {
+const CompanyProfilCard = ({ company }: CompanyProfilCardProps) => {
   return (
-    <Card className="flex flex-col h-fit gap-2 w-[300px] pt-0 shadow-lg rounded-2xl overflow-hidden border-2  transition-all">
+    <Card className="flex flex-col h-fit gap-2 w-[300px] pt-0 shadow-lg rounded-2xl overflow-hidden border-2 items-center transition-all">
       <CardHeader className="p-4 items-center">
         <Avatar className="h-35 w-35 relative">
           <AvatarImage
@@ -48,4 +48,4 @@ const CompanyProfileCard = ({ company }: CompanyProfileCardProps) => {
   );
 };
 
-export default CompanyProfileCard;
+export default CompanyProfilCard;
