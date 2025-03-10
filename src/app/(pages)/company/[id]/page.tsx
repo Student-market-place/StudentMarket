@@ -39,9 +39,12 @@ const CompanyPublicPage = () => {
   const offers = query.data;
 
   return (
-    <div className="flex items-center justify-center gap-30 p-8">
+    <div className="flex items-start justify-center gap-30 p-8">
       <CompanyProfilCard key={company.id} company={company} />
       <div className="flex flex-col gap-4">
+        <div className="flex justify-center items-center">
+          <h1>Offres publiées</h1>
+        </div>
         {offers?.map((offer: CompanyOfferWithRelation) => (
           <CardJobOffer key={offer.id} jobOffer={offer} />
         ))}
