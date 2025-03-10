@@ -20,7 +20,11 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         student: true,
-        companyOffer: true,
+        companyOffer: {
+          include: {
+            company: true,
+          },
+        },
       },
     });
     return NextResponse.json(student_apply, { status: 200 });

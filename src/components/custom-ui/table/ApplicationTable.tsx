@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Pencil,
   Trash2,
@@ -20,8 +20,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { fetchStudentsApply } from "@/services/studentApply.service";
+import axios from "axios";
+import { StudentApply } from "@/types/studentApply.type";
 
-const applications = [
+const applicationsFix = [
   {
     title: "Software Developer",
     company: "Google",
@@ -73,6 +76,7 @@ export function ApplicationTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("endDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [applications, setApplications] = useState<StudentApply[]>([]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -83,6 +87,23 @@ export function ApplicationTable() {
     }
   };
 
+  useEffect(() => {
+    async function loadApplications() {
+      try {
+        const data = await fetchStudentsApply();
+        setApplications(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch applications", err);
+      }
+    }
+
+    loadApplications();
+  }, []);
+
+  type StudentApply = {
+    companyOffer: CompanyOffer;
+  };
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Ongoing";
 
@@ -101,32 +122,28 @@ export function ApplicationTable() {
       const searchLower = searchTerm.toLowerCase();
 
       return (
-        application.title.toLowerCase().includes(searchLower) ||
-        application.company.toLowerCase().includes(searchLower)
+        application.companyOffer.title.toLowerCase().includes(searchLower) ||
+        application.companyOffer.company.name
+          .toLowerCase()
+          .includes(searchLower)
       );
     });
 
     return [...filtered].sort((a, b) => {
       if (sortField === "startDate" || sortField === "endDate") {
-        if (sortField === "endDate") {
-          if (a.endDate === null && b.endDate === null) return 0;
-          if (a.endDate === null) return sortDirection === "desc" ? -1 : 1;
-          if (b.endDate === null) return sortDirection === "desc" ? 1 : -1;
-        }
-
-        const dateA = new Date(a[sortField] || "");
-        const dateB = new Date(b[sortField] || "");
+        const dateA = new Date(a.companyOffer[sortField] || "");
+        const dateB = new Date(b.companyOffer[sortField] || "");
 
         return sortDirection === "asc"
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       } else {
         return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
+          ? a.companyOffer[sortField].localeCompare(b.companyOffer[sortField])
+          : b.companyOffer[sortField].localeCompare(a.companyOffer[sortField]);
       }
     });
-  }, [searchTerm, sortField, sortDirection]);
+  }, [searchTerm, sortField, sortDirection, applications]);
 
   return (
     <div className="space-y-4 p-12">
@@ -255,44 +272,42 @@ export function ApplicationTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-
                       No applications found matching &quot;{searchTerm}&quot;.
-
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredAndSortedData.map((application, index) => (
                     <TableRow
-                      key={`${application.title}-${application.company}-${index}`}
+                      key={`${application.companyOffer.title}-${application.companyOffer.company}-${index}`}
                     >
                       <TableCell className="w-[25%] font-medium">
-                        {application.title}
+                        {application.companyOffer.title}
                       </TableCell>
                       <TableCell className="w-[20%]">
-                        {application.company}
+                        {application.companyOffer.company.name}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={
-                            application.type === "Internship"
+                            application.companyOffer.type === "Internship"
                               ? "default"
                               : "secondary"
                           }
                           className={
-                            application.type === "Internship"
+                            application.companyOffer.type === "Internship"
                               ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                           }
                         >
-                          {application.type}
+                          {application.companyOffer.type}
                         </Badge>
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
-                        {formatDate(application.startDate)}
+                        {formatDate(application.companyOffer.startDate)}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
-                        {application.endDate ? (
-                          formatDate(application.endDate)
+                        {application.companyOffer.endDate ? (
+                          formatDate(application.companyOffer.endDate)
                         ) : (
                           <Badge
                             variant="success"
