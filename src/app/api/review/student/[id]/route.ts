@@ -17,12 +17,13 @@ export async function GET(req: NextRequest, { params }: IParams) {
         student: true,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     return NextResponse.json(reviews, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération des avis de l'étudiant" },
       { status: 500 }

@@ -1,11 +1,4 @@
-import {
-  User,
-  School,
-  UploadFile,
-  Skill,
-  Prisma,
-  EnumStatusTYpe,
-} from "@prisma/client";
+import { User, School, UploadFile, Skill, Prisma } from "@prisma/client";
 
 enum Type {
   STAGIAIRE = "stage",

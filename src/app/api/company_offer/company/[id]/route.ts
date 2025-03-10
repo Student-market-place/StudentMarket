@@ -23,6 +23,7 @@ export async function GET(req: NextRequest, { params }: IParams) {
 
     return NextResponse.json(company_offers, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération des avis de l'étudiant" },
       { status: 500 }
