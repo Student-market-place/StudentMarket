@@ -1,4 +1,5 @@
 import { Student, Company, Prisma } from "@prisma/client";
+
 export interface StudentHistory {
   id: string;
   studentId: Student | string;
@@ -20,6 +21,15 @@ export interface GetAllParams {
 export type HistoryWithRelation = Prisma.Student_historyGetPayload<{
   include: {
     company: true;
-    student: true;
+    student: {
+      include: {
+        school: true;
+        user: true;
+        profilePicture: true;
+        skills: true;
+        studentHistories: true;
+        CV: true;
+      };
+    };
   };
 }>;

@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { School, SchoolWithRelations } from "@/types/school.type";
+import { School } from "@/types/school.type";
 import SchoolService from "@/services/school.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {

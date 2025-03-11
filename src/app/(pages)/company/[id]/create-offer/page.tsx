@@ -27,6 +27,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skill } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { CompanyOffer, Type, Status } from "@/types/companyOffer.type";
 
 interface Option {
   label: string;
@@ -52,13 +53,12 @@ const CreateOfferPage = () => {
   const [newSkillName, setNewSkillName] = useState("");
   const [isCreatingSkill, setIsCreatingSkill] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<CreateOfferFormData>({
     defaultValues: {
       title: "",
@@ -84,7 +84,7 @@ const CreateOfferPage = () => {
   // Vérifier que l'utilisateur est bien le propriétaire de l'entreprise
   useEffect(() => {
     if (!isClient) return; // Ne pas exécuter côté serveur
-    
+
     const checkUser = async () => {
       try {
         const storedUserId = localStorage.getItem("userId");
@@ -114,7 +114,7 @@ const CreateOfferPage = () => {
     if (!skill) return;
 
     const isAlreadySelected = selectedSkills.some((s) => s.value === skillId);
-    
+
     if (isAlreadySelected) {
       // Supprimer la compétence
       const filteredSkills = selectedSkills.filter((s) => s.value !== skillId);
@@ -125,7 +125,10 @@ const CreateOfferPage = () => {
       );
     } else {
       // Ajouter la compétence
-      const newSkills = [...selectedSkills, { label: skill.name, value: skill.id }];
+      const newSkills = [
+        ...selectedSkills,
+        { label: skill.name, value: skill.id },
+      ];
       setSelectedSkills(newSkills);
       setValue(
         "skills",
@@ -139,32 +142,32 @@ const CreateOfferPage = () => {
     if (!newSkillName.trim() || isCreatingSkill) {
       return;
     }
-    
+
     // Vérifier si la compétence existe déjà
     const skillExists = skills.some(
       (s: Skill) => s.name.toLowerCase() === newSkillName.trim().toLowerCase()
     );
-    
+
     if (skillExists) {
       toast.error("Cette compétence existe déjà");
       return;
     }
-    
+
     setIsCreatingSkill(true);
-    
+
     try {
       // Créer un identifiant temporaire
       const tempId = `temp-${Date.now()}`;
-      
+
       // Créer la nouvelle compétence dans la base de données
       const newSkill = await SkillService.postSkill({
         id: tempId,
         name: newSkillName.trim(),
         createdAt: new Date(),
         modifiedAt: new Date(),
-        deletedAt: null as any, // Nécessaire pour la compatibilité des types
+        deletedAt: null, // Nécessaire pour la compatibilité des types
       });
-      
+
       // Mettre à jour l'état local
       const skillOption = { label: newSkill.name, value: newSkill.id };
       setSelectedSkills([...selectedSkills, skillOption]);
@@ -172,13 +175,13 @@ const CreateOfferPage = () => {
         "skills",
         [...selectedSkills, skillOption].map((s) => s.value)
       );
-      
+
       // Rafraîchir la liste complète des compétences
       queryClient.invalidateQueries({ queryKey: ["skills"] });
-      
+
       // Réinitialiser le champ de saisie
       setNewSkillName("");
-      
+
       toast.success(`La compétence "${newSkill.name}" a été ajoutée`);
     } catch (error) {
       console.error("Erreur lors de la création de la compétence:", error);
@@ -197,25 +200,25 @@ const CreateOfferPage = () => {
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: any = {
+      const offerData: CompanyOffer = {
+        id: "", // sera généré par l'API
         companyId: companyId,
         title: data.title,
         description: data.description,
-        type: data.type === "Stage" ? "stage" : "alternance", // Conversion selon l'enum
+        type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
         startDate: new Date(data.startDate),
-        expectedSkills: data.expectedSkills,
-        status: "en_cours",
+        status: Status.OPEN,
         skills: data.skills,
+        studentApplies: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: new Date(),  // On utilisera une date actuelle
-        id: "", // sera généré par l'API
+        deletedAt: new Date(),
       };
 
       await CompanyOfferService.postCompanyOffer(offerData);
-      
+
       toast.success("Votre offre a été créée avec succès.");
-      
+
       // Rediriger vers la page de l'entreprise
       router.push(`/company/${companyId}`);
     } catch (error) {
@@ -248,13 +251,13 @@ const CreateOfferPage = () => {
         <CardHeader>
           <CardTitle>Créer une nouvelle offre</CardTitle>
           <CardDescription>
-            Remplissez le formulaire pour créer une nouvelle offre d'emploi.
+            Remplissez le formulaire pour créer une nouvelle offre d&aposemploi.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Titre de l'offre *</Label>
+              <Label htmlFor="title">Titre de l&aposoffre *</Label>
               <Input
                 id="title"
                 {...register("title", {
@@ -286,7 +289,7 @@ const CreateOfferPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Type d'offre *</Label>
+                <Label htmlFor="type">Type d&aposoffre *</Label>
                 <Select
                   onValueChange={(value) =>
                     setValue("type", value as "Stage" | "Alternance")
@@ -322,17 +325,17 @@ const CreateOfferPage = () => {
 
             <div className="space-y-2">
               <Label>Compétences requises</Label>
-              
+
               {/* Ajouter une nouvelle compétence */}
               <div className="flex gap-2 mb-4">
-                <Input 
-                  placeholder="Ajouter une nouvelle compétence..." 
+                <Input
+                  placeholder="Ajouter une nouvelle compétence..."
                   value={newSkillName}
                   onChange={(e) => setNewSkillName(e.target.value)}
                   className="flex-1"
                 />
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={createNewSkill}
                   disabled={isCreatingSkill || !newSkillName.trim()}
                   variant="outline"
@@ -340,7 +343,7 @@ const CreateOfferPage = () => {
                   {isCreatingSkill ? "Ajout..." : "Ajouter"}
                 </Button>
               </div>
-              
+
               {/* Liste des compétences existantes */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {skills.map((skill: Skill) => (
@@ -357,11 +360,13 @@ const CreateOfferPage = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Compétences sélectionnées */}
               {selectedSkills.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600 mb-1">Compétences sélectionnées:</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Compétences sélectionnées:
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {selectedSkills.map((skill) => (
                       <div
@@ -393,4 +398,4 @@ const CreateOfferPage = () => {
   );
 };
 
-export default CreateOfferPage; 
+export default CreateOfferPage;

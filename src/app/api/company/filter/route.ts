@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    
+
     // Récupération des paramètres de filtrage
     const companyName = searchParams.get("name");
 
     // Construction de la requête avec les filtres
-    const filters: any = {
+    const filters: Prisma.CompanyWhereInput = {
       deletedAt: null,
     };
 
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (companyName) {
       filters.name = {
         contains: companyName,
-        mode: 'insensitive' // Recherche insensible à la casse
+        mode: "insensitive", // Recherche insensible à la casse
       };
     }
 
@@ -51,4 +51,4 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
