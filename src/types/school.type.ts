@@ -1,4 +1,4 @@
-import { UploadFile, User } from "@prisma/client";
+import { UploadFile, User, Prisma } from "@prisma/client";
 export interface School {
     id: string;
     name: string;
@@ -10,3 +10,11 @@ export interface School {
     updatedAt: Date;
     deletedAt: Date;
 }
+
+export type SchoolWithRelations = Prisma.SchoolGetPayload<{
+    include: {
+        user: true;
+        profilePicture: true;
+        students: true;
+    };
+}>;
