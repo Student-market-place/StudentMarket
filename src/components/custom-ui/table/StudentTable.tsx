@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Pencil,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  Search,
-  ArrowUpDown,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -54,15 +47,18 @@ interface StudentTableProps {
   useDefaultData?: boolean;
 }
 
-export function StudentTable({ students: providedStudents, useDefaultData = false }: StudentTableProps) {
+export function StudentTable({
+  students: providedStudents,
+  useDefaultData = false,
+}: StudentTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("fullName");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   // Utiliser les données fournies ou les données par défaut si demandé
-  const studentsData: StudentData[] = useDefaultData 
-    ? defaultStudents 
-    : (providedStudents || []);
+  const studentsData: StudentData[] = useDefaultData
+    ? defaultStudents
+    : providedStudents || [];
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -78,12 +74,13 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
       if (!searchTerm) return true;
 
       const searchLower = searchTerm.toLowerCase();
-      
+
       const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-      const schoolName = typeof student.school === 'object' 
-        ? student.school?.name || '' 
-        : String(student.school || '');
-      
+      const schoolName =
+        typeof student.school === "object"
+          ? student.school?.name || ""
+          : String(student.school || "");
+
       return (
         fullName.includes(searchLower) ||
         student.firstName.toLowerCase().includes(searchLower) ||
@@ -113,16 +110,22 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
               : -1;
       } else if (sortField === "school") {
         // Pour les étudiants de l'API, school peut être un objet
-        const schoolA = typeof a.school === 'object' ? a.school?.name || '' : String(a.school || '');
-        const schoolB = typeof b.school === 'object' ? b.school?.name || '' : String(b.school || '');
-        
+        const schoolA =
+          typeof a.school === "object"
+            ? a.school?.name || ""
+            : String(a.school || "");
+        const schoolB =
+          typeof b.school === "object"
+            ? b.school?.name || ""
+            : String(b.school || "");
+
         return sortDirection === "asc"
           ? schoolA.localeCompare(schoolB)
           : schoolB.localeCompare(schoolA);
       } else {
-        const valueA = String(a[sortField] || '');
-        const valueB = String(b[sortField] || '');
-        
+        const valueA = String(a[sortField] || "");
+        const valueB = String(b[sortField] || "");
+
         return sortDirection === "asc"
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
@@ -236,7 +239,8 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      Aucun étudiant trouvé correspondant à "{searchTerm}".
+                      Aucun étudiant trouvé correspondant à &quot;{searchTerm}
+                      &quot;.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -248,16 +252,14 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
                         {student.firstName} {student.lastName}
                       </TableCell>
                       <TableCell className="w-[25%]">
-                        {typeof student.school === 'object' 
-                          ? student.school?.name 
+                        {typeof student.school === "object"
+                          ? student.school?.name
                           : student.school}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={
-                            student.status === "stage"
-                              ? "default"
-                              : "secondary"
+                            student.status === "stage" ? "default" : "secondary"
                           }
                           className={
                             student.status === "stage"
@@ -265,9 +267,11 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                           }
                         >
-                          {student.status === "stage" ? "Stage" : 
-                           student.status === "alternance" ? "Alternance" : 
-                           String(student.status)}
+                          {student.status === "stage"
+                            ? "Stage"
+                            : student.status === "alternance"
+                              ? "Alternance"
+                              : String(student.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="w-[15%] text-center">

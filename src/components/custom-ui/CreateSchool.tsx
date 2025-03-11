@@ -92,7 +92,7 @@ export function CreateSchool() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l'école</FormLabel>
+                  <FormLabel>Nom de l&apos;école</FormLabel>
                   <FormControl>
                     <Input placeholder="Nom de l'école" {...field} />
                   </FormControl>

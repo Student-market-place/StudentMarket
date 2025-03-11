@@ -38,6 +38,9 @@ const SettingsCompanyPage = () => {
             <Button>Mes offres</Button>
           </Link>
           <Button>Candidatures reçues</Button>
+          <Link href={`/company/${id}/reviews`}>
+            <Button>Commentaires</Button>
+          </Link>
         </div>
       </div>
     </div>
