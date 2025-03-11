@@ -19,25 +19,56 @@ interface School {
   name: string;
 }
 
-const FilterBlock = ({ activeTab }: FilterBlockProps) => {
-  const router = useRouter();
+// Composant Search Params qui encapsule l'utilisation de useSearchParams
+// pour éviter les erreurs Suspense avec Next.js
+const FilterBlockWithSearchParams = ({ activeTab }: FilterBlockProps) => {
   const searchParams = useSearchParams();
+  
+  return <FilterBlockContent 
+    activeTab={activeTab} 
+    initialAvailability={searchParams.get("availability") || ""}
+    initialContractType={searchParams.get("contractType") || ""}
+    initialSchool={searchParams.get("school") || ""}
+    initialOfferType={searchParams.get("type") || ""}
+    initialCompanyName={searchParams.get("name") || ""}
+    initialSkillsParam={searchParams.get("skills")}
+  />;
+};
+
+// Composant principal sans useSearchParams
+const FilterBlockContent = ({ 
+  activeTab,
+  initialAvailability,
+  initialContractType,
+  initialSchool,
+  initialOfferType,
+  initialCompanyName,
+  initialSkillsParam
+}: FilterBlockProps & {
+  initialAvailability: string;
+  initialContractType: string;
+  initialSchool: string;
+  initialOfferType: string;
+  initialCompanyName: string;
+  initialSkillsParam: string | null;
+}) => {
+  const router = useRouter();
   
   // États communs
   const [skills, setSkills] = useState<Skill[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
   
   // États spécifiques aux étudiants
-  const [availability, setAvailability] = useState(searchParams.get("availability") || "");
-  const [contractType, setContractType] = useState(searchParams.get("contractType") || "");
-  const [school, setSchool] = useState(searchParams.get("school") || "");
+  const [availability, setAvailability] = useState(initialAvailability);
+  const [contractType, setContractType] = useState(initialContractType);
+  const [school, setSchool] = useState(initialSchool);
   const [schools, setSchools] = useState<School[]>([]);
   
   // États spécifiques aux offres
-  const [offerType, setOfferType] = useState(searchParams.get("type") || "");
+  const [offerType, setOfferType] = useState(initialOfferType);
   
   // États spécifiques aux entreprises
-  const [companyName, setCompanyName] = useState(searchParams.get("name") || "");
+  const [companyName, setCompanyName] = useState(initialCompanyName);
 
   // Chargement des données depuis la base de données
   useEffect(() => {
@@ -54,9 +85,8 @@ const FilterBlock = ({ activeTab }: FilterBlockProps) => {
         }
 
         // Initialiser les compétences sélectionnées à partir des paramètres d'URL
-        const skillsParam = searchParams.get("skills");
-        if (skillsParam) {
-          const skillIds = skillsParam.split(',');
+        if (initialSkillsParam) {
+          const skillIds = initialSkillsParam.split(',');
           const selectedSkillsFromUrl = skillIds.map(id => {
             const skill = skillsData.find((s: Skill) => s.id === id);
             return skill ? skill : null;
@@ -70,7 +100,7 @@ const FilterBlock = ({ activeTab }: FilterBlockProps) => {
     };
     
     fetchFilterData();
-  }, [activeTab, searchParams]);
+  }, [activeTab, initialSkillsParam]);
 
   const handleSkillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
@@ -250,6 +280,8 @@ const FilterBlock = ({ activeTab }: FilterBlockProps) => {
             <option value="">Tous</option>
             <option value="stage">Stage</option>
             <option value="alternance">Alternance</option>
+            <option value="cdi">CDI</option>
+            <option value="cdd">CDD</option>
           </select>
         </div>
       )}
@@ -265,30 +297,25 @@ const FilterBlock = ({ activeTab }: FilterBlockProps) => {
             id="companyName"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Rechercher par nom"
             className="mt-2 p-2 border rounded-md w-full"
+            placeholder="Rechercher une entreprise"
           />
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <Button
-          onClick={handleSearch}
-          className="w-full mt-4 bg-blue-500 text-white hover:bg-blue-600"
-        >
-          Appliquer le filtre
-        </Button>
-        
+      {/* Boutons d'action pour appliquer/réinitialiser les filtres */}
+      <div className="flex gap-2 pt-2">
         <Button
           onClick={resetFilters}
-          variant="outline"
-          className="w-full border-blue-500 text-blue-500 hover:bg-blue-50"
+          className="bg-gray-200 text-gray-800 hover:bg-gray-300"
         >
           Réinitialiser
         </Button>
+        <Button onClick={handleSearch}>Rechercher</Button>
       </div>
     </div>
   );
 };
 
-export default FilterBlock;
+// Exporter le composant avec SearchParams encapsulé
+export default FilterBlockWithSearchParams;

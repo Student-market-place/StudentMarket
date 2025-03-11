@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import CardStudent from "./CardStudent";
 import { useEffect } from "react";
 
+// Composant wrapper qui utilise useSearchParams
 const StudentList = () => {
   const searchParams = useSearchParams();
   
@@ -16,6 +17,28 @@ const StudentList = () => {
   const skillId = searchParams.get("skills");
   const schoolId = searchParams.get("school");
   
+  return (
+    <StudentListContent 
+      availability={availability}
+      contractType={contractType}
+      skillId={skillId}
+      schoolId={schoolId}
+    />
+  );
+};
+
+// Composant de contenu qui ne dépend pas directement de useSearchParams
+const StudentListContent = ({
+  availability,
+  contractType,
+  skillId,
+  schoolId
+}: {
+  availability: string | null;
+  contractType: string | null;
+  skillId: string | null;
+  schoolId: string | null;
+}) => {
   // Construire l'URL de l'API avec les paramètres de filtrage
   const getApiUrl = () => {
     const params = new URLSearchParams();
