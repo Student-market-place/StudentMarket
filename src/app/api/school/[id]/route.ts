@@ -44,12 +44,12 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
 export async function PUT(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
+  const { name, domainName, isActive, profilePictureId, email } =
+    await req.json();
 
-  const { name, domainName, isActive, profilePictureId } = await req.json();
-
-  if (!name || !domainName || !isActive || !profilePictureId) {
+  if (!name || !domainName) {
     return NextResponse.json(
-      { error: "name, domainName, isActive, profilePictureId are required" },
+      { error: "name and domainName are required" },
       { status: 400 }
     );
   }
@@ -62,8 +62,21 @@ export async function PUT(req: NextRequest, { params }: IParams) {
       data: {
         name,
         domainName,
-        isActive,
-        profilePicture: { connect: { id: profilePictureId } },
+        ...(typeof isActive !== "undefined" && { isActive }),
+        ...(profilePictureId && {
+          profilePicture: { connect: { id: profilePictureId } },
+        }),
+        ...(email && {
+          user: {
+            update: {
+              email,
+            },
+          },
+        }),
+      },
+      include: {
+        user: true,
+        profilePicture: true,
       },
     });
 

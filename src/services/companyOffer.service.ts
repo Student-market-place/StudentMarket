@@ -5,12 +5,12 @@ import {
 } from "@/types/companyOffer.type";
 import axios from "axios";
 
-const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company_offer`;
+// Utiliser la même base URL pour toutes les requêtes
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchCompanyOffers(
   params: GetAllParams
 ): Promise<CompanyOfferWithRelation[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/company_offer`;
 
   // Construction d'un objet de paramètres de requête
@@ -26,19 +26,24 @@ async function fetchCompanyOffers(
     queryObject.type = [params.type];
   }
 
-  const response = await axios.get(url, { params: queryObject });
-  return response.data;
+  if (params.studentApplies && params.studentApplies.length > 0) {
+    queryObject.studentApplies = params.studentApplies;
+
+    const response = await axios.get(url, { params: queryObject });
+    return response.data;
+  }
+  return [];
 }
 
 async function fetchCompanyOffer(id: string): Promise<CompanyOfferWithRelation> {
-  const response = await axios.get(`${END_POINT}/${id}`);
+  const url = `${baseUrl}/api/company_offer/${id}`;
+  const response = await axios.get(url);
   return response.data;
 }
 
 async function fetchCompanyOffersByCompany(
   companyId: string
 ): Promise<CompanyOfferWithRelation[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/company_offer/company/${companyId}`;
   const response = await axios.get(url);
   return response.data;
@@ -47,24 +52,26 @@ async function fetchCompanyOffersByCompany(
 async function postCompanyOffer(
   companyOffer: CompanyOffer
 ): Promise<CompanyOffer> {
-  const response = await axios.post(END_POINT, companyOffer);
+  const url = `${baseUrl}/api/company_offer`;
+  const response = await axios.post(url, companyOffer);
   return response.data;
 }
 
 async function putCompanyOffer(
   companyOffer: CompanyOffer
 ): Promise<CompanyOffer> {
-  const response = await axios.put(
-    `${END_POINT}/${companyOffer.id}`,
-    companyOffer
-  );
+  const url = `${baseUrl}/api/company_offer/${companyOffer.id}`;
+  const response = await axios.put(url, companyOffer);
   return response.data;
 }
 
-async function deleteCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
-  const response = await axios.delete(`${END_POINT}/${companyOffer.id}`);
+
+async function deleteCompanyOffer(id: string): Promise<CompanyOffer> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/company_offer/${id}`;
+
+
+  const response = await axios.delete(url);
   return response.data;
 }
 

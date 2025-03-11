@@ -4,7 +4,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="flex items-center justify-center">
       {children}
     </div>
   );
