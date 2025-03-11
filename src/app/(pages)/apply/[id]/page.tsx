@@ -1,224 +1,374 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import CompanyOfferService from "@/services/companyOffer.service";
-import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { Check, ArrowLeft, Upload } from "lucide-react";
-import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 
-export default function ApplyPage() {
-  const { id } = useParams();
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CalendarIcon, Building2, Check, FileText } from "lucide-react";
+
+import CompanyOfferService from "@/services/companyOffer.service";
+import StudentApplyService from "@/services/studentApply.service";
+import UserService from "@/services/user.service";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { UserWithRelations } from "@/types/user.type";
+
+// Page de chargement
+const ApplyLoading = () => (
+  <div className="container max-w-4xl mx-auto p-6 space-y-8">
+    <div className="flex flex-col space-y-4">
+      <Skeleton className="h-10 w-3/4" />
+      <Skeleton className="h-6 w-1/2" />
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="col-span-2">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-full" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+);
+
+// Schéma de validation du formulaire
+const formSchema = z.object({
+  message: z.string()
+    .min(50, "Votre message doit contenir au moins 50 caractères")
+    .max(1000, "Votre message est trop long (1000 caractères maximum)")
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+// Composant principal
+const ApplyPage = () => {
+  const params = useParams();
   const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [motivationLetter, setMotivationLetter] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const offerId = typeof params.id === 'string' ? params.id : '';
+  
+  const [user, setUser] = useState<UserWithRelations | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  
+  // Récupération des données de l'utilisateur connecté
   useEffect(() => {
-    // Récupérer l'ID de l'utilisateur connecté depuis le localStorage
-    const storedUserId = localStorage.getItem("userId");
-    setUserId(storedUserId);
-    
-    // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
-    if (!storedUserId) {
-      router.push("/login?redirect=" + encodeURIComponent(`/apply/${id}`));
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      UserService.fetchUserById(userId)
+        .then(data => setUser(data))
+        .catch(err => {
+          console.error("Erreur lors du chargement de l'utilisateur:", err);
+          setError("Vous devez être connecté pour postuler à cette offre.");
+        });
+    } else {
+      setError("Vous devez être connecté pour postuler à cette offre.");
     }
-  }, [id, router]);
-
-  const { data: offer, isLoading } = useQuery<CompanyOfferWithRelation>({
-    queryKey: ["company_offer", id],
-    queryFn: () => CompanyOfferService.fetchCompanyOffer(id as string),
-    enabled: !!id,
+  }, []);
+  
+  // Récupération des données de l'offre
+  const { data: offer, isLoading, isError } = useQuery({
+    queryKey: ['offer', offerId],
+    queryFn: () => CompanyOfferService.fetchCompanyOffer(offerId),
+    enabled: !!offerId
   });
+  
+  // Configuration du formulaire
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      message: ""
+    }
+  });
+  
+  // Soumission du formulaire
+  const onSubmit = async (values: FormValues) => {
+    // Vérifier que l'utilisateur est un étudiant
+    if (!user || !user.student) {
+      setError("Vous devez être un étudiant pour postuler à cette offre.");
+      return;
+    }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!userId || !offer) return;
-    
     setIsSubmitting(true);
+    setError(null);
     
     try {
-      // Simulation de l'envoi de la candidature
-      // Remplacer par l'appel API réel
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Créer la candidature
+      await StudentApplyService.createStudentApply({
+        studentId: user.student.id,
+        companyOfferId: offerId,
+        message: values.message,
+        status: "en_attente"
+      });
       
-      setSubmitSuccess(true);
+      setSuccess(true);
       
-      // Redirection après 2 secondes
+      // Rediriger après un court délai
       setTimeout(() => {
-        router.push(`/offer/${id}`);
+        router.push(`/student/applications`);
       }, 2000);
-    } catch (error) {
-      console.error("Erreur lors de l'envoi de la candidature", error);
+    } catch (err) {
+      console.error("Erreur lors de la soumission de la candidature:", err);
+      setError("Une erreur est survenue lors de la soumission de votre candidature. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (isLoading) {
+  
+  if (isLoading || !user) return <ApplyLoading />;
+  
+  if (isError || !offer) {
     return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="w-full h-[200px] animate-pulse bg-gray-200 rounded-xl" />
-      </div>
-    );
-  }
-
-  if (!offer) {
-    return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-          <h1 className="text-xl font-bold text-red-600 mb-2">Offre non trouvée</h1>
-          <p className="text-red-600">L'offre que vous recherchez n'existe pas ou a été supprimée.</p>
-          <Link href="/home">
-            <Button className="mt-4">Retour à l'accueil</Button>
-          </Link>
+      <div className="container max-w-4xl mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>
+            Cette offre n'existe pas ou a été supprimée.
+          </AlertDescription>
+        </Alert>
+        <div className="flex justify-center mt-6">
+          <Button onClick={() => router.push('/home')}>
+            Retour à l'accueil
+          </Button>
         </div>
       </div>
     );
   }
-
-  if (offer.status !== "en_cours") {
+  
+  // Vérifier si l'utilisateur est un étudiant
+  if (user.role !== "student" || !user.student) {
     return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-          <h1 className="text-xl font-bold text-amber-600 mb-2">Candidature impossible</h1>
-          <p className="text-amber-600">Cette offre n'est plus disponible pour candidature.</p>
-          <Link href={`/offer/${id}`}>
-            <Button variant="outline" className="mt-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à l'offre
-            </Button>
-          </Link>
+      <div className="container max-w-4xl mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Accès refusé</AlertTitle>
+          <AlertDescription>
+            Vous devez être un étudiant pour postuler à cette offre.
+          </AlertDescription>
+        </Alert>
+        <div className="flex justify-center mt-6">
+          <Button onClick={() => router.push('/home')}>
+            Retour à l'accueil
+          </Button>
         </div>
       </div>
     );
   }
-
-  if (submitSuccess) {
-    return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-green-100 p-3 rounded-full">
-              <Check className="h-8 w-8 text-green-600" />
-            </div>
-          </div>
-          <h1 className="text-xl font-bold text-green-600 mb-2">Candidature envoyée avec succès !</h1>
-          <p className="text-green-600">Votre candidature a bien été transmise à l'entreprise.</p>
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <div className="mb-6">
-        <Link href={`/offer/${id}`} className="inline-flex items-center text-blue-600 hover:text-blue-800">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour à l'offre
-        </Link>
+    <div className="container max-w-4xl mx-auto p-6 space-y-8">
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h1 className="text-2xl font-bold mb-2">Postuler à l'offre : {offer.title}</h1>
+        <div className="flex items-center text-gray-600 mb-4">
+          <Building2 className="h-5 w-5 mr-2" />
+          <span className="font-medium">{offer.company?.name}</span>
+        </div>
+        <div className="flex gap-3">
+          <Badge className="text-sm">{offer.type}</Badge>
+          <span className="text-gray-500">Début : {new Date(offer.startDate).toLocaleDateString('fr-FR')}</span>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Informations sur l'offre */}
-        <div className="lg:col-span-1">
+      {success && (
+        <Alert className="bg-green-50 border-green-200">
+          <Check className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-600">Candidature envoyée</AlertTitle>
+          <AlertDescription className="text-green-700">
+            Votre candidature a été envoyée avec succès. Vous allez être redirigé vers vos candidatures.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Résumé de l'offre</CardTitle>
+              <CardTitle>Votre candidature</CardTitle>
+              <CardDescription>
+                Présentez-vous et expliquez pourquoi vous êtes intéressé par cette offre
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold">{offer.title}</h3>
-                <p className="text-sm text-gray-500">{offer.company.name}</p>
+            <CardContent>
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-md">
+                <h4 className="font-medium text-blue-800 mb-1">{offer.title}</h4>
+                <p className="text-sm text-blue-700">
+                  Vous postulez pour cette offre chez {offer.company?.name}
+                </p>
               </div>
-              <div>
-                <h4 className="text-sm font-medium">Type</h4>
-                <p>{offer.type === 'stage' ? 'Stage' : 'Alternance'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Compétences requises</h4>
-                <ul className="list-disc pl-5 text-sm">
-                  {offer.skills.map((skill) => (
-                    <li key={skill.id}>{skill.name}</li>
-                  ))}
-                </ul>
-              </div>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message de candidature</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Présentez-vous, décrivez vos motivations et expliquez pourquoi vous êtes qualifié pour ce poste..."
+                            className="min-h-[200px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Soyez concis et précis. Mettez en avant vos compétences qui correspondent à l'offre.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex justify-end gap-4">
+                    <Button variant="outline" type="button" onClick={() => router.back()}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Envoi en cours..." : "Envoyer ma candidature"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>
         
-        {/* Formulaire de candidature */}
-        <div className="lg:col-span-2">
+        <div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Formulaire de candidature</CardTitle>
+              <CardTitle>Détails de l'offre</CardTitle>
             </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="motivationLetter">Lettre de motivation</Label>
-                  <Textarea
-                    id="motivationLetter"
-                    placeholder="Présentez-vous et expliquez pourquoi vous êtes intéressé(e) par cette offre..."
-                    rows={6}
-                    value={motivationLetter}
-                    onChange={(e) => setMotivationLetter(e.target.value)}
-                    required
-                    className="resize-none"
-                  />
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-gray-500" />
+                  <span>{offer.company?.name}</span>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="cv">CV (optionnel)</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Input
-                      id="cv"
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                    <Label htmlFor="cv" className="cursor-pointer flex flex-col items-center gap-2">
-                      <Upload className="h-8 w-8 text-gray-400" />
-                      {file ? (
-                        <span className="text-sm font-medium text-blue-600">{file.name}</span>
-                      ) : (
-                        <>
-                          <span className="font-medium">Cliquez pour télécharger</span>
-                          <span className="text-xs text-gray-500">PDF, DOC, DOCX (max. 5MB)</span>
-                        </>
-                      )}
-                    </Label>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                  <span>Début : {new Date(offer.startDate).toLocaleDateString('fr-FR')}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-gray-500" />
+                  <Badge variant="secondary">{offer.type}</Badge>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="font-medium mb-2">Description de l'offre</h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {offer.description}
+                </p>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="font-medium mb-2">Compétences requises</h3>
+                <div className="flex flex-wrap gap-2">
+                  {offer.skills && offer.skills.length > 0 ? (
+                    offer.skills.map((skill, index) => (
+                      <Badge key={index} variant="outline">
+                        {typeof skill === 'string' ? skill : skill.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-gray-500">Aucune compétence spécifiée</span>
+                  )}
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="font-medium mb-2">Votre profil</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.student.profilePicture?.url || ''} alt={user.name || ''} />
+                    <AvatarFallback>{user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{user.student.firstName} {user.student.lastName}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
                 </div>
-              </CardContent>
-              
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isSubmitting || !motivationLetter.trim()}
-                >
-                  {isSubmitting ? "Envoi en cours..." : "Envoyer ma candidature"}
-                </Button>
-              </CardFooter>
-            </form>
+                
+                <div className="flex flex-wrap gap-2">
+                  {(user.student as any)?.skills && (user.student as any).skills.length > 0 ? (
+                    (user.student as any).skills.map((skill: any) => (
+                      <Badge key={skill.id} variant="outline" className={
+                        offer.skills?.some(s => 
+                          (typeof s === 'string' ? s : s.name) === skill.name
+                        ) ? 'bg-green-50 text-green-700 border-green-200' : ''
+                      }>
+                        {skill.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-gray-500">Aucune compétence spécifiée</span>
+                  )}
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
     </div>
   );
-} 
+};
+
+// Composant avec Suspense
+const ApplyWithSuspense = () => {
+  return (
+    <Suspense fallback={<ApplyLoading />}>
+      <ApplyPage />
+    </Suspense>
+  );
+};
+
+export default ApplyWithSuspense; 
