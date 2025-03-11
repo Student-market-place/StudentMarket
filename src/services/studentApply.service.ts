@@ -4,8 +4,8 @@ import axios from "axios";
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/student_apply`;
 
 export async function fetchStudentsApply(): Promise<StudentApply[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-  const url = `${baseUrl}/api/student_apply`;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const url = `${baseUrl}/student_apply`;
 
   const response = await axios.get(url);
   return response.data;

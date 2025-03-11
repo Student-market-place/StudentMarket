@@ -20,7 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fetchStudentsApply } from "@/services/studentApply.service";
+import StudentApplyService, {
+  fetchStudentsApply,
+} from "@/services/studentApply.service";
 import axios from "axios";
 import { StudentApply } from "@/types/studentApply.type";
 import { CompanyOffer } from "@/types/companyOffer.type";
@@ -92,8 +94,10 @@ export function ApplicationTable() {
     async function loadApplications() {
       try {
         const data = await fetchStudentsApply();
+        console.log("Applications data:", data);
+
+        // Just set applications data without trying to fetch additional student info
         setApplications(data);
-        console.log(data);
       } catch (err) {
         console.error("Failed to fetch applications", err);
       }
