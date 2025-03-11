@@ -20,6 +20,12 @@ enum EnumStatusTYpe {
   alternance
 }
 
+enum OfferStatus {
+  en_cours
+  terminee
+  annulee
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -221,8 +227,8 @@ model Company_offer {
   expectedSkills String
   startDate      DateTime
   type           EnumStatusTYpe
+  status         OfferStatus     @default(en_cours)
   skills         Skill[]   
-
 
   createdAt      DateTime        @default(now())
   modifiedAt     DateTime        @updatedAt

@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import Link from "next/link";
 
 interface CardJobOfferProps {
   jobOffer: CompanyOfferWithRelation;
@@ -38,9 +39,13 @@ const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
         <button className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition">
           Postuler
         </button>
-        <button className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition">
-          Détails
-        </button>
+        <Link href={`/offer/${jobOffer.id}`}>
+          <button
+            className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition"
+          >
+            Détails
+          </button>
+        </Link>
       </CardFooter>
     </Card>
   );

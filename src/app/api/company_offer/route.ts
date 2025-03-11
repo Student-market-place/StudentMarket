@@ -1,4 +1,4 @@
-import { PrismaClient, EnumStatusTYpe } from "@prisma/client";
+import { PrismaClient, EnumStatusTYpe, OfferStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     const where: {
       type?: EnumStatusTYpe;
-      status?: string;
+      status?: OfferStatus;
       skills?: { some: { id: { in: string[] } } };
     } = {};
 
@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (statusParam) {
-      where.status = statusParam;
+      if (Object.values(OfferStatus).includes(statusParam as OfferStatus)) {
+        where.status = statusParam as OfferStatus;
+      }
     }
 
     if (skillsParams.length > 0) {

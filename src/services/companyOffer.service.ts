@@ -30,7 +30,7 @@ async function fetchCompanyOffers(
   return response.data;
 }
 
-async function fetchCompanyOffer(id: string): Promise<CompanyOffer> {
+async function fetchCompanyOffer(id: string): Promise<CompanyOfferWithRelation> {
   const response = await axios.get(`${END_POINT}/${id}`);
   return response.data;
 }
