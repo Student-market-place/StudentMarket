@@ -40,50 +40,83 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     description,
     isAvailable,
     userId,
-    skillsId,
+    skillIds,
     schoolId,
     CVId,
     profilePictureId,
+    email,
   } = await req.json();
 
-  if (
-    !firstName ||
-    !lastName ||
-    !status ||
-    !userId ||
-    !skillsId ||
-    !schoolId ||
-    !CVId ||
-    !profilePictureId
-  ) {
+  if (!firstName || !lastName) {
     return NextResponse.json(
-      { error: "Veuillez renseigner tous les champs obligatoires" },
+      { error: "Le prénom et le nom sont obligatoires" },
       { status: 400 }
     );
   }
 
   try {
+    const updateData: any = {
+      firstName,
+      lastName,
+      description,
+    };
+
+    if (typeof isAvailable !== "undefined") {
+      updateData.isAvailable = isAvailable;
+    }
+
+    if (status) {
+      updateData.status = status;
+    }
+
+    if (userId) {
+      updateData.user = { connect: { id: userId } };
+    }
+
+    if (Array.isArray(skillIds)) {
+      updateData.skills = { set: skillIds.map((id: string) => ({ id })) };
+    }
+
+    if (schoolId) {
+      updateData.school = { connect: { id: schoolId } };
+    }
+
+    if (CVId) {
+      updateData.CV = { connect: { id: CVId } };
+    }
+
+    if (profilePictureId) {
+      updateData.profilePicture = { connect: { id: profilePictureId } };
+    }
+
+    if (email) {
+      updateData.user = {
+        ...updateData.user,
+        update: { email },
+      };
+    }
+
     const student = await prisma.student.update({
       where: {
         id: id,
       },
-      data: {
-        firstName,
-        lastName,
-        status,
-        description,
-        isAvailable,
-        user: { connect: { id: userId } },
-        skills: { set: skillsId.map((id: string) => ({ id })) },
-        school: { connect: { id: schoolId } },
-        CV: { connect: { id: CVId } },
-        profilePicture: { connect: { id: profilePictureId } },
+      data: updateData,
+      include: {
+        user: true,
+        skills: true,
+        school: true,
+        CV: true,
+        profilePicture: true,
       },
     });
 
     return NextResponse.json(student, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Error updating student:", error);
+    return NextResponse.json(
+      { error: "Failed to update student" },
+      { status: 500 }
+    );
   }
 }
 

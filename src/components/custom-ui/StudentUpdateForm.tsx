@@ -158,7 +158,7 @@ export default function StudentUpdateForm({
       });
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Profil mis à jour avec succès");
-      router.push(`/student/${student.id}`);
+      router.push(`/student/${student.id}/settings`);
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
       toast.error("Erreur lors de la mise à jour du profil");
@@ -304,7 +304,7 @@ export default function StudentUpdateForm({
                         accept="image/*"
                         onChange={handleFileChange}
                         className="w-full"
-                        disabled={isFileUploading}
+                        disabled
                       />
                       {isFileUploading && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -350,7 +350,7 @@ export default function StudentUpdateForm({
                         accept=".pdf,.doc,.docx"
                         onChange={handleCVChange}
                         className="w-full"
-                        disabled={isCVUploading}
+                        disabled
                       />
                       {isCVUploading && (
                         <p className="text-sm text-gray-500 mt-1">
