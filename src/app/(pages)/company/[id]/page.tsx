@@ -7,9 +7,13 @@ import CompanyOfferService from "@/services/companyOffer.service";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const CompanyPublicPage = () => {
   const { id } = useParams() as { id: string };
+  const [isOwner, setIsOwner] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const {
     data: company,
@@ -19,6 +23,33 @@ const CompanyPublicPage = () => {
     queryKey: ["company", id],
     queryFn: () => CompanyService.fetchCompany(id),
   });
+
+  // S'assurer que le code s'exécute seulement côté client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Vérifier si l'utilisateur est le propriétaire de l'entreprise
+  useEffect(() => {
+    if (!isClient || !company) return;
+
+    try {
+      const userId = localStorage.getItem('userId');
+      console.log("🔍 Vérification du propriétaire - UserId:", userId);
+      console.log("🔍 Entreprise - OwnerId:", company.userId);
+      
+      if (userId && userId === company.userId) {
+        console.log("✅ L'utilisateur est le propriétaire");
+        setIsOwner(true);
+      } else {
+        console.log("❌ L'utilisateur n'est pas le propriétaire");
+        setIsOwner(false);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du propriétaire:", error);
+      setIsOwner(false);
+    }
+  }, [company, isClient]);
 
   const query = useQuery({
     queryKey: ["company_offer", id],
@@ -60,6 +91,11 @@ const CompanyPublicPage = () => {
           <a href={`mailto:${company.user.email}`} className="w-full">
             <Button className="w-full">Contacter</Button>
           </a>
+          {isOwner && (
+            <Link href={`/company/${id}/create-offer`} className="w-full">
+              <Button className="w-full">Créer une offre</Button>
+            </Link>
+          )}
         </div>
         
         {/* Liste des offres */}
