@@ -206,7 +206,7 @@ const CompanyReviewsPage = () => {
                   </div>
 
                   <Button type="submit" disabled={!rating || !comment}>
-                    Soumettre l&aposévaluation
+                    Soumettre l&apos;évaluation
                   </Button>
                 </form>
               </CardContent>

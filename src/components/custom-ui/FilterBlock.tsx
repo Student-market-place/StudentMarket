@@ -23,27 +23,29 @@ interface School {
 // pour éviter les erreurs Suspense avec Next.js
 const FilterBlockWithSearchParams = ({ activeTab }: FilterBlockProps) => {
   const searchParams = useSearchParams();
-  
-  return <FilterBlockContent 
-    activeTab={activeTab} 
-    initialAvailability={searchParams.get("availability") || ""}
-    initialContractType={searchParams.get("contractType") || ""}
-    initialSchool={searchParams.get("school") || ""}
-    initialOfferType={searchParams.get("type") || ""}
-    initialCompanyName={searchParams.get("name") || ""}
-    initialSkillsParam={searchParams.get("skills")}
-  />;
+
+  return (
+    <FilterBlockContent
+      activeTab={activeTab}
+      initialAvailability={searchParams.get("availability") || ""}
+      initialContractType={searchParams.get("contractType") || ""}
+      initialSchool={searchParams.get("school") || ""}
+      initialOfferType={searchParams.get("type") || ""}
+      initialCompanyName={searchParams.get("name") || ""}
+      initialSkillsParam={searchParams.get("skills")}
+    />
+  );
 };
 
 // Composant principal sans useSearchParams
-const FilterBlockContent = ({ 
+const FilterBlockContent = ({
   activeTab,
   initialAvailability,
   initialContractType,
   initialSchool,
   initialOfferType,
   initialCompanyName,
-  initialSkillsParam
+  initialSkillsParam,
 }: FilterBlockProps & {
   initialAvailability: string;
   initialContractType: string;
@@ -53,20 +55,20 @@ const FilterBlockContent = ({
   initialSkillsParam: string | null;
 }) => {
   const router = useRouter();
-  
+
   // États communs
   const [skills, setSkills] = useState<Skill[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
-  
+
   // États spécifiques aux étudiants
   const [availability, setAvailability] = useState(initialAvailability);
   const [contractType, setContractType] = useState(initialContractType);
   const [school, setSchool] = useState(initialSchool);
   const [schools, setSchools] = useState<School[]>([]);
-  
+
   // États spécifiques aux offres
   const [offerType, setOfferType] = useState(initialOfferType);
-  
+
   // États spécifiques aux entreprises
   const [companyName, setCompanyName] = useState(initialCompanyName);
 
@@ -75,62 +77,69 @@ const FilterBlockContent = ({
     const fetchFilterData = async () => {
       try {
         // Récupération des compétences
-        const skillsData = await fetch('/api/skills').then(res => res.json());
+        const skillsData = await fetch("/api/skills").then((res) => res.json());
         setSkills(skillsData);
-        
+
         // Récupération des écoles si on est sur l'onglet étudiants
         if (activeTab === "students") {
-          const schoolsData = await fetch('/api/schools').then(res => res.json());
+          const schoolsData = await fetch("/api/schools").then((res) =>
+            res.json()
+          );
           setSchools(schoolsData);
         }
 
         // Initialiser les compétences sélectionnées à partir des paramètres d'URL
         if (initialSkillsParam) {
-          const skillIds = initialSkillsParam.split(',');
-          const selectedSkillsFromUrl = skillIds.map(id => {
-            const skill = skillsData.find((s: Skill) => s.id === id);
-            return skill ? skill : null;
-          }).filter(Boolean);
-          
+          const skillIds = initialSkillsParam.split(",");
+          const selectedSkillsFromUrl = skillIds
+            .map((id) => {
+              const skill = skillsData.find((s: Skill) => s.id === id);
+              return skill ? skill : null;
+            })
+            .filter(Boolean);
+
           setSelectedSkills(selectedSkillsFromUrl);
         }
       } catch (error) {
-        console.error("Erreur lors du chargement des données de filtrage:", error);
+        console.error(
+          "Erreur lors du chargement des données de filtrage:",
+          error
+        );
       }
     };
-    
+
     fetchFilterData();
   }, [activeTab, initialSkillsParam]);
 
   const handleSkillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
-    
+
     if (!selectedId) return; // Si l'option "Sélectionner" est choisie, ne rien faire
-    
-    if (!selectedSkills.some(s => s.id === selectedId)) {
-      const skillToAdd = skills.find(s => s.id === selectedId);
+
+    if (!selectedSkills.some((s) => s.id === selectedId)) {
+      const skillToAdd = skills.find((s) => s.id === selectedId);
       if (skillToAdd) {
         setSelectedSkills([...selectedSkills, skillToAdd]);
       }
     }
-    
+
     // Réinitialiser le select à l'option par défaut
     e.target.value = "";
   };
 
   const removeSkill = (skillId: string) => {
-    setSelectedSkills(selectedSkills.filter(s => s.id !== skillId));
+    setSelectedSkills(selectedSkills.filter((s) => s.id !== skillId));
   };
 
   // Fonction pour appliquer les filtres
   const handleSearch = () => {
     const params = new URLSearchParams();
-    
+
     // Filtres communs (compétences)
     if (selectedSkills.length > 0) {
-      params.set("skills", selectedSkills.map(s => s.id).join(','));
+      params.set("skills", selectedSkills.map((s) => s.id).join(","));
     }
-    
+
     // Filtres spécifiques selon l'onglet actif
     if (activeTab === "students") {
       if (availability) params.set("availability", availability);
@@ -141,16 +150,16 @@ const FilterBlockContent = ({
     } else if (activeTab === "companies") {
       if (companyName) params.set("name", companyName);
     }
-    
+
     // Mise à jour de l'URL avec les paramètres de recherche
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.push(newUrl);
   };
-  
+
   const resetFilters = () => {
     // Réinitialisation des états selon l'onglet actif
     setSelectedSkills([]);
-    
+
     if (activeTab === "students") {
       setAvailability("");
       setContractType("");
@@ -160,7 +169,7 @@ const FilterBlockContent = ({
     } else if (activeTab === "companies") {
       setCompanyName("");
     }
-    
+
     // Redirection vers l'URL sans paramètres
     router.push(window.location.pathname);
   };
@@ -191,13 +200,13 @@ const FilterBlockContent = ({
         {/* Affichage des compétences sélectionnées */}
         {selectedSkills.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
-            {selectedSkills.map(skill => (
-              <div 
-                key={skill.id} 
+            {selectedSkills.map((skill) => (
+              <div
+                key={skill.id}
                 className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md flex items-center text-sm"
               >
                 {skill.name}
-                <button 
+                <button
                   onClick={() => removeSkill(skill.id)}
                   className="ml-1 text-blue-500 hover:text-blue-700"
                 >
@@ -290,7 +299,7 @@ const FilterBlockContent = ({
       {activeTab === "companies" && (
         <div>
           <label htmlFor="companyName" className="block text-sm font-medium">
-            Nom de l'entreprise
+            Nom de l&apos;entreprise
           </label>
           <input
             type="text"

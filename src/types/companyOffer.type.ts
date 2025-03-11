@@ -1,11 +1,11 @@
 import { Company, EnumStatusTYpe, Prisma } from "@prisma/client";
 
-enum Type {
+export enum Type {
   STAGE = "Stage",
   ALTERNANCE = "Alternance",
 }
 
-enum Status {
+export enum Status {
   OPEN = "Open",
   CLOSED = "Closed",
 }

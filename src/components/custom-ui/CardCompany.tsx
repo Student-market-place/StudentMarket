@@ -1,8 +1,6 @@
 import { CompanyWithRelation } from "@/types/company.type";
-import { Badge } from "../ui/badge";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -16,7 +14,6 @@ interface CardCompanyProps {
 }
 
 const CardCompany = ({ company }: CardCompanyProps) => {
-
   console.log(company);
 
   return (
@@ -40,7 +37,7 @@ const CardCompany = ({ company }: CardCompanyProps) => {
       </CardHeader>
       <CardFooter className="p-3 text-center">
         <Link href={`/company/${company.id}`}>
-          <Button variant="outline">Voir l'entreprise</Button>
+          <Button variant="outline">Voir l&apos;entreprise</Button>
         </Link>
       </CardFooter>
     </Card>

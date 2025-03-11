@@ -27,6 +27,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skill } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { CompanyOffer, Type, Status } from "@/types/companyOffer.type";
 
 interface Option {
   label: string;
@@ -164,7 +165,7 @@ const CreateOfferPage = () => {
         name: newSkillName.trim(),
         createdAt: new Date(),
         modifiedAt: new Date(),
-        deletedAt: null as any, // Nécessaire pour la compatibilité des types
+        deletedAt: null, // Nécessaire pour la compatibilité des types
       });
 
       // Mettre à jour l'état local
@@ -199,19 +200,19 @@ const CreateOfferPage = () => {
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: any = {
+      const offerData: CompanyOffer = {
+        id: "", // sera généré par l'API
         companyId: companyId,
         title: data.title,
         description: data.description,
-        type: data.type === "Stage" ? "stage" : "alternance", // Conversion selon l'enum
+        type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
         startDate: new Date(data.startDate),
-        expectedSkills: data.expectedSkills,
-        status: "en_cours",
+        status: Status.OPEN,
         skills: data.skills,
+        studentApplies: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: new Date(), // On utilisera une date actuelle
-        id: "", // sera généré par l'API
+        deletedAt: new Date(),
       };
 
       await CompanyOfferService.postCompanyOffer(offerData);
