@@ -7,19 +7,33 @@ export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const studentIdParam = searchParams.get("studentId");
+    const companyIdParam = searchParams.get("companyId");
 
     const where: {
       studentId?: string;
+      companyId?: string;
     } = {};
 
     if (studentIdParam) {
       where.studentId = studentIdParam;
     }
+    if (companyIdParam) {
+      where.companyId = companyIdParam;
+    }
 
     const history = await prisma.student_history.findMany({
       include: {
         company: true,
-        student: true,
+        student: {
+          include: {
+            school: true,
+            user: true,
+            profilePicture: true,
+            skills: true,
+            studentHistories: true,
+            CV: true,
+          },
+        },
       },
       where,
     });
@@ -53,6 +67,19 @@ export async function POST(req: NextRequest) {
       company: { connect: { id: companyId } },
       startDate,
       endDate,
+    },
+    include: {
+      company: true,
+      student: {
+        include: {
+          school: true,
+          user: true,
+          profilePicture: true,
+          skills: true,
+          studentHistories: true,
+          CV: true,
+        },
+      },
     },
   });
   return NextResponse.json(student_history, { status: 201 });

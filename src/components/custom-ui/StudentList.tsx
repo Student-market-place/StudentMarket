@@ -1,6 +1,4 @@
 "use client";
-
-import StudentService from "@/services/student.service";
 import { StudentWithRelation } from "@/types/student.type";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -10,15 +8,15 @@ import { useEffect } from "react";
 // Composant wrapper qui utilise useSearchParams
 const StudentList = () => {
   const searchParams = useSearchParams();
-  
+
   // Récupérer les paramètres de filtrage depuis l'URL
   const availability = searchParams.get("availability");
   const contractType = searchParams.get("contractType");
   const skillId = searchParams.get("skills");
   const schoolId = searchParams.get("school");
-  
+
   return (
-    <StudentListContent 
+    <StudentListContent
       availability={availability}
       contractType={contractType}
       skillId={skillId}
@@ -32,7 +30,7 @@ const StudentListContent = ({
   availability,
   contractType,
   skillId,
-  schoolId
+  schoolId,
 }: {
   availability: string | null;
   contractType: string | null;
@@ -42,16 +40,16 @@ const StudentListContent = ({
   // Construire l'URL de l'API avec les paramètres de filtrage
   const getApiUrl = () => {
     const params = new URLSearchParams();
-    
+
     if (availability) params.append("availability", availability);
     if (contractType) params.append("contractType", contractType);
     if (skillId) params.append("skills", skillId);
     if (schoolId) params.append("school", schoolId);
-    
+
     const queryString = params.toString();
-    return `/api/student/filter${queryString ? `?${queryString}` : ''}`;
+    return `/api/student/filter${queryString ? `?${queryString}` : ""}`;
   };
-  
+
   const { data: students, refetch } = useQuery({
     queryKey: ["students", availability, contractType, skillId, schoolId],
     queryFn: async () => {
@@ -62,7 +60,7 @@ const StudentListContent = ({
       return await response.json();
     },
   });
-  
+
   // Rafraîchir les données lorsque les paramètres de filtrage changent
   useEffect(() => {
     refetch();
@@ -73,7 +71,9 @@ const StudentListContent = ({
   }
 
   if (students.length === 0) {
-    return <div className="col-span-4 text-center py-8">Aucun étudiant trouvé</div>;
+    return (
+      <div className="col-span-4 text-center py-8">Aucun étudiant trouvé</div>
+    );
   }
 
   return (

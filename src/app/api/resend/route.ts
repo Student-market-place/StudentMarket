@@ -5,7 +5,7 @@ const resend = new Resend(process.env.NEXT_PUBLIC_AUTH_RESEND_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const { from, to, subject, url } = await req.json();
+    const { to, subject, url } = await req.json();
 
     const { data, error } = await resend.emails.send({
       from: "no-reply@1ucas1eveque.fr",
