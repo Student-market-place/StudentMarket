@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, EnumStatusTYpe } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -14,51 +14,37 @@ export async function GET(req: NextRequest) {
     const schoolId = searchParams.get("school");
 
     // Construction de la requête avec les filtres
-    const filters: Prisma.StudentWhereInput = {
+    let whereClause: Prisma.StudentWhereInput = {
       deletedAt: null,
     };
 
     // Filtre par disponibilité
     if (availability) {
-      filters.isAvailable = availability === "true";
+      whereClause.isAvailable = availability === "true";
     }
 
     // Filtre par type de contrat
     if (contractType) {
-      filters.status = contractType;
+      whereClause.status = contractType as EnumStatusTYpe;
     }
 
     // Filtre par école
     if (schoolId) {
-      filters.schoolId = schoolId;
+      whereClause.schoolId = schoolId;
     }
 
-    // Préparation de la requête de recherche
-    const query: Prisma.StudentFindManyArgs = {
-      where: filters,
-      include: {
-        user: true,
-        skills: true,
-        school: true,
-        profilePicture: true,
-        CV: true,
-      },
-    };
-
-    // Si on filtre par compétences, utilisons la relation directe dans la requête
+    // Si on filtre par compétences
     if (skillsParam) {
       const skillIds = skillsParam.split(",");
 
       if (skillIds.length === 1) {
-        // Pour une seule compétence
-        query.where.skills = {
+        whereClause.skills = {
           some: {
             id: skillIds[0],
           },
         };
       } else if (skillIds.length > 1) {
-        // Pour plusieurs compétences, on utilise AND pour chaque compétence
-        query.where.AND = skillIds.map((skillId) => ({
+        whereClause.AND = skillIds.map((skillId) => ({
           skills: {
             some: {
               id: skillId,
@@ -67,6 +53,17 @@ export async function GET(req: NextRequest) {
         }));
       }
     }
+
+    const query: Prisma.StudentFindManyArgs = {
+      where: whereClause,
+      include: {
+        user: true,
+        skills: true,
+        school: true,
+        profilePicture: true,
+        CV: true,
+      },
+    };
 
     // Requête avec toutes les conditions
     const students = await prisma.student.findMany(query);
