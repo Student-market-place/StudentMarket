@@ -9,12 +9,15 @@ import {
   CardTitle,
 } from "../ui/card";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CardJobOfferProps {
   jobOffer: CompanyOfferWithRelation;
 }
 
 const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
+  const router = useRouter();
+  
   return (
     <Card className=" w-[250px] p-4 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0 text-center">
@@ -36,7 +39,10 @@ const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 px-3 pb-3 text-center text-xs text-gray-400  justify-center item-center">
-        <button className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition">
+        <button 
+          className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition"
+          onClick={() => router.push(`/apply/${jobOffer.id}`)}
+        >
           Postuler
         </button>
         <Link href={`/offer/${jobOffer.id}`}>

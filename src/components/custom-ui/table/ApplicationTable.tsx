@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Pencil,
   Trash2,
@@ -21,58 +21,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const applications = [
-  {
-    title: "Software Developer",
-    company: "Google",
-    type: "Internship",
-    startDate: "2022-06-01",
-    endDate: "2022-08-31",
-  },
-  {
-    title: "Data Analyst",
-    company: "Microsoft",
-    type: "Apprenticeship",
-    startDate: "2022-09-15",
-    endDate: "2023-09-14",
-  },
-  {
-    title: "Cybersecurity Engineer",
-    company: "IBM",
-    type: "Internship",
-    startDate: "2023-10-01",
-    endDate: "2023-12-31",
-  },
-  {
-    title: "Machine Learning Engineer",
-    company: "Meta",
-    type: "Internship",
-    startDate: "2024-01-10",
-    endDate: "2024-04-10",
-  },
-  {
-    title: "Cloud Engineer",
-    company: "Amazon",
-    type: "Apprenticeship",
-    startDate: "2024-05-01",
-    endDate: "2025-03-01",
-  },
-  {
-    title: "Frontend Developer",
-    company: "Netflix",
-    type: "Internship",
-    startDate: "2025-03-10",
-    endDate: null,
-  },
-];
+import axios from "axios";
+import { StudentApply } from "@/types/studentApply.type";
+
+interface ApplicationTableProps {
+  studentId: string;
+}
 
 type SortField = "title" | "company" | "type" | "startDate" | "endDate";
 type SortDirection = "asc" | "desc";
 
-export function ApplicationTable() {
+export function ApplicationTable({ studentId }: ApplicationTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("endDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [application, setApplication] = useState<StudentApply[]>([]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -82,6 +45,22 @@ export function ApplicationTable() {
       setSortDirection("asc");
     }
   };
+
+  useEffect(() => {
+    async function loadApplications() {
+      try {
+        const response = await axios.get(`/api/student/${studentId}/apply`);
+        const data = response.data;
+        console.log("Applications data:", data);
+
+        setApplication(data);
+      } catch (err) {
+        console.error("Failed to fetch applications", err);
+      }
+    }
+
+    loadApplications();
+  }, [studentId]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Ongoing";
@@ -95,38 +74,41 @@ export function ApplicationTable() {
   };
 
   const filteredAndSortedData = useMemo(() => {
-    const filtered = applications.filter((application) => {
+    const filtered = application.filter((application) => {
       if (!searchTerm) return true;
 
       const searchLower = searchTerm.toLowerCase();
 
       return (
-        application.title.toLowerCase().includes(searchLower) ||
-        application.company.toLowerCase().includes(searchLower)
+        application.companyOffer.title.toLowerCase().includes(searchLower) ||
+        application.companyOffer.company.name
+          .toLowerCase()
+          .includes(searchLower)
       );
     });
 
     return [...filtered].sort((a, b) => {
       if (sortField === "startDate" || sortField === "endDate") {
-        if (sortField === "endDate") {
-          if (a.endDate === null && b.endDate === null) return 0;
-          if (a.endDate === null) return sortDirection === "desc" ? -1 : 1;
-          if (b.endDate === null) return sortDirection === "desc" ? 1 : -1;
-        }
-
-        const dateA = new Date(a[sortField] || "");
-        const dateB = new Date(b[sortField] || "");
+        const dateA = new Date(a.companyOffer[sortField] || "");
+        const dateB = new Date(b.companyOffer[sortField] || "");
 
         return sortDirection === "asc"
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       } else {
-        return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
+        const fieldA = a.companyOffer[sortField];
+        const fieldB = b.companyOffer[sortField];
+
+        if (typeof fieldA === "string" && typeof fieldB === "string") {
+          return sortDirection === "asc"
+            ? fieldA.localeCompare(fieldB)
+            : fieldB.localeCompare(fieldA);
+        } else {
+          return 0; // or handle other types if necessary
+        }
       }
     });
-  }, [searchTerm, sortField, sortDirection]);
+  }, [searchTerm, sortField, sortDirection, application]);
 
   return (
     <div className="space-y-4 p-12">
@@ -255,44 +237,42 @@ export function ApplicationTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-
                       No applications found matching &quot;{searchTerm}&quot;.
-
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredAndSortedData.map((application, index) => (
                     <TableRow
-                      key={`${application.title}-${application.company}-${index}`}
+                      key={`${application.companyOffer.title}-${application.companyOffer.company}-${index}`}
                     >
                       <TableCell className="w-[25%] font-medium">
-                        {application.title}
+                        {application.companyOffer.title}
                       </TableCell>
                       <TableCell className="w-[20%]">
-                        {application.company}
+                        {application.companyOffer.company.name}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={
-                            application.type === "Internship"
+                            application.companyOffer.type === "stage"
                               ? "default"
                               : "secondary"
                           }
                           className={
-                            application.type === "Internship"
+                            application.companyOffer.type === "stage"
                               ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                           }
                         >
-                          {application.type}
+                          {application.companyOffer.type}
                         </Badge>
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
-                        {formatDate(application.startDate)}
+                        {formatDate(application.companyOffer.startDate)}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
-                        {application.endDate ? (
-                          formatDate(application.endDate)
+                        {application.companyOffer.endDate ? (
+                          formatDate(application.companyOffer.endDate)
                         ) : (
                           <Badge
                             variant="success"

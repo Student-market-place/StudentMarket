@@ -18,6 +18,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, BriefcaseIcon, BuildingIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Type de params adapté à Next.js
 // type PageParams = {
@@ -30,6 +31,7 @@ export default function OfferPage() {
   // Utilisation de useParams au lieu de recevoir params comme prop
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
 
   const { data: offer, isLoading } = useQuery<CompanyOfferWithRelation>({
     queryKey: ["company_offer", id],

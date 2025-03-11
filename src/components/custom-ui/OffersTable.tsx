@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import { StudentWithRelation } from "@/types/student.type";
+import { useRouter } from "next/navigation";
 
 // Interface simplifiée pour l'école
 interface SimplifiedSchool {
@@ -46,6 +47,7 @@ export const OffersTable: React.FC<OffersTableProps> = ({
   school,
 }) => {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <Card>
@@ -82,9 +84,8 @@ export const OffersTable: React.FC<OffersTableProps> = ({
                   <TableHead className="w-[20%]">Entreprise</TableHead>
                   <TableHead className="w-[15%]">Type</TableHead>
                   <TableHead className="w-[15%]">Compétences</TableHead>
-                  <TableHead className="w-[15%] text-center">
-                    Étudiants compatibles
-                  </TableHead>
+                  <TableHead className="w-[15%] text-center">Étudiants compatibles</TableHead>
+                  <TableHead className="w-[10%] text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -158,6 +159,18 @@ export const OffersTable: React.FC<OffersTableProps> = ({
                             >
                               {compatibleStudents.length}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/apply/${offer.id}`);
+                              }}
+                              className="bg-primary hover:bg-primary/90"
+                            >
+                              Postuler
+                            </Button>
                           </TableCell>
                         </TableRow>
 
