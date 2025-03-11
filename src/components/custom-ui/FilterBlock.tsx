@@ -278,7 +278,7 @@ const FilterBlockContent = ({
       {activeTab === "offers" && (
         <div>
           <label htmlFor="offerType" className="block text-sm font-medium">
-            Type d'offre
+            Type d&apos;offre
           </label>
           <select
             id="offerType"

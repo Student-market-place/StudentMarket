@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const schoolId = searchParams.get("school");
 
     // Construction de la requête avec les filtres
-    let whereClause: Prisma.StudentWhereInput = {
+    const whereClause: Prisma.StudentWhereInput = {
       deletedAt: null,
     };
 
