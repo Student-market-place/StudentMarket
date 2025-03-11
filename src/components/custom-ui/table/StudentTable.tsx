@@ -225,9 +225,6 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[10%] text-center font-medium">
-                    Actions
-                  </TableHead>
                 </TableRow>
               </TableHeader>
             </Table>
@@ -286,24 +283,6 @@ export function StudentTable({ students: providedStudents, useDefaultData = fals
                         >
                           {student.isAvailable ? "Oui" : "Non"}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="w-[10%] text-center">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))
