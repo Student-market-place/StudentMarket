@@ -4,7 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import CompanyOfferService from "@/services/companyOffer.service";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -26,7 +32,7 @@ export default function ApplyPage() {
     // Récupérer l'ID de l'utilisateur connecté depuis le localStorage
     const storedUserId = localStorage.getItem("userId");
     setUserId(storedUserId);
-    
+
     // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     if (!storedUserId) {
       router.push("/login?redirect=" + encodeURIComponent(`/apply/${id}`));
@@ -41,18 +47,18 @@ export default function ApplyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!userId || !offer) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Simulation de l'envoi de la candidature
       // Remplacer par l'appel API réel
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setSubmitSuccess(true);
-      
+
       // Redirection après 2 secondes
       setTimeout(() => {
         router.push(`/offer/${id}`);
@@ -76,10 +82,14 @@ export default function ApplyPage() {
     return (
       <div className="container mx-auto p-4 sm:p-6">
         <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-          <h1 className="text-xl font-bold text-red-600 mb-2">Offre non trouvée</h1>
-          <p className="text-red-600">L'offre que vous recherchez n'existe pas ou a été supprimée.</p>
+          <h1 className="text-xl font-bold text-red-600 mb-2">
+            Offre non trouvée
+          </h1>
+          <p className="text-red-600">
+            L&aposoffre que vous recherchez n&aposexiste pas ou a été supprimée.
+          </p>
           <Link href="/home">
-            <Button className="mt-4">Retour à l'accueil</Button>
+            <Button className="mt-4">Retour à l&aposaccueil</Button>
           </Link>
         </div>
       </div>
@@ -90,12 +100,16 @@ export default function ApplyPage() {
     return (
       <div className="container mx-auto p-4 sm:p-6">
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-          <h1 className="text-xl font-bold text-amber-600 mb-2">Candidature impossible</h1>
-          <p className="text-amber-600">Cette offre n'est plus disponible pour candidature.</p>
+          <h1 className="text-xl font-bold text-amber-600 mb-2">
+            Candidature impossible
+          </h1>
+          <p className="text-amber-600">
+            Cette offre n&aposest plus disponible pour candidature.
+          </p>
           <Link href={`/offer/${id}`}>
             <Button variant="outline" className="mt-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à l'offre
+              Retour à l&aposoffre
             </Button>
           </Link>
         </div>
@@ -112,8 +126,12 @@ export default function ApplyPage() {
               <Check className="h-8 w-8 text-green-600" />
             </div>
           </div>
-          <h1 className="text-xl font-bold text-green-600 mb-2">Candidature envoyée avec succès !</h1>
-          <p className="text-green-600">Votre candidature a bien été transmise à l'entreprise.</p>
+          <h1 className="text-xl font-bold text-green-600 mb-2">
+            Candidature envoyée avec succès !
+          </h1>
+          <p className="text-green-600">
+            Votre candidature a bien été transmise à l&aposentreprise.
+          </p>
         </div>
       </div>
     );
@@ -122,18 +140,23 @@ export default function ApplyPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <div className="mb-6">
-        <Link href={`/offer/${id}`} className="inline-flex items-center text-blue-600 hover:text-blue-800">
+        <Link
+          href={`/offer/${id}`}
+          className="inline-flex items-center text-blue-600 hover:text-blue-800"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour à l'offre
+          Retour à l&aposoffre
         </Link>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Informations sur l'offre */}
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Résumé de l'offre</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">
+                Résumé de l&aposoffre
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -142,7 +165,7 @@ export default function ApplyPage() {
               </div>
               <div>
                 <h4 className="text-sm font-medium">Type</h4>
-                <p>{offer.type === 'stage' ? 'Stage' : 'Alternance'}</p>
+                <p>{offer.type === "stage" ? "Stage" : "Alternance"}</p>
               </div>
               <div>
                 <h4 className="text-sm font-medium">Compétences requises</h4>
@@ -155,12 +178,14 @@ export default function ApplyPage() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Formulaire de candidature */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Formulaire de candidature</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">
+                Formulaire de candidature
+              </CardTitle>
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-6">
@@ -176,7 +201,7 @@ export default function ApplyPage() {
                     className="resize-none"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="cv">CV (optionnel)</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -191,28 +216,39 @@ export default function ApplyPage() {
                         }
                       }}
                     />
-                    <Label htmlFor="cv" className="cursor-pointer flex flex-col items-center gap-2">
+                    <Label
+                      htmlFor="cv"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
                       <Upload className="h-8 w-8 text-gray-400" />
                       {file ? (
-                        <span className="text-sm font-medium text-blue-600">{file.name}</span>
+                        <span className="text-sm font-medium text-blue-600">
+                          {file.name}
+                        </span>
                       ) : (
                         <>
-                          <span className="font-medium">Cliquez pour télécharger</span>
-                          <span className="text-xs text-gray-500">PDF, DOC, DOCX (max. 5MB)</span>
+                          <span className="font-medium">
+                            Cliquez pour télécharger
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            PDF, DOC, DOCX (max. 5MB)
+                          </span>
                         </>
                       )}
                     </Label>
                   </div>
                 </div>
               </CardContent>
-              
+
               <CardFooter>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   disabled={isSubmitting || !motivationLetter.trim()}
                 >
-                  {isSubmitting ? "Envoi en cours..." : "Envoyer ma candidature"}
+                  {isSubmitting
+                    ? "Envoi en cours..."
+                    : "Envoyer ma candidature"}
                 </Button>
               </CardFooter>
             </form>
@@ -221,4 +257,4 @@ export default function ApplyPage() {
       </div>
     </div>
   );
-} 
+}

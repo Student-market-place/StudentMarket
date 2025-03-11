@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import StudentHistoryService from "@/services/studentHistory.service";
@@ -12,7 +11,6 @@ import ReviewService from "@/services/review.service";
 import { useParams } from "next/navigation";
 import { HistoryWithRelation } from "@/types/studentHistory.type";
 import { ReviewWithRelation } from "@/types/review.type";
-import DisplayRating from "@/components/custom-ui/RatingStar";
 import { Star } from "lucide-react";
 import CardStudent from "@/components/custom-ui/CardStudent";
 
@@ -208,7 +206,7 @@ const CompanyReviewsPage = () => {
                   </div>
 
                   <Button type="submit" disabled={!rating || !comment}>
-                    Soumettre l'évaluation
+                    Soumettre l&aposévaluation
                   </Button>
                 </form>
               </CardContent>
