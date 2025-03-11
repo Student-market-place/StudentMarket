@@ -20,55 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fetchStudentApply } from "@/services/studentApply.service";
+
 import axios from "axios";
 import { StudentApply } from "@/types/studentApply.type";
-import { CompanyOffer } from "@/types/companyOffer.type";
-
-const applicationsFix = [
-  {
-    title: "Software Developer",
-    company: "Google",
-    type: "Internship",
-    startDate: "2022-06-01",
-    endDate: "2022-08-31",
-  },
-  {
-    title: "Data Analyst",
-    company: "Microsoft",
-    type: "Apprenticeship",
-    startDate: "2022-09-15",
-    endDate: "2023-09-14",
-  },
-  {
-    title: "Cybersecurity Engineer",
-    company: "IBM",
-    type: "Internship",
-    startDate: "2023-10-01",
-    endDate: "2023-12-31",
-  },
-  {
-    title: "Machine Learning Engineer",
-    company: "Meta",
-    type: "Internship",
-    startDate: "2024-01-10",
-    endDate: "2024-04-10",
-  },
-  {
-    title: "Cloud Engineer",
-    company: "Amazon",
-    type: "Apprenticeship",
-    startDate: "2024-05-01",
-    endDate: "2025-03-01",
-  },
-  {
-    title: "Frontend Developer",
-    company: "Netflix",
-    type: "Internship",
-    startDate: "2025-03-10",
-    endDate: null,
-  },
-];
 
 interface ApplicationTableProps {
   studentId: string;

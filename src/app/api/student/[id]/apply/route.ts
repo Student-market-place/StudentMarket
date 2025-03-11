@@ -1,13 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { IParams } from "@/types/api.type";
 
 const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: IParams
 ): Promise<NextResponse> {
-  const id = (await params).id;
+  const { id } = await params;
 
   console.log(`Fetching student apply applications for student ID: ${id}`);
 
