@@ -4,17 +4,22 @@ export interface Company {
   id: string;
   name: string;
   description: string;
-  profilePictureId: string | UploadFile;
-  userId: string | User;
+  profilePictureId: string;
+  userId: string;
   createdAt: Date;
   modifiedAt: Date;
-  deletedAt: Date;
+  deletedAt: Date | null;
 }
 
 export type CompanyWithRelation = Prisma.CompanyGetPayload<{
   include: {
     profilePicture: true;
     user: true;
+    _count: {
+      select: {
+        companyOffers: true;
+      };
+    };
   };
 }>;
 

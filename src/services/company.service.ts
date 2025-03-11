@@ -7,7 +7,7 @@ import axios from "axios";
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company`;
 
-async function fetchCompanies(): Promise<Company[]> {
+async function fetchCompanies(): Promise<CompanyWithRelation[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/company`;
 
