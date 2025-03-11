@@ -20,16 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
-import CompanyOfferService from "@/services/companyOffer.service";
 
 interface JobsOfferTableProps {
   jobOffers: CompanyOfferWithRelation[];
@@ -44,19 +35,12 @@ type SortField =
   | "status";
 type SortDirection = "asc" | "desc";
 
-export const JobsOfferTable = ({
-  jobOffers: initialJobOffers,
-}: JobsOfferTableProps) => {
-  const [jobOffers, setJobOffers] =
-    useState<CompanyOfferWithRelation[]>(initialJobOffers);
+export const JobsOfferTable = ({ jobOffers }: JobsOfferTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  // État calculé pour le statut des offres
   const [statusSort, setStatusSort] = useState<"asc" | "desc">("asc");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -67,6 +51,7 @@ export const JobsOfferTable = ({
     }
   };
 
+  // Fonction spéciale pour gérer le tri par statut (qui est calculé, pas stocké)
   const handleStatusSort = () => {
     setStatusSort(statusSort === "asc" ? "desc" : "asc");
   };
@@ -90,57 +75,6 @@ export const JobsOfferTable = ({
       return "Open";
     } else {
       return "Closed";
-    }
-  };
-
-  // Fonction pour ouvrir la boîte de dialogue de confirmation de suppression
-  const openDeleteDialog = (jobId: string) => {
-    setDeletingJobId(jobId);
-    setDeleteError(null);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Fonction pour fermer la boîte de dialogue
-  const closeDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setDeletingJobId(null);
-    setDeleteError(null);
-  };
-
-  // Fonction pour gérer la suppression d'une offre
-  // Fonction pour gérer la suppression d'une offre
-  const handleDeleteJobOffer = async () => {
-    if (!deletingJobId) return;
-
-    try {
-      setIsDeleting(true);
-      setDeleteError(null);
-
-      // Find the full company offer object by ID
-      const offerToDelete = jobOffers.find(
-        (offer) => offer.id === deletingJobId
-      );
-
-      if (!offerToDelete) {
-        throw new Error("Job offer not found");
-      }
-
-      // Appel du service de suppression avec l'objet complet
-      await CompanyOfferService.deleteCompanyOffer(offerToDelete);
-
-      // Mise à jour locale de l'état sans refaire d'appel API
-      setJobOffers((prevOffers) =>
-        prevOffers.filter((offer) => offer.id !== deletingJobId)
-      );
-
-      closeDeleteDialog();
-    } catch (error) {
-      console.error("Error deleting job offer:", error);
-      setDeleteError(
-        error instanceof Error ? error.message : "Failed to delete job offer"
-      );
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -414,7 +348,6 @@ export const JobsOfferTable = ({
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
-                              onClick={() => openDeleteDialog(job.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -429,42 +362,6 @@ export const JobsOfferTable = ({
           </div>
         </div>
       </div>
-
-      {/* Boîte de dialogue de confirmation de suppression */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this job offer? This action cannot
-              be undone.
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError && (
-            <div className="text-sm font-medium text-destructive mt-2">
-              {deleteError}
-            </div>
-          )}
-          <DialogFooter className="sm:justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={closeDeleteDialog}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDeleteJobOffer}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
