@@ -1,5 +1,7 @@
 import axios from "axios";
 import { Apply_Status } from "@prisma/client";
+import { StudentWithRelation } from "@/types/student.type";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 
 // Type pour la création d'une candidature
 interface CreateStudentApplyData {
@@ -19,8 +21,8 @@ export interface StudentApplyWithRelations {
   createdAt: Date;
   modifiedAt: Date;
   deletedAt?: Date;
-  student?: any; // Type plus précis selon votre besoin
-  companyOffer?: any; // Type plus précis selon votre besoin
+  student?: StudentWithRelation; // Type plus précis selon votre besoin
+  companyOffer?: CompanyOfferWithRelation; // Type plus précis selon votre besoin
 }
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/student_apply`;
@@ -30,7 +32,9 @@ const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/student_apply`;
  * @param studentId - ID de l'étudiant
  * @returns Liste des candidatures
  */
-async function fetchStudentApplies(studentId: string): Promise<StudentApplyWithRelations[]> {
+async function fetchStudentApplies(
+  studentId: string
+): Promise<StudentApplyWithRelations[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student_apply/student/${studentId}`;
   const response = await axios.get(url);
@@ -42,7 +46,9 @@ async function fetchStudentApplies(studentId: string): Promise<StudentApplyWithR
  * @param id - ID de la candidature
  * @returns Détails de la candidature
  */
-async function fetchStudentApply(id: string): Promise<StudentApplyWithRelations> {
+async function fetchStudentApply(
+  id: string
+): Promise<StudentApplyWithRelations> {
   const response = await axios.get(`${END_POINT}/${id}`);
   return response.data;
 }
@@ -52,7 +58,9 @@ async function fetchStudentApply(id: string): Promise<StudentApplyWithRelations>
  * @param companyOfferId - ID de l'offre
  * @returns Liste des candidatures
  */
-async function fetchCompanyOfferApplies(companyOfferId: string): Promise<StudentApplyWithRelations[]> {
+async function fetchCompanyOfferApplies(
+  companyOfferId: string
+): Promise<StudentApplyWithRelations[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/student_apply/offer/${companyOfferId}`;
   const response = await axios.get(url);
@@ -64,7 +72,9 @@ async function fetchCompanyOfferApplies(companyOfferId: string): Promise<Student
  * @param data - Données de la candidature
  * @returns La candidature créée
  */
-async function createStudentApply(data: CreateStudentApplyData): Promise<StudentApplyWithRelations> {
+async function createStudentApply(
+  data: CreateStudentApplyData
+): Promise<StudentApplyWithRelations> {
   const response = await axios.post(END_POINT, data);
   return response.data;
 }
@@ -75,7 +85,10 @@ async function createStudentApply(data: CreateStudentApplyData): Promise<Student
  * @param status - Nouveau statut
  * @returns La candidature mise à jour
  */
-async function updateStudentApplyStatus(id: string, status: Apply_Status): Promise<StudentApplyWithRelations> {
+async function updateStudentApplyStatus(
+  id: string,
+  status: Apply_Status
+): Promise<StudentApplyWithRelations> {
   const response = await axios.patch(`${END_POINT}/${id}/status`, { status });
   return response.data;
 }
@@ -85,7 +98,9 @@ async function updateStudentApplyStatus(id: string, status: Apply_Status): Promi
  * @param id - ID de la candidature
  * @returns La candidature supprimée
  */
-async function deleteStudentApply(id: string): Promise<StudentApplyWithRelations> {
+async function deleteStudentApply(
+  id: string
+): Promise<StudentApplyWithRelations> {
   const response = await axios.delete(`${END_POINT}/${id}`);
   return response.data;
 }
