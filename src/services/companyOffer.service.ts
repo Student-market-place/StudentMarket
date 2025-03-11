@@ -66,10 +66,10 @@ async function putCompanyOffer(
   return response.data;
 }
 
-async function deleteCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
-  const response = await axios.delete(`${END_POINT}/${companyOffer.id}`);
+async function deleteCompanyOffer(id: string): Promise<CompanyOffer> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const url = `${baseUrl}/api/company_offer/${id}`;
+  const response = await axios.delete(url);
   return response.data;
 }
 

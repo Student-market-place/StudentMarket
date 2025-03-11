@@ -20,10 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import {
+  CompanyOffer,
+  CompanyOfferWithRelation,
+} from "@/types/companyOffer.type";
+import CompanyOfferService from "@/services/companyOffer.service";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 interface JobsOfferTableProps {
   jobOffers: CompanyOfferWithRelation[];
+  onDelete?: (id: string) => void;
 }
 
 type SortField =
@@ -35,12 +41,17 @@ type SortField =
   | "status";
 type SortDirection = "asc" | "desc";
 
-export const JobsOfferTable = ({ jobOffers }: JobsOfferTableProps) => {
+export const JobsOfferTable = ({
+  jobOffers,
+  onDelete,
+}: JobsOfferTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   // État calculé pour le statut des offres
   const [statusSort, setStatusSort] = useState<"asc" | "desc">("asc");
+
+  const queryClient = useQueryClient();
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -131,6 +142,16 @@ export const JobsOfferTable = ({ jobOffers }: JobsOfferTableProps) => {
 
     return sorted;
   }, [jobOffers, searchTerm, sortField, sortDirection, statusSort]);
+
+  const handleDelete = async (job: CompanyOfferWithRelation) => {
+    try {
+      await CompanyOfferService.deleteCompanyOffer(job.id);
+      onDelete?.(job.id);
+      await queryClient.invalidateQueries({ queryKey: ["company_offers"] });
+    } catch (error) {
+      console.error("Error deleting job offer:", error);
+    }
+  };
 
   return (
     <div className="space-y-4 p-12">
@@ -348,6 +369,7 @@ export const JobsOfferTable = ({ jobOffers }: JobsOfferTableProps) => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
+                              onClick={() => handleDelete(job)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
