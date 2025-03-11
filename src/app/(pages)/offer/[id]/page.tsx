@@ -11,11 +11,23 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, BriefcaseIcon, BuildingIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 
-export default function OfferPage({ params }: { params: { id: string } }) {
+// Type de params adapté à Next.js
+type PageParams = {
+  params: {
+    id: string;
+  };
+};
+
+export default function OfferPage() {
+  // Utilisation de useParams au lieu de recevoir params comme prop
+  const params = useParams();
+  const id = params.id as string;
+
   const { data: offer, isLoading } = useQuery<CompanyOfferWithRelation>({
-    queryKey: ["company_offer", params.id],
-    queryFn: () => CompanyOfferService.fetchCompanyOffer(params.id),
+    queryKey: ["company_offer", id],
+    queryFn: () => CompanyOfferService.fetchCompanyOffer(id),
   });
 
   const getStatusColor = (status: string) => {
