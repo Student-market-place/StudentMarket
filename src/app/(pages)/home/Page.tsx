@@ -68,7 +68,7 @@ const HomePage = () => {
       </div>
 
       <div className="flex gap-8">
-        <FilterBlock />
+        <FilterBlock activeTab={activeTab} />
         <div className="grid grid-cols-4 gap-8">
           {activeTab === "students" ? (
             <>
