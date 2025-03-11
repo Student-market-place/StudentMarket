@@ -1,12 +1,12 @@
 import { IParams } from "@/types/api.type";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
-
+  console.log(req);
   try {
     const student = await prisma.student.findUnique({
       where: {
@@ -55,7 +55,7 @@ export async function PUT(req: NextRequest, { params }: IParams) {
   }
 
   try {
-    const updateData: any = {
+    const updateData: Prisma.StudentUpdateInput = {
       firstName,
       lastName,
       description,
