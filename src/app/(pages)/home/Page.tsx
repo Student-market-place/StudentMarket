@@ -12,7 +12,7 @@ import CompanyList from "@/components/custom-ui/CompanyList";
 
 const HomePage = () => {
   const [user, setUser] = useState<UserWithRelations | null>(null);
-  const [activeTab, setActiveTab] = useState<"students" | "offers" | "companies">("students");
+  const [activeTab, setActiveTab] = useState<"students" | "offers" | "companies">("offers");
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
