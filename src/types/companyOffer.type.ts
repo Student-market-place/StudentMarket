@@ -1,11 +1,11 @@
 import { Company, EnumStatusTYpe, Prisma } from "@prisma/client";
 
-enum Type {
+export enum Type {
   STAGE = "Stage",
   ALTERNANCE = "Alternance",
 }
 
-enum Status {
+export enum Status {
   OPEN = "Open",
   CLOSED = "Closed",
 }
@@ -22,6 +22,7 @@ export interface CompanyOffer {
   updatedAt: Date;
   deletedAt: Date;
   skills: string[];
+  studentApplies: string[];
 }
 
 export interface GetAllParams {
@@ -29,11 +30,13 @@ export interface GetAllParams {
   status?: Status;
   type?: EnumStatusTYpe;
   skills?: string[];
+  studentApplies?: string[];
 }
 
 export type CompanyOfferWithRelation = Prisma.Company_offerGetPayload<{
   include: {
     company: true;
     skills: true;
+    studentApplies: true;
   };
 }>;

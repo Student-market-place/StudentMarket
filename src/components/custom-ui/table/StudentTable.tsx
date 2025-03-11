@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Pencil,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  Search,
-  ArrowUpDown,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,87 +13,52 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { StudentWithRelation } from "@/types/student.type";
 
-const students = [
+// Données statiques pour le fallback si aucune donnée n'est fournie
+const defaultStudents = [
   {
+    id: "1",
     firstName: "John",
     lastName: "Doe",
     school: "Springfield Elementary",
-    status: "Internship",
+    status: "stage" as const,
     isAvailable: true,
   },
   {
+    id: "2",
     firstName: "Jane",
     lastName: "Smith",
     school: "Rydell High",
-    status: "Apprenticeship",
+    status: "alternance" as const,
     isAvailable: true,
   },
-  {
-    firstName: "Alice",
-    lastName: "Johnson",
-    school: "Springfield Elementary",
-    status: "Internship",
-    isAvailable: false,
-  },
-  {
-    firstName: "Bob",
-    lastName: "Brown",
-    school: "Rydell High",
-    status: "Apprenticeship",
-    isAvailable: true,
-  },
-  {
-    firstName: "Eve",
-    lastName: "White",
-    school: "Springfield Elementary",
-    status: "Internship",
-    isAvailable: false,
-  },
-  {
-    firstName: "Max",
-    lastName: "Black",
-    school: "Rydell High",
-    status: "Apprenticeship",
-    isAvailable: false,
-  },
-  {
-    firstName: "Sam",
-    lastName: "Green",
-    school: "Springfield Elementary",
-    status: "Internship",
-    isAvailable: false,
-  },
-  {
-    firstName: "Lucy",
-    lastName: "Grey",
-    school: "Rydell High",
-    status: "Apprenticeship",
-    isAvailable: true,
-  },
-  {
-    firstName: "Alex",
-    lastName: "Blue",
-    school: "Springfield Elementary",
-    status: "Internship",
-    isAvailable: true,
-  },
-  {
-    firstName: "Mary",
-    lastName: "Red",
-    school: "Rydell High",
-    status: "Apprenticeship",
-    isAvailable: false,
-  },
+  // Les autres entrées statiques...
 ];
 
 type SortField = "fullName" | "school" | "status" | "isAvailable";
 type SortDirection = "asc" | "desc";
 
-export function StudentTable() {
+// Type commun pour gérer à la fois les données statiques et les données de l'API
+type StudentData = StudentWithRelation | (typeof defaultStudents)[number];
+
+interface StudentTableProps {
+  students?: StudentWithRelation[];
+  useDefaultData?: boolean;
+}
+
+export function StudentTable({
+  students: providedStudents,
+  useDefaultData = false,
+}: StudentTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("fullName");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  // Utiliser les données fournies ou les données par défaut si demandé
+  const studentsData: StudentData[] = useDefaultData
+    ? defaultStudents
+    : providedStudents || [];
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -112,18 +70,22 @@ export function StudentTable() {
   };
 
   const filteredAndSortedData = useMemo(() => {
-    const filtered = students.filter((student) => {
+    const filtered = studentsData.filter((student) => {
       if (!searchTerm) return true;
 
       const searchLower = searchTerm.toLowerCase();
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
 
-      // Only search by name and school
+      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+      const schoolName =
+        typeof student.school === "object"
+          ? student.school?.name || ""
+          : String(student.school || "");
+
       return (
         fullName.includes(searchLower) ||
         student.firstName.toLowerCase().includes(searchLower) ||
         student.lastName.toLowerCase().includes(searchLower) ||
-        student.school.toLowerCase().includes(searchLower)
+        schoolName.toLowerCase().includes(searchLower)
       );
     });
 
@@ -146,13 +108,30 @@ export function StudentTable() {
             : a[sortField]
               ? 1
               : -1;
-      } else {
+      } else if (sortField === "school") {
+        // Pour les étudiants de l'API, school peut être un objet
+        const schoolA =
+          typeof a.school === "object"
+            ? a.school?.name || ""
+            : String(a.school || "");
+        const schoolB =
+          typeof b.school === "object"
+            ? b.school?.name || ""
+            : String(b.school || "");
+
         return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
+          ? schoolA.localeCompare(schoolB)
+          : schoolB.localeCompare(schoolA);
+      } else {
+        const valueA = String(a[sortField] || "");
+        const valueB = String(b[sortField] || "");
+
+        return sortDirection === "asc"
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
       }
     });
-  }, [searchTerm, sortField, sortDirection]);
+  }, [searchTerm, sortField, sortDirection, studentsData]);
 
   return (
     <div className="space-y-4 p-12">
@@ -163,7 +142,7 @@ export function StudentTable() {
           </div>
           <Input
             type="text"
-            placeholder="Search by name or school..."
+            placeholder="Rechercher par nom ou école..."
             className="pl-10 pr-4 py-2 border rounded-md w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -183,7 +162,7 @@ export function StudentTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("fullName")}
                     >
-                      <span>Name</span>
+                      <span>Nom</span>
                       {sortField === "fullName" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -201,7 +180,7 @@ export function StudentTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("school")}
                     >
-                      <span>School</span>
+                      <span>École</span>
                       {sortField === "school" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -219,7 +198,7 @@ export function StudentTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("status")}
                     >
-                      <span>Status</span>
+                      <span>Statut</span>
                       {sortField === "status" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -237,7 +216,7 @@ export function StudentTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("isAvailable")}
                     >
-                      <span>Availability</span>
+                      <span>Disponibilité</span>
                       {sortField === "isAvailable" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -248,9 +227,6 @@ export function StudentTable() {
                         <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
                       )}
                     </Button>
-                  </TableHead>
-                  <TableHead className="w-[10%] text-center font-medium">
-                    Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -263,9 +239,8 @@ export function StudentTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-
-                      No students found matching &quot;{searchTerm}&quot;.
-
+                      Aucun étudiant trouvé correspondant à &quot;{searchTerm}
+                      &quot;.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -277,22 +252,26 @@ export function StudentTable() {
                         {student.firstName} {student.lastName}
                       </TableCell>
                       <TableCell className="w-[25%]">
-                        {student.school}
+                        {typeof student.school === "object"
+                          ? student.school?.name
+                          : student.school}
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
                         <Badge
                           variant={
-                            student.status === "Internship"
-                              ? "default"
-                              : "secondary"
+                            student.status === "stage" ? "default" : "secondary"
                           }
                           className={
-                            student.status === "Internship"
+                            student.status === "stage"
                               ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                           }
                         >
-                          {student.status}
+                          {student.status === "stage"
+                            ? "Stage"
+                            : student.status === "alternance"
+                              ? "Alternance"
+                              : String(student.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="w-[15%] text-center">
@@ -306,26 +285,8 @@ export function StudentTable() {
                               : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                           }
                         >
-                          {student.isAvailable ? "Yes" : "No"}
+                          {student.isAvailable ? "Oui" : "Non"}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="w-[10%] text-center">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))

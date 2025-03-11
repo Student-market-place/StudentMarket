@@ -7,11 +7,9 @@ async function fetchReviews(
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/review`;
 
-
   const queryObject: Record<string, number> = {};
   if (params.rating !== undefined) {
     queryObject.status = params.rating;
-
   }
 
   const response = await axios.get(url, { params: queryObject });
@@ -35,10 +33,10 @@ async function fetchReviewsByStudent(
   return response.data;
 }
 
-async function postReview(): Promise<Review> {
+async function postReview(reviewData: Partial<Review>): Promise<Review> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   const url = `${baseUrl}/api/review`;
-  const response = await axios.get(url);
+  const response = await axios.post(url, reviewData);
   return response.data;
 }
 

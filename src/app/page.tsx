@@ -2,8 +2,6 @@ import { Button } from "@/components/ui/button";
 
 import Image from "next/image";
 
-import Link from "next/link";
-
 export default function Home() {
   return (
     <div className="flex flex-col gap-30 w-full">
@@ -94,7 +92,8 @@ export default function Home() {
               détaillés, où vous pouvez évaluer leurs compétences, leur
               expérience et leurs projets réalisés. Gérez les candidatures en
               toute simplicité, consultez les profils des étudiants qui
-              postulent et suivez facilement l&apos;évolution de vos recrutements.
+              postulent et suivez facilement l&apos;évolution de vos
+              recrutements.
               <br /> Student Market vous permet de gagner en efficacité et de
               trouver rapidement les talents qui feront la différence dans vos
               projets
@@ -129,10 +128,6 @@ export default function Home() {
             height={300}
           />
         </div>
-      </div>
-      <div className="flex justify-center gap-10">
-        <Link href="/privacy-policy">Politique de confidentialité</Link>
-        <Link href="/terms-of-use">Conditions d&apos;utilisations</Link>
       </div>
     </div>
   );
