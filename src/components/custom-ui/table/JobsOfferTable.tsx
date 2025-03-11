@@ -20,12 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CompanyOffer,
-  CompanyOfferWithRelation,
-} from "@/types/companyOffer.type";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
 import CompanyOfferService from "@/services/companyOffer.service";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface JobsOfferTableProps {
   jobOffers: CompanyOfferWithRelation[];
@@ -48,8 +45,7 @@ export const JobsOfferTable = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  // État calculé pour le statut des offres
-  const [statusSort, setStatusSort] = useState<"asc" | "desc">("asc");
+  const [statusSort] = useState<"asc" | "desc">("asc");
 
   const queryClient = useQueryClient();
 
@@ -62,11 +58,6 @@ export const JobsOfferTable = ({
     }
   };
 
-  // Fonction spéciale pour gérer le tri par statut (qui est calculé, pas stocké)
-  const handleStatusSort = () => {
-    setStatusSort(statusSort === "asc" ? "desc" : "asc");
-  };
-
   const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -76,12 +67,10 @@ export const JobsOfferTable = ({
     }).format(date);
   };
 
-  // Determine job status based on dates
   const getJobStatus = (job: CompanyOfferWithRelation) => {
     const now = new Date();
     const startDate = new Date(job.startDate);
 
-    // If start date is in the future and not deleted, job is open
     if (startDate > now && !job.deletedAt) {
       return "Open";
     } else {
@@ -98,7 +87,6 @@ export const JobsOfferTable = ({
 
     let sorted = [...filtered];
 
-    // Tri en fonction du champ sélectionné
     if (sortField === "startDate" || sortField === "createdAt") {
       sorted = sorted.sort((a, b) => {
         const dateA = new Date(a[sortField]);
@@ -128,7 +116,6 @@ export const JobsOfferTable = ({
       });
     }
 
-    // Si on trie par statut, on applique le tri après (car c'est une propriété calculée)
     if (sortField === "status") {
       sorted = sorted.sort((a, b) => {
         const statusA = getJobStatus(a);
@@ -310,7 +297,7 @@ export const JobsOfferTable = ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAndSortedData.map((job, index) => {
+                  filteredAndSortedData.map((job) => {
                     const status = getJobStatus(job);
                     return (
                       <TableRow key={job.id}>
