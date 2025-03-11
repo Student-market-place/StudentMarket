@@ -4,7 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const company = await prisma.company.findMany();
+  const company = await prisma.company.findMany({
+    include: {
+      profilePicture: true,
+      user: true,
+    },
+  });
   return NextResponse.json(company, { status: 200 });
 }
 

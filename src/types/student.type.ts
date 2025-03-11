@@ -1,11 +1,4 @@
-import {
-  User,
-  School,
-  UploadFile,
-  Skill,
-  Prisma,
-  EnumStatusTYpe,
-} from "@prisma/client";
+import { User, School, UploadFile, Skill, Prisma } from "@prisma/client";
 
 enum Type {
   STAGIAIRE = "stage",
@@ -31,10 +24,9 @@ export interface Student {
 
 export interface GetAllParams {
   isAvailable?: boolean;
-  status?: EnumStatusTYpe;
+  status?: string;
   skills?: string[];
-  studentHistories?: string[];
-  CV?: string[];
+  userId?: string;
 }
 
 export type StudentWithRelation = Prisma.StudentGetPayload<{

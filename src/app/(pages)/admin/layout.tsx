@@ -1,5 +1,3 @@
-import NavBar from "@/components/custom-ui/NavBar";
-
 export default function PublicLayout({
   children,
 }: Readonly<{
@@ -7,7 +5,6 @@ export default function PublicLayout({
 }>) {
   return (
     <div>
-      <NavBar menu={"Dashboard"} />
       {children}
     </div>
   );

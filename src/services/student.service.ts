@@ -24,6 +24,9 @@ async function fetchStudents(
     // Axios va sérialiser le tableau en répétant le paramètre dans l'URL
     queryObject.skills = params.skills;
   }
+  if (params.userId) {
+    queryObject.userId = [params.userId];
+  }
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;
