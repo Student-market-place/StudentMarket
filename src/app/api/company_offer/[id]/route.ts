@@ -11,6 +11,10 @@ export async function GET(req: NextRequest, { params }: IParams) {
       where: {
         id: id,
       },
+      include: {
+        company: true,
+        skills: true,
+      }
     });
 
     if (!company_offer) {

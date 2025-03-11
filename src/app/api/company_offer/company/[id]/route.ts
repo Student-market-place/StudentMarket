@@ -8,20 +8,20 @@ export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
 
   try {
-    const reviews = await prisma.review.findMany({
+    const company_offers = await prisma.company_offer.findMany({
       where: {
-        studentId: id,
+        companyId: id,
       },
       include: {
         company: true,
-        student: true,
+        skills: true,
       },
       orderBy: {
         createdAt: "desc",
       },
     });
 
-    return NextResponse.json(reviews, { status: 200 });
+    return NextResponse.json(company_offers, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
