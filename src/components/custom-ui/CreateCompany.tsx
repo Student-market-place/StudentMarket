@@ -116,7 +116,7 @@ export function CreateCompany() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l'entreprise</FormLabel>
+                  <FormLabel>Nom de l&apos;entreprise</FormLabel>
                   <FormControl>
                     <Input placeholder="Nom de l'entreprise" {...field} />
                   </FormControl>
@@ -133,7 +133,7 @@ export function CreateCompany() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email de l'entreprise</FormLabel>
+                  <FormLabel>Email de l&apos;entreprise</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
