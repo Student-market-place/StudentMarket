@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,32 +8,41 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Pencil } from "lucide-react";
+import { CompanyWithRelation } from "@/types/company.type";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Switch } from "../ui/switch";
-import SchoolService from "@/services/school.service";
+import { useState } from "react";
+import CompanyService from "@/services/company.service";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { Textarea } from "../ui/textarea";
+
+interface UpdateCompanyProps {
+  id: string;
+  company: CompanyWithRelation;
+}
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Le nom doit contenir au moins 2 caractères.",
   }),
-  domainName: z.string().min(2, {
-    message: "Le domaine doit contenir au moins 2 caractères.",
+  description: z.string().min(1, {
+    message: "La description est requise.",
   }),
-  email: z.string().email({
-    message: "L'email doit être valide.",
-  }),
-  isActive: z.boolean().optional(),
+  email: z
+    .string()
+    .email({
+      message: "L'email doit être valide.",
+    })
+    .optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export function CreateSchool() {
+export function UpdateCompany({ company }: UpdateCompanyProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -43,10 +50,9 @@ export function CreateSchool() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      domainName: "",
-      isActive: false,
+      name: company.name,
+      email: company.user.email || "",
+      description: company.description,
     },
   });
 
@@ -55,18 +61,16 @@ export function CreateSchool() {
       setIsSubmitting(true);
       const dataToSubmit = {
         name: values.name,
-        domainName: values.domainName,
-        email: values.email,
-        isActive: values.isActive ?? false,
+        description: values.description,
+        ...(values.email && { email: values.email }),
       };
-      await SchoolService.postSchool(dataToSubmit);
-      await queryClient.invalidateQueries({ queryKey: ["schools"] });
-      toast.success("École créée avec succès");
+      await CompanyService.putCompany(company.id, dataToSubmit);
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast.success("Entreprise mise à jour avec succès");
       setOpen(false);
-      form.reset();
     } catch (error) {
-      console.error("Erreur lors de la création:", error);
-      toast.error("Erreur lors de la création de l'école");
+      console.error("Erreur lors de la mise à jour:", error);
+      toast.error("Erreur lors de la mise à jour de l'entreprise");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,13 +79,17 @@ export function CreateSchool() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Ajouter une école</Button>
+        <Button variant="ghost">
+          <Pencil className="h-4 w-4" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Ajouter une école</DialogTitle>
+          <DialogTitle>
+            Mise à jour de l&apos;entreprise {company.name}
+          </DialogTitle>
           <DialogDescription>
-            Remplissez tous les champs pour ajouter une nouvelle école
+            Remplissez tous les champs pour mettre à jour l&apos;entreprise
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -94,30 +102,13 @@ export function CreateSchool() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l'école</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom de l'école" {...field} />
+                    <Input placeholder="Nom de l'entreprise" {...field} />
                   </FormControl>
                   {form.formState.errors.name && (
                     <p className="text-sm text-red-500">
                       {form.formState.errors.name.message}
-                    </p>
-                  )}
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="domainName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Domaine</FormLabel>
-                  <FormControl>
-                    <Input placeholder="example.com" {...field} />
-                  </FormControl>
-                  {form.formState.errors.domainName && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.domainName.message}
                     </p>
                   )}
                 </FormItem>
@@ -130,7 +121,11 @@ export function CreateSchool() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="contact@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="contact@entreprise.com"
+                      {...field}
+                    />
                   </FormControl>
                   {form.formState.errors.email && (
                     <p className="text-sm text-red-500">
@@ -142,21 +137,30 @@ export function CreateSchool() {
             />
             <FormField
               control={form.control}
-              name="isActive"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Statut</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+                    <Textarea
+                      placeholder="Description de l'entreprise"
+                      {...field}
                     />
                   </FormControl>
+                  {form.formState.errors.description && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.description.message}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Création..." : "Créer"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
+              {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
             </Button>
           </form>
         </Form>
@@ -165,4 +169,4 @@ export function CreateSchool() {
   );
 }
 
-export default CreateSchool;
+export default UpdateCompany;
