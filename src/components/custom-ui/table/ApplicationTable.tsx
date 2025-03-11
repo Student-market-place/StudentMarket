@@ -20,9 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import StudentApplyService, {
-  fetchStudentsApply,
-} from "@/services/studentApply.service";
+import { fetchStudentApply } from "@/services/studentApply.service";
 import axios from "axios";
 import { StudentApply } from "@/types/studentApply.type";
 import { CompanyOffer } from "@/types/companyOffer.type";
@@ -72,14 +70,18 @@ const applicationsFix = [
   },
 ];
 
+interface ApplicationTableProps {
+  studentId: string;
+}
+
 type SortField = "title" | "company" | "type" | "startDate" | "endDate";
 type SortDirection = "asc" | "desc";
 
-export function ApplicationTable() {
+export function ApplicationTable({ studentId }: ApplicationTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("endDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [applications, setApplications] = useState<StudentApply[]>([]);
+  const [application, setApplication] = useState<StudentApply[]>([]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -93,18 +95,18 @@ export function ApplicationTable() {
   useEffect(() => {
     async function loadApplications() {
       try {
-        const data = await fetchStudentsApply();
+        const response = await axios.get(`/api/student/${studentId}/apply`);
+        const data = response.data;
         console.log("Applications data:", data);
 
-        // Just set applications data without trying to fetch additional student info
-        setApplications(data);
+        setApplication(data);
       } catch (err) {
         console.error("Failed to fetch applications", err);
       }
     }
 
     loadApplications();
-  }, []);
+  }, [studentId]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Ongoing";
@@ -118,7 +120,7 @@ export function ApplicationTable() {
   };
 
   const filteredAndSortedData = useMemo(() => {
-    const filtered = applications.filter((application) => {
+    const filtered = application.filter((application) => {
       if (!searchTerm) return true;
 
       const searchLower = searchTerm.toLowerCase();
@@ -152,7 +154,7 @@ export function ApplicationTable() {
         }
       }
     });
-  }, [searchTerm, sortField, sortDirection, applications]);
+  }, [searchTerm, sortField, sortDirection, application]);
 
   return (
     <div className="space-y-4 p-12">
