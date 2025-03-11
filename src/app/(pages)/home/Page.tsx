@@ -71,18 +71,6 @@ const HomePage = () => {
     loadUser();
   }, [isClient]); // Dépendance à isClient pour s'assurer que le code ne s'exécute que côté client
 
-  // Fonction de test pour charger l'utilisateur directement avec un ID
-  // const testLoadUser = async () => {
-  //   try {
-  //     console.log("🧪 Test de chargement avec ID spécifique");
-  //     const testId = "cm82stewk00007kxklv3jtctd";
-  //     const userData = await UserService.fetchUserById(testId);
-  //     console.log("✅ Test utilisateur chargé:", userData);
-  //     setUser(userData);
-  //   } catch (error) {
-  //     console.error("❌ Erreur test:", error);
-  //   }
-  // };
 
   const handleActive = (tab: "students" | "offers" | "companies") => {
     setActiveTab(tab);

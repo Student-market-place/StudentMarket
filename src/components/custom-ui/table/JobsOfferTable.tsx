@@ -27,6 +27,8 @@ import { useQueryClient } from "@tanstack/react-query";
 interface JobsOfferTableProps {
   jobOffers: CompanyOfferWithRelation[];
   onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onNew?: () => void;
 }
 
 type SortField =
@@ -41,6 +43,8 @@ type SortDirection = "asc" | "desc";
 export const JobsOfferTable = ({
   jobOffers,
   onDelete,
+  onEdit,
+  onNew,
 }: JobsOfferTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -155,7 +159,7 @@ export const JobsOfferTable = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="default" className="cursor-pointer">
+        <Button variant="default" className="cursor-pointer" onClick={onNew}>
           New
         </Button>
       </div>
@@ -349,6 +353,7 @@ export const JobsOfferTable = ({
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 cursor-pointer"
+                              onClick={() => onEdit?.(job.id)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>

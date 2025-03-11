@@ -130,9 +130,9 @@ function NavBar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   {user.role === "company" && (
-                    <Link href={`/${user.role}/${user.company?.id}`}>
-                      Mon Profil
-                    </Link>
+                      <Link href={`/${user.role}/${user.company?.id}`}>
+                        Mon Profil
+                      </Link>
                   )}
                   {user.role === "student" && (
                     <Link href={`/${user.role}/${user.student?.id}`}>
@@ -145,6 +145,25 @@ function NavBar() {
                     </Link>
                   )}
                 </DropdownMenuItem>
+                {user.role === "company" && (
+                  <>  
+                    <DropdownMenuItem>
+                      <Link href={`/${user.role}/${user.company?.id}/offers`}>
+                        Mes offres
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href={`/${user.role}/${user.company?.id}/reviews`}>
+                        Mes évaluations
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href={`/${user.role}/${user.company?.id}/settings`}>
+                        Paramètres
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   Déconnexion
                 </DropdownMenuItem>

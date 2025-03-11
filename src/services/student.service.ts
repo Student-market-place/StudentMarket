@@ -39,6 +39,18 @@ async function fetchStudentById(id: string): Promise<StudentWithRelation> {
   return response.data;
 }
 
+async function fetchStudentApplications(id: string) {
+  try {
+    // Importer dynamiquement le service StudentApplyService
+    const { default: StudentApplyService } = await import('./studentApply.service');
+    // Utiliser la méthode fetchStudentApplies de ce service
+    return await StudentApplyService.fetchStudentApplies(id);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des candidatures:", error);
+    throw error;
+  }
+}
+
 interface UpdateStudentData {
   firstName?: string;
   lastName?: string;
@@ -75,6 +87,7 @@ const StudentService = {
   fetchStudentById,
   updateStudent,
   createStudent,
+  fetchStudentApplications,
 };
 
 export default StudentService;

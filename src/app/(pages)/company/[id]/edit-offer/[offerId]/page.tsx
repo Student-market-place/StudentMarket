@@ -34,7 +34,7 @@ interface Option {
   value: string;
 }
 
-interface CreateOfferFormData {
+interface EditOfferFormData {
   title: string;
   description: string;
   type: "Stage" | "Alternance";
@@ -43,8 +43,8 @@ interface CreateOfferFormData {
   skills: string[];
 }
 
-const CreateOfferPage = () => {
-  const { id: companyId } = useParams() as { id: string };
+const EditOfferPage = () => {
+  const { id: companyId, offerId } = useParams() as { id: string; offerId: string };
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,28 +53,61 @@ const CreateOfferPage = () => {
   const [newSkillName, setNewSkillName] = useState("");
   const [isCreatingSkill, setIsCreatingSkill] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm<CreateOfferFormData>({
-    defaultValues: {
-      title: "",
-      description: "",
-      type: "Stage",
-      startDate: format(new Date(), "yyyy-MM-dd"),
-      expectedSkills: "",
-      skills: [],
-    },
-  });
+    reset,
+  } = useForm<EditOfferFormData>();
 
   // Récupérer toutes les compétences disponibles
   const { data: skills = [] } = useQuery({
     queryKey: ["skills"],
     queryFn: () => SkillService.fetchSkills(),
   });
+
+  // Récupérer les détails de l'offre
+  const { data: offer, isLoading: isLoadingOffer } = useQuery({
+    queryKey: ["company_offer", offerId],
+    queryFn: () => CompanyOfferService.fetchCompanyOffer(offerId),
+  });
+
+  // Effet pour pré-remplir le formulaire lorsque les données sont chargées
+  useEffect(() => {
+    if (offer && skills.length > 0) {
+      // Pré-remplir le formulaire avec les données existantes
+      reset({
+        title: offer.title,
+        description: offer.description,
+        type: offer.type === "stage" ? "Stage" : "Alternance",
+        startDate: format(new Date(offer.startDate), "yyyy-MM-dd"),
+        skills: offer.skills ? offer.skills.map((skill: any) => skill.id || skill) : [],
+      });
+
+      // Pré-sélectionner les compétences
+      if (offer.skills) {
+        const skillOptions = offer.skills
+          .map((skill: any) => {
+            // Si skills est un tableau d'objets
+            const skillId = skill.id || skill;
+            const skillObj = typeof skill === 'object' ? skill : skills.find((s: Skill) => s.id === skillId);
+            
+            return skillObj ? { 
+              label: typeof skillObj === 'object' ? skillObj.name : skillObj, 
+              value: typeof skillObj === 'object' ? skillObj.id : skillId 
+            } : null;
+          })
+          .filter((s: any): s is Option => s !== null);
+
+        setSelectedSkills(skillOptions);
+      }
+      
+      setIsLoading(false);
+    }
+  }, [offer, skills, reset]);
 
   // S'assurer que le code s'exécute seulement côté client
   useEffect(() => {
@@ -96,7 +129,7 @@ const CreateOfferPage = () => {
           // Code de vérification du propriétaire si nécessaire
         } else {
           console.log("⚠️ Aucun utilisateur connecté");
-          toast.error("Vous devez être connecté pour créer une offre.");
+          toast.error("Vous devez être connecté pour modifier une offre.");
           router.push(`/company/${companyId}`);
         }
       } catch (error) {
@@ -189,7 +222,7 @@ const CreateOfferPage = () => {
         name: newSkillName.trim(),
         createdAt: new Date(),
         modifiedAt: new Date(),
-        deletedAt: null, // Nécessaire pour la compatibilité des types
+        deletedAt: null,
       });
 
       // Mettre à jour l'état local
@@ -215,39 +248,38 @@ const CreateOfferPage = () => {
     }
   };
 
-  const onSubmit = async (data: CreateOfferFormData) => {
+  const onSubmit = async (data: EditOfferFormData) => {
     if (!userId) {
-      toast.error("Vous devez être connecté pour créer une offre.");
+      toast.error("Vous devez être connecté pour modifier une offre.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: CompanyOffer = {
-        id: "", // sera généré par l'API
+      const offerData: Partial<CompanyOffer> = {
+        id: offerId,
         companyId: companyId,
         title: data.title,
         description: data.description,
         type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
         startDate: new Date(data.startDate),
-        status: Status.OPEN,
         skills: data.skills,
-        studentApplies: [],
-        createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: new Date(),
       };
 
-      await CompanyOfferService.postCompanyOffer(offerData);
+      await CompanyOfferService.putCompanyOffer(offerData as CompanyOffer);
 
-      toast.success("Votre offre a été créée avec succès.");
+      toast.success("Votre offre a été modifiée avec succès.");
 
-      // Rediriger vers la page de l'entreprise
-      router.push(`/company/${companyId}`);
+      // Invalider les requêtes pour forcer le rechargement des données
+      queryClient.invalidateQueries({ queryKey: ["company_offer"] });
+
+      // Rediriger vers la page des offres
+      router.push(`/company/${companyId}/offers`);
     } catch (error) {
-      console.error("Erreur lors de la création de l'offre:", error);
-      toast.error("Une erreur est survenue lors de la création de l'offre.");
+      console.error("Erreur lors de la modification de l'offre:", error);
+      toast.error("Une erreur est survenue lors de la modification de l'offre.");
     } finally {
       setIsSubmitting(false);
     }
@@ -261,7 +293,23 @@ const CreateOfferPage = () => {
           <CardHeader>
             <CardTitle>Accès refusé</CardTitle>
             <CardDescription>
-              Vous devez être connecté pour créer une offre.
+              Vous devez être connecté pour modifier une offre.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  // Afficher un état de chargement
+  if (isLoading || isLoadingOffer) {
+    return (
+      <div className="container py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Chargement...</CardTitle>
+            <CardDescription>
+              Veuillez patienter pendant le chargement des données.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -273,9 +321,9 @@ const CreateOfferPage = () => {
     <div className="container py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Créer une nouvelle offre</CardTitle>
+          <CardTitle>Modifier l'offre</CardTitle>
           <CardDescription>
-            Remplissez le formulaire pour créer une nouvelle offre d&aposemploi.
+            Modifiez les informations de votre offre d&aposemploi.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -318,7 +366,7 @@ const CreateOfferPage = () => {
                   onValueChange={(value) =>
                     setValue("type", value as "Stage" | "Alternance")
                   }
-                  defaultValue="Stage"
+                  defaultValue={offer && offer.type ? (offer.type === "stage" ? "Stage" : "Alternance") : "Stage"}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un type" />
@@ -426,9 +474,19 @@ const CreateOfferPage = () => {
               )}
             </div>
 
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Création en cours..." : "Créer l'offre"}
-            </Button>
+            <div className="flex gap-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => router.push(`/company/${companyId}/offers`)}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting ? "Modification en cours..." : "Enregistrer les modifications"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -436,4 +494,4 @@ const CreateOfferPage = () => {
   );
 };
 
-export default CreateOfferPage;
+export default EditOfferPage; 
