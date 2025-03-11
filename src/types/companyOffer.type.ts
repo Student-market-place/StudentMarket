@@ -22,6 +22,7 @@ export interface CompanyOffer {
   updatedAt: Date;
   deletedAt: Date;
   skills: string[];
+  studentApplies: string[];
 }
 
 export interface GetAllParams {
@@ -29,11 +30,13 @@ export interface GetAllParams {
   status?: Status;
   type?: EnumStatusTYpe;
   skills?: string[];
+  studentApplies?: string[];
 }
 
 export type CompanyOfferWithRelation = Prisma.Company_offerGetPayload<{
   include: {
     company: true;
     skills: true;
+    studentApplies: true;
   };
 }>;

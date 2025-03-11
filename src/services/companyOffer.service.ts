@@ -26,8 +26,13 @@ async function fetchCompanyOffers(
     queryObject.type = [params.type];
   }
 
-  const response = await axios.get(url, { params: queryObject });
-  return response.data;
+  if (params.studentApplies && params.studentApplies.length > 0) {
+    queryObject.studentApplies = params.studentApplies;
+
+    const response = await axios.get(url, { params: queryObject });
+    return response.data;
+  }
+  return [];
 }
 
 async function fetchCompanyOffer(id: string): Promise<CompanyOffer> {

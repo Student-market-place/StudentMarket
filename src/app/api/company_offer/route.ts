@@ -9,11 +9,13 @@ export async function GET(req: NextRequest) {
     const typeParam = searchParams.get("type");
     const statusParam = searchParams.get("status");
     const skillsParams = searchParams.getAll("skills");
+    const studentAppliesParams = searchParams.getAll("studentApplies");
 
     const where: {
       type?: EnumStatusTYpe;
       status?: string;
       skills?: { some: { id: { in: string[] } } };
+      studentApplies?: { some: { id: { in: string[] } } };
     } = {};
 
     if (typeParam) {
@@ -26,6 +28,10 @@ export async function GET(req: NextRequest) {
 
     if (skillsParams.length > 0) {
       where.skills = { some: { id: { in: skillsParams } } };
+    }
+
+    if (studentAppliesParams.length > 0) {
+      where.studentApplies = { some: { id: { in: studentAppliesParams } } };
     }
 
     const companyOffers = await prisma.company_offer.findMany({

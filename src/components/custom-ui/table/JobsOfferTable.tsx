@@ -20,103 +20,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import CompanyOfferService from "@/services/companyOffer.service";
 
-const jobOffers = [
-  {
-    title: "Software Developer",
-    type: "Internship",
-    startDate: "2022-06-01",
-    studentApplies: 3,
-    status: "Closed",
-    createdAt: "2022-05-15",
-  },
-  {
-    title: "Data Analyst",
-    type: "Apprenticeship",
-    startDate: "2022-09-15",
-    studentApplies: 1,
-    status: "Open",
-    createdAt: "2022-08-20",
-  },
-  {
-    title: "Cybersecurity Engineer",
-    type: "Internship",
-    startDate: "2023-01-10",
-    studentApplies: 5,
-    status: "Closed",
-    createdAt: "2022-12-01",
-  },
-  {
-    title: "Machine Learning Engineer",
-    type: "Internship",
-    startDate: "2023-06-01",
-    studentApplies: 2,
-    status: "Open",
-    createdAt: "2023-04-15",
-  },
-  {
-    title: "Cloud Engineer",
-    type: "Apprenticeship",
-    startDate: "2023-10-15",
-    studentApplies: 4,
-    status: "Closed",
-    createdAt: "2023-09-01",
-  },
-  {
-    title: "Frontend Developer",
-    type: "Internship",
-    startDate: "2024-01-05",
-    studentApplies: 6,
-    status: "Open",
-    createdAt: "2023-11-20",
-  },
-  {
-    title: "Backend Developer",
-    type: "Apprenticeship",
-    startDate: "2024-05-20",
-    studentApplies: 3,
-    status: "Closed",
-    createdAt: "2024-03-01",
-  },
-  {
-    title: "UI/UX Designer",
-    type: "Internship",
-    startDate: "2024-09-01",
-    studentApplies: 2,
-    status: "Open",
-    createdAt: "2024-07-10",
-  },
-  {
-    title: "Blockchain Developer",
-    type: "Apprenticeship",
-    startDate: "2024-12-10",
-    studentApplies: 1,
-    status: "Closed",
-    createdAt: "2024-10-01",
-  },
-  {
-    title: "DevOps Engineer",
-    type: "Internship",
-    startDate: "2025-03-01",
-    studentApplies: 5,
-    status: "Open",
-    createdAt: "2025-01-15",
-  },
-];
+interface JobsOfferTableProps {
+  jobOffers: CompanyOfferWithRelation[];
+}
 
 type SortField =
   | "title"
   | "type"
   | "startDate"
   | "studentApplies"
-  | "status"
-  | "createdAt";
+  | "createdAt"
+  | "status";
 type SortDirection = "asc" | "desc";
 
-export const JobsOfferTable = () => {
+export const JobsOfferTable = ({
+  jobOffers: initialJobOffers,
+}: JobsOfferTableProps) => {
+  const [jobOffers, setJobOffers] =
+    useState<CompanyOfferWithRelation[]>(initialJobOffers);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [statusSort, setStatusSort] = useState<"asc" | "desc">("asc");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -127,8 +67,11 @@ export const JobsOfferTable = () => {
     }
   };
 
-  // Format date to be more readable
-  const formatDate = (dateString: string) => {
+  const handleStatusSort = () => {
+    setStatusSort(statusSort === "asc" ? "desc" : "asc");
+  };
+
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
@@ -137,34 +80,123 @@ export const JobsOfferTable = () => {
     }).format(date);
   };
 
+  // Determine job status based on dates
+  const getJobStatus = (job: CompanyOfferWithRelation) => {
+    const now = new Date();
+    const startDate = new Date(job.startDate);
+
+    // If start date is in the future and not deleted, job is open
+    if (startDate > now && !job.deletedAt) {
+      return "Open";
+    } else {
+      return "Closed";
+    }
+  };
+
+  // Fonction pour ouvrir la boîte de dialogue de confirmation de suppression
+  const openDeleteDialog = (jobId: string) => {
+    setDeletingJobId(jobId);
+    setDeleteError(null);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Fonction pour fermer la boîte de dialogue
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setDeletingJobId(null);
+    setDeleteError(null);
+  };
+
+  // Fonction pour gérer la suppression d'une offre
+  // Fonction pour gérer la suppression d'une offre
+  const handleDeleteJobOffer = async () => {
+    if (!deletingJobId) return;
+
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+
+      // Find the full company offer object by ID
+      const offerToDelete = jobOffers.find(
+        (offer) => offer.id === deletingJobId
+      );
+
+      if (!offerToDelete) {
+        throw new Error("Job offer not found");
+      }
+
+      // Appel du service de suppression avec l'objet complet
+      await CompanyOfferService.deleteCompanyOffer(offerToDelete);
+
+      // Mise à jour locale de l'état sans refaire d'appel API
+      setJobOffers((prevOffers) =>
+        prevOffers.filter((offer) => offer.id !== deletingJobId)
+      );
+
+      closeDeleteDialog();
+    } catch (error) {
+      console.error("Error deleting job offer:", error);
+      setDeleteError(
+        error instanceof Error ? error.message : "Failed to delete job offer"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const filteredAndSortedData = useMemo(() => {
     const filtered = jobOffers.filter((job) => {
       if (!searchTerm) return true;
-
       const searchLower = searchTerm.toLowerCase();
-
       return job.title.toLowerCase().includes(searchLower);
     });
 
-    return [...filtered].sort((a, b) => {
-      if (sortField === "startDate" || sortField === "createdAt") {
+    let sorted = [...filtered];
+
+    // Tri en fonction du champ sélectionné
+    if (sortField === "startDate" || sortField === "createdAt") {
+      sorted = sorted.sort((a, b) => {
         const dateA = new Date(a[sortField]);
         const dateB = new Date(b[sortField]);
 
         return sortDirection === "asc"
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
-      } else if (sortField === "studentApplies") {
+      });
+    } else if (sortField === "studentApplies") {
+      sorted = sorted.sort((a, b) => {
+        const appliesA = a.studentApplies?.length || 0;
+        const appliesB = b.studentApplies?.length || 0;
+
         return sortDirection === "asc"
-          ? a[sortField] - b[sortField]
-          : b[sortField] - a[sortField];
-      } else {
+          ? appliesA - appliesB
+          : appliesB - appliesA;
+      });
+    } else if (sortField === "title" || sortField === "type") {
+      sorted = sorted.sort((a, b) => {
+        const valueA = String(a[sortField] || "");
+        const valueB = String(b[sortField] || "");
+
         return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
-      }
-    });
-  }, [searchTerm, sortField, sortDirection]);
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      });
+    }
+
+    // Si on trie par statut, on applique le tri après (car c'est une propriété calculée)
+    if (sortField === "status") {
+      sorted = sorted.sort((a, b) => {
+        const statusA = getJobStatus(a);
+        const statusB = getJobStatus(b);
+
+        return sortDirection === "asc"
+          ? statusA.localeCompare(statusB)
+          : statusB.localeCompare(statusA);
+      });
+    }
+
+    return sorted;
+  }, [jobOffers, searchTerm, sortField, sortDirection, statusSort]);
 
   return (
     <div className="space-y-4 p-12">
@@ -268,7 +300,12 @@ export const JobsOfferTable = () => {
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
-                      onClick={() => handleSort("status")}
+                      onClick={() => {
+                        setSortField("status");
+                        setSortDirection(
+                          sortDirection === "asc" ? "desc" : "asc"
+                        );
+                      }}
                     >
                       <span>Status</span>
                       {sortField === "status" ? (
@@ -314,80 +351,120 @@ export const JobsOfferTable = () => {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-
                       No job offers found matching &quot;{searchTerm}&quot;.
-
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAndSortedData.map((job, index) => (
-                    <TableRow key={`${job.title}-${job.createdAt}-${index}`}>
-                      <TableCell className="w-[25%] font-medium">
-                        {job.title}
-                      </TableCell>
-                      <TableCell className="w-[15%] text-center">
-                        <Badge
-                          variant={
-                            job.type === "Internship" ? "default" : "secondary"
-                          }
-                          className={
-                            job.type === "Internship"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                          }
-                        >
-                          {job.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="w-[15%] text-center">
-                        {formatDate(job.startDate)}
-                      </TableCell>
-                      <TableCell className="w-[10%] text-center">
-                        {job.studentApplies}
-                      </TableCell>
-                      <TableCell className="w-[10%] text-center">
-                        <Badge
-                          variant={
-                            job.status === "Open" ? "success" : "secondary"
-                          }
-                          className={
-                            job.status === "Open"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                          }
-                        >
-                          {job.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="w-[15%] text-center">
-                        {formatDate(job.createdAt)}
-                      </TableCell>
-                      <TableCell className="w-[10%] text-center">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer"
+                  filteredAndSortedData.map((job, index) => {
+                    const status = getJobStatus(job);
+                    return (
+                      <TableRow key={job.id}>
+                        <TableCell className="w-[25%] font-medium">
+                          {job.title}
+                        </TableCell>
+                        <TableCell className="w-[15%] text-center">
+                          <Badge
+                            variant={
+                              job.type === "alternance"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className={
+                              job.type === "alternance"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                            }
                           >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
+                            {job.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="w-[15%] text-center">
+                          {formatDate(job.startDate)}
+                        </TableCell>
+                        <TableCell className="w-[10%] text-center">
+                          {job.studentApplies?.length || 0}
+                        </TableCell>
+                        <TableCell className="w-[10%] text-center">
+                          <Badge
+                            variant={
+                              status === "Open" ? "success" : "secondary"
+                            }
+                            className={
+                              status === "Open"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            }
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            {status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="w-[15%] text-center">
+                          {formatDate(job.createdAt)}
+                        </TableCell>
+                        <TableCell className="w-[10%] text-center">
+                          <div className="flex justify-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 cursor-pointer"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
+                              onClick={() => openDeleteDialog(job.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
           </div>
         </div>
       </div>
+
+      {/* Boîte de dialogue de confirmation de suppression */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this job offer? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <div className="text-sm font-medium text-destructive mt-2">
+              {deleteError}
+            </div>
+          )}
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={closeDeleteDialog}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteJobOffer}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
