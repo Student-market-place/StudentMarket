@@ -74,6 +74,7 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     });
     return NextResponse.json(school, { status: 200 });
   } catch (error) {
+    console.error("Error updating school:", error);
     return NextResponse.json(
       { error: "Failed to update school" },
       { status: 500 }

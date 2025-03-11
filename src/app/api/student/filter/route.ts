@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    
+
     // Récupération des paramètres de filtrage
     const availability = searchParams.get("availability");
     const contractType = searchParams.get("contractType");
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const schoolId = searchParams.get("school");
 
     // Construction de la requête avec les filtres
-    const filters: any = {
+    const filters: Prisma.StudentWhereInput = {
       deletedAt: null,
     };
 
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Préparation de la requête de recherche
-    let query: any = {
+    const query: Prisma.StudentFindManyArgs = {
       where: filters,
       include: {
         user: true,
@@ -47,23 +47,23 @@ export async function GET(req: NextRequest) {
 
     // Si on filtre par compétences, utilisons la relation directe dans la requête
     if (skillsParam) {
-      const skillIds = skillsParam.split(',');
-      
+      const skillIds = skillsParam.split(",");
+
       if (skillIds.length === 1) {
         // Pour une seule compétence
         query.where.skills = {
           some: {
-            id: skillIds[0]
-          }
+            id: skillIds[0],
+          },
         };
       } else if (skillIds.length > 1) {
         // Pour plusieurs compétences, on utilise AND pour chaque compétence
-        query.where.AND = skillIds.map(skillId => ({
+        query.where.AND = skillIds.map((skillId) => ({
           skills: {
             some: {
-              id: skillId
-            }
-          }
+              id: skillId,
+            },
+          },
         }));
       }
     }
@@ -79,4 +79,4 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

@@ -26,9 +26,9 @@ import { StudentWithRelation } from "@/types/student.type";
 import { CompanyOfferWithRelation, Status } from "@/types/companyOffer.type";
 
 // Définir un type pour l'erreur
-type ErrorType = {
-  message: string;
-};
+// type ErrorType = {
+//   message: string;
+// };
 
 // Composant d'affichage du chargement
 const DashboardLoading = () => (

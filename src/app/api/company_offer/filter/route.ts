@@ -18,44 +18,32 @@ export async function GET(req: NextRequest) {
     const skillsParam = searchParams.get("skills");
 
     // Construction de la requête avec les filtres
-    const filters: Prisma.Company_offerWhereInput = {
+    const whereClause: Prisma.Company_offerWhereInput = {
       deletedAt: null,
     };
 
     // Filtre par statut d'offre
     if (offerStatus) {
-      filters.status = offerStatus as OfferStatus;
+      whereClause.status = offerStatus as OfferStatus;
     }
 
     // Filtre par type d'offre
     if (offerType) {
-      filters.type = offerType as EnumStatusTYpe;
+      whereClause.type = offerType as EnumStatusTYpe;
     }
 
-    // Si on filtre par compétence, ajoutons-le directement à la requête Prisma
-    let query: any = {
-      where: filters,
-      include: {
-        company: true,
-        skills: true,
-        studentApplies: true,
-      },
-    };
-
-    // Si on filtre par compétences, utilisons la relation directe dans la requête
+    // Si on filtre par compétences
     if (skillsParam) {
       const skillIds = skillsParam.split(",");
 
       if (skillIds.length === 1) {
-        // Pour une seule compétence
-        query.where.skills = {
+        whereClause.skills = {
           some: {
             id: skillIds[0],
           },
         };
       } else if (skillIds.length > 1) {
-        // Pour plusieurs compétences, on utilise AND pour chaque compétence
-        query.where.AND = skillIds.map((skillId) => ({
+        whereClause.AND = skillIds.map((skillId) => ({
           skills: {
             some: {
               id: skillId,
@@ -64,6 +52,15 @@ export async function GET(req: NextRequest) {
         }));
       }
     }
+
+    const query: Prisma.Company_offerFindManyArgs = {
+      where: whereClause,
+      include: {
+        company: true,
+        skills: true,
+        studentApplies: true,
+      },
+    };
 
     // Requête avec toutes les conditions
     const offers = await prisma.company_offer.findMany(query);
