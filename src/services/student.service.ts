@@ -65,9 +65,16 @@ async function updateStudent(
   data: UpdateStudentDto
 ): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student/${id}`;
+  console.log("URL de l'API:", url);
+  console.log("Données envoyées:", data);
 
-  const response = await axios.put(url, data);
-  return response.data;
+  try {
+    const response = await axios.put(url, data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur API:", error.response?.data);
+    throw error;
+  }
 }
 
 async function createStudent(
@@ -76,6 +83,13 @@ async function createStudent(
   const url = `${baseUrl}/api/student`;
 
   const response = await axios.post(url, data);
+  return response.data;
+}
+
+async function deleteStudent(id: string): Promise<StudentWithRelation> {
+  const url = `${baseUrl}/api/student/${id}`;
+
+  const response = await axios.delete(url);
   return response.data;
 }
 

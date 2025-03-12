@@ -1,13 +1,26 @@
 import { IParams } from "@/types/api.type";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma, EnumStatusTYpe } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { StudentResponseDto, UpdateStudentDto } from "@/types/dto/student.dto";
 
 const prisma = new PrismaClient();
 
+interface StudentUpdateData extends Omit<Prisma.StudentUpdateInput, "status"> {
+  firstName: string;
+  lastName: string;
+  status: EnumStatusTYpe;
+  description: string;
+  isAvailable: boolean;
+  user: { connect: { id: string } };
+  skills?: { set: { id: string }[] };
+  school: { connect: { id: string } };
+  CV?: { connect: { id: string } };
+  profilePicture?: { connect: { id: string } };
+}
+
 export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
-
+  console.log(req);
   try {
     const student = await prisma.student.findUnique({
       where: {

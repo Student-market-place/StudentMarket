@@ -110,7 +110,8 @@ export default function Home() {
               détaillés, où vous pouvez évaluer leurs compétences, leur
               expérience et leurs projets réalisés. Gérez les candidatures en
               toute simplicité, consultez les profils des étudiants qui
-              postulent et suivez facilement l&apos;évolution de vos recrutements.
+              postulent et suivez facilement l&apos;évolution de vos
+              recrutements.
               <br /> Student Market vous permet de gagner en efficacité et de
               trouver rapidement les talents qui feront la différence dans vos
               projets
@@ -143,15 +144,13 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <div className="md:w-2/5 flex justify-center">
-            <Image
-              src="/assets/card-job-offer.png"
-              className="w-full max-w-[300px] h-auto object-cover shadow-lg rounded-md"
-              alt="Exemple de tableau de bord école"
-              width={300}
-              height={300}
-            />
-          </div>
+          <Image
+            src="/assets/card-job-offer.png"
+            className="w-[300px] h-[300px] object-cover shadow-lg"
+            alt="Aperçu d'une offre"
+            width={300}
+            height={300}
+          />
         </div>
       </div>
       <div className="flex justify-center gap-10">

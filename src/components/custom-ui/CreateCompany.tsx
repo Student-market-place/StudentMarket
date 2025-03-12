@@ -1,6 +1,6 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,34 +8,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "../ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { useQueryClient } from "@tanstack/react-query";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Switch } from "../ui/switch";
-import SchoolService from "@/services/school.service";
+import CompanyService from "@/services/company.service";
 import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Le nom doit contenir au moins 2 caractères.",
   }),
-  domainName: z.string().min(2, {
-    message: "Le domaine doit contenir au moins 2 caractères.",
-  }),
   email: z.string().email({
     message: "L'email doit être valide.",
   }),
-  isActive: z.boolean().optional(),
+  description: z.string().min(1, {
+    message: "La description est requise.",
+  }),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export function CreateSchool() {
+export function CreateCompany() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -45,28 +42,53 @@ export function CreateSchool() {
     defaultValues: {
       name: "",
       email: "",
-      domainName: "",
-      isActive: false,
+      description: "",
     },
   });
 
   async function onSubmit(values: FormData) {
     try {
       setIsSubmitting(true);
-      const dataToSubmit = {
+
+      // 1. Créer l'utilisateur
+      const userResponse = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: values.email,
+          role: "company",
+        }),
+      });
+
+      if (!userResponse.ok) {
+        const errorData = await userResponse.json();
+        if (errorData.exists) {
+          toast.error("Un utilisateur avec cet email existe déjà");
+          return;
+        }
+        throw new Error("Erreur lors de la création de l'utilisateur");
+      }
+
+      const userData = await userResponse.json();
+
+      // 2. Créer l'entreprise avec l'ID de l'utilisateur
+      const companyData = {
         name: values.name,
-        domainName: values.domainName,
-        email: values.email,
-        isActive: values.isActive ?? false,
+        description: values.description,
+        userId: userData.id,
+        profilePicture: "default-company-profile.jpg",
       };
-      await SchoolService.postSchool(dataToSubmit);
-      await queryClient.invalidateQueries({ queryKey: ["schools"] });
-      toast.success("École créée avec succès");
+
+      await CompanyService.createCompany(companyData);
+      await queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast.success("Entreprise créée avec succès");
       setOpen(false);
       form.reset();
     } catch (error) {
       console.error("Erreur lors de la création:", error);
-      toast.error("Erreur lors de la création de l'école");
+      toast.error("Erreur lors de la création de l'entreprise");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,13 +97,13 @@ export function CreateSchool() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Ajouter une école</Button>
+        <Button variant="outline">Ajouter une entreprise</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Ajouter une école</DialogTitle>
+          <DialogTitle>Ajouter une entreprise</DialogTitle>
           <DialogDescription>
-            Remplissez tous les champs pour ajouter une nouvelle école
+            Remplissez tous les champs pour ajouter une nouvelle entreprise
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -94,9 +116,9 @@ export function CreateSchool() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l&apos;école</FormLabel>
+                  <FormLabel>Nom de l&apos;entreprise</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom de l'école" {...field} />
+                    <Input placeholder="Nom de l'entreprise" {...field} />
                   </FormControl>
                   {form.formState.errors.name && (
                     <p className="text-sm text-red-500">
@@ -108,29 +130,16 @@ export function CreateSchool() {
             />
             <FormField
               control={form.control}
-              name="domainName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Domaine</FormLabel>
-                  <FormControl>
-                    <Input placeholder="example.com" {...field} />
-                  </FormControl>
-                  {form.formState.errors.domainName && (
-                    <p className="text-sm text-red-500">
-                      {form.formState.errors.domainName.message}
-                    </p>
-                  )}
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email de l&apos;entreprise</FormLabel>
                   <FormControl>
-                    <Input placeholder="contact@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="contact@entreprise.com"
+                      {...field}
+                    />
                   </FormControl>
                   {form.formState.errors.email && (
                     <p className="text-sm text-red-500">
@@ -142,16 +151,21 @@ export function CreateSchool() {
             />
             <FormField
               control={form.control}
-              name="isActive"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Statut</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+                    <Textarea
+                      placeholder="Description de l'entreprise"
+                      {...field}
                     />
                   </FormControl>
+                  {form.formState.errors.description && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.description.message}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -164,5 +178,3 @@ export function CreateSchool() {
     </Dialog>
   );
 }
-
-export default CreateSchool;

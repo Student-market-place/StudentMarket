@@ -25,8 +25,8 @@ export interface StudentApplyWithRelations {
   createdAt: Date;
   modifiedAt: Date;
   deletedAt?: Date;
-  student?: any; // Type plus précis selon votre besoin
-  companyOffer?: any; // Type plus précis selon votre besoin
+  student?: StudentWithRelation; // Type plus précis selon votre besoin
+  companyOffer?: CompanyOfferWithRelation; // Type plus précis selon votre besoin
 }
 
 const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/student_apply`;

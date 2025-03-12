@@ -1,4 +1,5 @@
 "use client";
+import { AllStudentTable } from "@/components/custom-ui/table/AllStudentTable";
 import { CompanyTable } from "@/components/custom-ui/table/CompanyTable";
 import { SchoolTable } from "@/components/custom-ui/table/SchoolTable";
 import { StudentTable } from "@/components/custom-ui/table/StudentTable";
@@ -27,7 +28,7 @@ const DashboardAdminPage = () => {
 
       <CompanyTable />
 
-      <StudentTable />
+      <AllStudentTable />
     </div>
   );
 };

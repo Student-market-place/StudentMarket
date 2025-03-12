@@ -73,15 +73,12 @@ export async function POST(req: NextRequest) {
     const data = rawData as CreateCompanyDto;
 
     if (!data.userId) {
-      return NextResponse.json(
-        { error: "userId est requis" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "userId est requis" }, { status: 400 });
     }
 
     // Vérifier si l'utilisateur existe
     const user = await prisma.user.findUnique({
-      where: { id: data.userId }
+      where: { id: data.userId },
     });
 
     if (!user) {
@@ -91,15 +88,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Créer d'abord l'entreprise sans la photo de profil
+    // Vérifier si la photo de profil par défaut existe déjà
+    let defaultProfilePicture = await prisma.uploadFile.findFirst({
+      where: { url: "default-company-profile.jpg" },
+    });
+
+    // Si elle n'existe pas, la créer
+    if (!defaultProfilePicture) {
+      defaultProfilePicture = await prisma.uploadFile.create({
+        data: {
+          url: "default-company-profile.jpg",
+        },
+      });
+    }
+
+    // Créer l'entreprise avec la photo de profil par défaut
     const companyData: Prisma.CompanyCreateInput = {
       name: data.name,
       description: data.description,
       user: {
         connect: {
-          id: data.userId
-        }
-      }
+          id: data.userId,
+        },
+      },
+      profilePicture: {
+        connect: {
+          id: defaultProfilePicture.id,
+        },
+      },
     };
 
     try {
