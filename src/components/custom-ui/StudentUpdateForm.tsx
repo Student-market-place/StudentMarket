@@ -154,7 +154,7 @@ export default function StudentUpdateForm({
       setIsSubmitting(true);
       await StudentService.updateStudent(student.id, {
         ...values,
-        skillIds: selectedSkills,
+        skillsId: selectedSkills,
       });
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Profil mis à jour avec succès");
