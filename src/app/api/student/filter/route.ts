@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient, EnumStatusTYpe } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { StudentResponseDto, StudentSearchDto } from "@/types/dto/student.dto";
 
 const prisma = new PrismaClient();
 
@@ -13,29 +14,37 @@ export async function GET(req: NextRequest) {
     const skillsParam = searchParams.get("skills");
     const schoolId = searchParams.get("school");
 
+    // Construction du DTO de recherche
+    const searchDto: StudentSearchDto = {
+      isAvailable: availability ? availability === "true" : undefined,
+      status: contractType as EnumStatusTYpe || undefined,
+      schoolId: schoolId || undefined,
+      skills: skillsParam ? skillsParam.split(",") : undefined
+    };
+
     // Construction de la requête avec les filtres
     const whereClause: Prisma.StudentWhereInput = {
       deletedAt: null,
     };
 
     // Filtre par disponibilité
-    if (availability) {
-      whereClause.isAvailable = availability === "true";
+    if (typeof searchDto.isAvailable !== 'undefined') {
+      whereClause.isAvailable = searchDto.isAvailable;
     }
 
     // Filtre par type de contrat
-    if (contractType) {
-      whereClause.status = contractType as EnumStatusTYpe;
+    if (searchDto.status) {
+      whereClause.status = searchDto.status;
     }
 
     // Filtre par école
-    if (schoolId) {
-      whereClause.schoolId = schoolId;
+    if (searchDto.schoolId) {
+      whereClause.schoolId = searchDto.schoolId;
     }
 
     // Si on filtre par compétences
-    if (skillsParam) {
-      const skillIds = skillsParam.split(",");
+    if (searchDto.skills && searchDto.skills.length > 0) {
+      const skillIds = searchDto.skills;
 
       if (skillIds.length === 1) {
         whereClause.skills = {
@@ -65,10 +74,49 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    // Requête avec toutes les conditions
-    const students = await prisma.student.findMany(query);
+    // Définition du type pour les résultats inclus
+    type StudentWithRelations = Prisma.StudentGetPayload<{
+      include: {
+        user: true;
+        skills: true;
+        school: true;
+        profilePicture: true;
+        CV: true;
+      }
+    }>;
 
-    return NextResponse.json(students, { status: 200 });
+    // Requête avec toutes les conditions
+    const students = await prisma.student.findMany(query) as StudentWithRelations[];
+
+    // Conversion en tableau de ResponseDto
+    const responseDtos: StudentResponseDto[] = students.map((student: StudentWithRelations) => ({
+      id: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      status: student.status,
+      description: student.description,
+      isAvailable: student.isAvailable,
+      userId: student.userId,
+      schoolId: student.schoolId,
+      CVId: student.CVId,
+      profilePictureId: student.profilePictureId,
+      createdAt: student.createdAt,
+      school: student.school ? {
+        id: student.school.id,
+        name: student.school.name
+      } : undefined,
+      skills: student.skills.map(skill => ({
+        id: skill.id,
+        name: skill.name
+      })),
+      user: student.user ? {
+        id: student.user.id,
+        email: student.user.email,
+        name: student.user.name
+      } : undefined
+    }));
+
+    return NextResponse.json(responseDtos, { status: 200 });
   } catch (error) {
     console.error("Erreur lors du filtrage des étudiants:", error);
     return NextResponse.json(

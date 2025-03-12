@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { CompanySearchDto, CompanyResponseDto } from "@/types/dto/company.dto";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,11 @@ export async function GET(req: NextRequest) {
 
     // Récupération des paramètres de filtrage
     const companyName = searchParams.get("name");
+    
+    // Construction du DTO de recherche
+    const searchDto: CompanySearchDto = {
+      query: companyName || undefined
+    };
 
     // Construction de la requête avec les filtres
     const filters: Prisma.CompanyWhereInput = {
@@ -16,9 +22,9 @@ export async function GET(req: NextRequest) {
     };
 
     // Filtre par nom d'entreprise
-    if (companyName) {
+    if (searchDto.query) {
       filters.name = {
-        contains: companyName,
+        contains: searchDto.query,
         mode: "insensitive", // Recherche insensible à la casse
       };
     }
@@ -43,7 +49,27 @@ export async function GET(req: NextRequest) {
     // Exécution de la requête
     const companies = await prisma.company.findMany(query);
 
-    return NextResponse.json(companies, { status: 200 });
+    // Conversion en tableau de ResponseDto
+    const responseDtos: CompanyResponseDto[] = companies.map(company => ({
+      id: company.id,
+      name: company.name,
+      description: company.description,
+      userId: company.userId,
+      profilePictureId: company.profilePictureId,
+      createdAt: company.createdAt,
+      modifiedAt: company.modifiedAt,
+      user: company.user ? {
+        id: company.user.id,
+        email: company.user.email,
+        name: company.user.name
+      } : undefined,
+      profilePicture: company.profilePicture ? {
+        id: company.profilePicture.id,
+        url: company.profilePicture.url
+      } : null
+    }));
+
+    return NextResponse.json(responseDtos, { status: 200 });
   } catch (error) {
     console.error("Erreur lors du filtrage des entreprises:", error);
     return NextResponse.json(

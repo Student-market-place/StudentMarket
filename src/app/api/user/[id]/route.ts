@@ -1,6 +1,7 @@
 import { IParams } from "@/types/api.type";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { UpdateUserDto, UserResponseDto } from "@/types/dto/user.dto";
 
 const prisma = new PrismaClient();
 
@@ -36,14 +37,28 @@ export async function GET(req: NextRequest, { params }: IParams) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "user not found" },
+        { error: "Utilisateur non trouvé" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(user, { status: 200 });
+    // Conversion en ResponseDto
+    const responseDto: UserResponseDto = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      createdAt: user.createdAt,
+      studentId: user.student?.id,
+      companyId: user.company?.id,
+      schoolId: user.school?.id
+    };
+
+    return NextResponse.json(responseDto, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
@@ -56,15 +71,28 @@ export async function DELETE(req: NextRequest, { params }: IParams) {
         id: id,
       },
     });
+    
     if (!user) {
       return NextResponse.json(
-        { error: "user not found" },
+        { error: "Utilisateur non trouvé" },
         { status: 404 }
       );
     }
-    return NextResponse.json(user, { status: 200 });
+    
+    // Conversion en ResponseDto
+    const responseDto: UserResponseDto = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      createdAt: user.createdAt
+    };
+    
+    return NextResponse.json(responseDto, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Erreur lors de la suppression de l'utilisateur:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
@@ -74,20 +102,38 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { role } = await req.json();
     
-    if (!role || !["student", "company"].includes(role)) {
+    // Lire les données brutes une seule fois
+    const rawData = await req.json();
+    // Typer ensuite en tant que DTO
+    const data = {
+      id,
+      ...rawData
+    } as UpdateUserDto;
+    
+    if (!data.role && !data.name && !data.email && !data.image) {
+      return NextResponse.json(
+        { error: "Au moins un champ à mettre à jour est requis" },
+        { status: 400 }
+      );
+    }
+
+    if (data.role && !["student", "company", "admin", "school"].includes(data.role)) {
       return NextResponse.json(
         { error: "Rôle invalide" },
         { status: 400 }
       );
     }
 
+    const updateData: any = {};
+    if (data.role) updateData.role = data.role;
+    if (data.name) updateData.name = data.name;
+    if (data.email) updateData.email = data.email;
+    if (data.image) updateData.image = data.image;
+
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { 
-        role: role 
-      },
+      data: updateData,
       include: {
         student: {
           include: {
@@ -108,11 +154,24 @@ export async function PATCH(
       }
     });
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    // Conversion en ResponseDto
+    const responseDto: UserResponseDto = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      image: updatedUser.image,
+      createdAt: updatedUser.createdAt,
+      studentId: updatedUser.student?.id,
+      companyId: updatedUser.company?.id,
+      schoolId: updatedUser.school?.id
+    };
+
+    return NextResponse.json(responseDto, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du rôle:", error);
+    console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la mise à jour du rôle" },
+      { error: "Erreur serveur" },
       { status: 500 }
     );
   }

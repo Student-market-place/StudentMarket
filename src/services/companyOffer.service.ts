@@ -3,14 +3,20 @@ import {
   CompanyOfferWithRelation,
   GetAllParams,
 } from "@/types/companyOffer.type";
+import { 
+  CompanyOfferResponseDto,
+  CreateCompanyOfferDto,
+  UpdateCompanyOfferDto,
+  CompanyOfferSearchDto
+} from "@/types/dto/company-offer.dto";
 import axios from "axios";
 
 // Utiliser la même base URL pour toutes les requêtes
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchCompanyOffers(
-  params: GetAllParams
-): Promise<CompanyOfferWithRelation[]> {
+  params: CompanyOfferSearchDto
+): Promise<CompanyOfferResponseDto[]> {
   const url = `${baseUrl}/api/company_offer`;
 
   // Construction d'un objet de paramètres de requête
@@ -23,19 +29,26 @@ async function fetchCompanyOffers(
     queryObject.skills = params.skills;
   }
   if (params.type) {
-    queryObject.type = [params.type];
+    queryObject.type = [params.type.toString()];
+  }
+  if (params.companyId) {
+    queryObject.companyId = [params.companyId];
+  }
+  if (params.query) {
+    queryObject.query = [params.query];
+  }
+  if (params.startDateFrom) {
+    queryObject.startDateFrom = [params.startDateFrom.toISOString()];
+  }
+  if (params.startDateTo) {
+    queryObject.startDateTo = [params.startDateTo.toISOString()];
   }
 
-  if (params.studentApplies && params.studentApplies.length > 0) {
-    queryObject.studentApplies = params.studentApplies;
-
-    const response = await axios.get(url, { params: queryObject });
-    return response.data;
-  }
-  return [];
+  const response = await axios.get(url, { params: queryObject });
+  return response.data;
 }
 
-async function fetchCompanyOffer(id: string): Promise<CompanyOfferWithRelation> {
+async function fetchCompanyOffer(id: string): Promise<CompanyOfferResponseDto> {
   const url = `${baseUrl}/api/company_offer/${id}`;
   const response = await axios.get(url);
   return response.data;
@@ -43,34 +56,34 @@ async function fetchCompanyOffer(id: string): Promise<CompanyOfferWithRelation> 
 
 async function fetchCompanyOffersByCompany(
   companyId: string
-): Promise<CompanyOfferWithRelation[]> {
+): Promise<CompanyOfferResponseDto[]> {
   const url = `${baseUrl}/api/company_offer/company/${companyId}`;
   const response = await axios.get(url);
   return response.data;
 }
 
 async function postCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
+  companyOffer: CreateCompanyOfferDto
+): Promise<CompanyOfferResponseDto> {
   const url = `${baseUrl}/api/company_offer`;
   const response = await axios.post(url, companyOffer);
   return response.data;
 }
 
 async function putCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
+  companyOffer: UpdateCompanyOfferDto
+): Promise<CompanyOfferResponseDto> {
+  if (!companyOffer.id) {
+    throw new Error("ID de l'offre est requis pour la mise à jour");
+  }
+  
   const url = `${baseUrl}/api/company_offer/${companyOffer.id}`;
   const response = await axios.put(url, companyOffer);
   return response.data;
 }
 
-
-async function deleteCompanyOffer(id: string): Promise<CompanyOffer> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+async function deleteCompanyOffer(id: string): Promise<CompanyOfferResponseDto> {
   const url = `${baseUrl}/api/company_offer/${id}`;
-
-
   const response = await axios.delete(url);
   return response.data;
 }

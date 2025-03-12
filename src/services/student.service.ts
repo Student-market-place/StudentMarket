@@ -3,13 +3,19 @@ import {
   StudentWithRelation,
   StudentFormData,
 } from "@/types/student.type";
+import { 
+  StudentResponseDto,
+  CreateStudentDto,
+  UpdateStudentDto,
+  StudentSearchDto
+} from "@/types/dto/student.dto";
 import axios from "axios";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchStudents(
-  params: GetAllParams
-): Promise<StudentWithRelation[]> {
+  params: StudentSearchDto
+): Promise<StudentResponseDto[]> {
   const url = `${baseUrl}/api/student`;
 
   // Construction d'un objet de paramètres de requête
@@ -24,15 +30,18 @@ async function fetchStudents(
     // Axios va sérialiser le tableau en répétant le paramètre dans l'URL
     queryObject.skills = params.skills;
   }
-  if (params.userId) {
-    queryObject.userId = [params.userId];
+  if (params.schoolId) {
+    queryObject.schoolId = [params.schoolId];
+  }
+  if (params.query) {
+    queryObject.query = [params.query];
   }
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;
 }
 
-async function fetchStudentById(id: string): Promise<StudentWithRelation> {
+async function fetchStudentById(id: string): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.get(url);
@@ -51,22 +60,10 @@ async function fetchStudentApplications(id: string) {
   }
 }
 
-interface UpdateStudentData {
-  firstName?: string;
-  lastName?: string;
-  status?: string;
-  isAvailable?: boolean;
-  description?: string;
-  skillIds?: string[];
-  profilePictureId?: string;
-  CVId?: string;
-  email?: string;
-}
-
 async function updateStudent(
   id: string,
-  data: UpdateStudentData
-): Promise<StudentWithRelation> {
+  data: UpdateStudentDto
+): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.put(url, data);
@@ -74,8 +71,8 @@ async function updateStudent(
 }
 
 async function createStudent(
-  data: StudentFormData
-): Promise<StudentWithRelation> {
+  data: CreateStudentDto
+): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student`;
 
   const response = await axios.post(url, data);
