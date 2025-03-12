@@ -19,7 +19,7 @@ interface StudentUpdateData extends Omit<Prisma.StudentUpdateInput, "status"> {
 
 export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
-
+  console.log(req);
   try {
     const student = await prisma.student.findUnique({
       where: {
@@ -53,15 +53,16 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     description,
     isAvailable,
     userId,
-    skillsId,
+    skillIds,
     schoolId,
     CVId,
     profilePictureId,
+    email,
   } = await req.json();
 
   if (!firstName || !lastName || !status || !userId || !schoolId) {
     return NextResponse.json(
-      { error: "Veuillez renseigner tous les champs obligatoires" },
+      { error: "Le prénom et le nom sont obligatoires" },
       { status: 400 }
     );
   }
@@ -111,6 +112,11 @@ export async function PUT(req: NextRequest, { params }: IParams) {
   } catch (error) {
     console.error("Erreur lors de la mise à jour:", error);
     return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Error updating student:", error);
+    return NextResponse.json(
+      { error: "Failed to update student" },
+      { status: 500 }
+    );
   }
 }
 
