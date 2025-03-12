@@ -15,7 +15,7 @@ import { Star } from "lucide-react";
 import CardStudent from "@/components/custom-ui/CardStudent";
 
 const CompanyReviewsPage = () => {
-  const { id: companyId } = useParams();
+  const { id: companyId } = useParams() as { id: string };
   const [isLoading, setIsLoading] = useState(true);
   const [histories, setHistories] = useState<HistoryWithRelation[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
@@ -25,12 +25,16 @@ const CompanyReviewsPage = () => {
   const [reviews, setReviews] = useState<{
     [key: string]: ReviewWithRelation[];
   }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!companyId) return;
+      setError(null);
 
       try {
+        setIsLoading(true);
         const historiesData = await StudentHistoryService.fetchStudentsHistory({
           companyId: companyId as string,
         });
@@ -54,6 +58,7 @@ const CompanyReviewsPage = () => {
         setReviews(reviewsMap);
       } catch (err) {
         console.error(err);
+        setError("Une erreur est survenue lors du chargement des données");
       } finally {
         setIsLoading(false);
       }
@@ -67,6 +72,9 @@ const CompanyReviewsPage = () => {
     if (!selectedStudent || !rating || !comment) return;
 
     try {
+      setIsSubmitting(true);
+      setError(null);
+      
       const reviewData = {
         studentId: selectedStudent,
         companyId: companyId as string,
@@ -90,6 +98,9 @@ const CompanyReviewsPage = () => {
       }));
     } catch (error) {
       console.error("Error posting review:", error);
+      setError("Une erreur est survenue lors de l'envoi de l'évaluation");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -101,119 +112,160 @@ const CompanyReviewsPage = () => {
     );
   }
 
+  if (error && histories.length === 0) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
+          <p className="font-bold">Erreur</p>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Évaluations des Étudiants</h1>
 
-      <div className="flex gap-8">
-        <div>
-          <div className="w-full gap-4 grid grid-cols-2 ">
-            {histories.map((history) => (
-              <div
-                key={history.id}
-                className="flex gap-4 items-center p-4 border-2 rounded-xl"
-              >
-                <div className="mb-4">
-                  <CardStudent student={history.student} />
-                </div>
+      {histories.length === 0 ? (
+        <div className="text-center p-8 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">Aucun historique d'étudiant trouvé pour cette entreprise.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="lg:w-2/3">
+            <div className="w-full gap-4 grid grid-cols-1 md:grid-cols-2">
+              {histories.map((history) => (
+                <div
+                  key={history.id}
+                  className="flex flex-col gap-4 p-4 border-2 rounded-xl hover:border-blue-300 transition-colors"
+                >
+                  <div>
+                    <CardStudent student={history.student} />
+                  </div>
 
-                {/* Affichage des commentaires existants */}
-                {reviews[history.student.id]?.length > 0 && (
-                  <div className="ml-4">
-                    <div className="flex justify-end">
+                  {/* Affichage des commentaires existants */}
+                  {reviews[history.student.id]?.length > 0 ? (
+                    <div>
+                      <div className="flex justify-end mb-2">
+                        <Button
+                          onClick={() => setSelectedStudent(history.student.id)}
+                          size="sm"
+                        >
+                          Évaluer
+                        </Button>
+                      </div>
+                      <h3 className="text-sm font-semibold mb-2">
+                        Commentaires précédents :
+                      </h3>
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        {reviews[history.student.id].map((review) => (
+                          <Card key={review.id} className="p-3">
+                            <div className="flex gap-1 mb-1">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <Star
+                                  key={value}
+                                  size={16}
+                                  fill={
+                                    value <= review.rating
+                                      ? "#FFD700"
+                                      : "transparent"
+                                  }
+                                  color="#FFD700"
+                                />
+                              ))}
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              {review.comment}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </p>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center mt-2">
                       <Button
-                        className="top-2 right-2"
+                        variant="outline"
                         onClick={() => setSelectedStudent(history.student.id)}
                       >
-                        Évaluer
+                        Ajouter une évaluation
                       </Button>
                     </div>
-                    <h3 className="text-sm font-semibold mb-2">
-                      Commentaires précédents :
-                    </h3>
-                    <div className="space-y-2">
-                      {reviews[history.student.id].map((review) => (
-                        <Card key={review.id} className="p-3">
-                          <div className="flex gap-1 mb-1">
-                            {[1, 2, 3, 4, 5].map((value) => (
-                              <Star
-                                key={value}
-                                size={16}
-                                fill={
-                                  value <= review.rating
-                                    ? "#FFD700"
-                                    : "transparent"
-                                }
-                                color="#FFD700"
-                              />
-                            ))}
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {review.comment}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </p>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Formulaire d'évaluation */}
+          {selectedStudent && (
+            <div className="lg:w-1/3 sticky top-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Ajouter une évaluation
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="float-right" 
+                      onClick={() => setSelectedStudent(null)}
+                    >
+                      ×
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {error && (
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm" role="alert">
+                      <p>{error}</p>
+                    </div>
+                  )}
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div>
+                      <Label>Note</Label>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                          <Star
+                            key={value}
+                            size={24}
+                            className="cursor-pointer"
+                            fill={
+                              value <= (hoveredRating || rating)
+                                ? "#FFD700"
+                                : "transparent"
+                            }
+                            color="#FFD700"
+                            onClick={() => setRating(value)}
+                            onMouseEnter={() => setHoveredRating(value)}
+                            onMouseLeave={() => setHoveredRating(0)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Commentaire</Label>
+                      <Textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Votre commentaire sur l'étudiant..."
+                        className="min-h-[100px]"
+                      />
+                    </div>
+
+                    <Button type="submit" disabled={!rating || !comment || isSubmitting} className="w-full">
+                      {isSubmitting ? "Envoi en cours..." : "Soumettre l'évaluation"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
-
-        {/* Formulaire d'évaluation */}
-        {selectedStudent && (
-          <div className="sticky top-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ajouter une évaluation</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmitReview} className="space-y-4">
-                  <div>
-                    <Label>Note</Label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <Star
-                          key={value}
-                          size={24}
-                          className="cursor-pointer"
-                          fill={
-                            value <= (hoveredRating || rating)
-                              ? "#FFD700"
-                              : "transparent"
-                          }
-                          color="#FFD700"
-                          onClick={() => setRating(value)}
-                          onMouseEnter={() => setHoveredRating(value)}
-                          onMouseLeave={() => setHoveredRating(0)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Commentaire</Label>
-                    <Textarea
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Votre commentaire sur l'étudiant..."
-                      className="min-h-[100px]"
-                    />
-                  </div>
-
-                  <Button type="submit" disabled={!rating || !comment}>
-                    Soumettre l&apos;évaluation
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

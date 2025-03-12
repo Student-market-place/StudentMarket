@@ -1,4 +1,5 @@
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { CompanyOfferResponseDto } from "@/types/dto/company-offer.dto";
 import { Badge } from "../ui/badge";
 import {
   Card,
@@ -12,7 +13,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface CardJobOfferProps {
-  jobOffer: CompanyOfferWithRelation;
+  jobOffer: CompanyOfferWithRelation | CompanyOfferResponseDto;
 }
 
 const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
@@ -33,7 +34,7 @@ const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
         <div className="flex item-center justify-center flex-wrap gap-1 mt-1 ">
           {jobOffer.skills?.map((skill, index) => (
             <Badge key={index} variant="secondary">
-              {skill.name}
+              {typeof skill === 'string' ? skill : skill.name}
             </Badge>
           ))}
         </div>

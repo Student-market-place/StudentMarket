@@ -61,12 +61,8 @@ export function SkillsCombobox({
     try {
       setIsCreating(true);
       // Create the skill in the database
-      const newSkill = await SkillService.postSkill({
-        name: newSkillName,
-        id: `temp-${Date.now()}`,
-        createdAt: new Date(),
-        modifiedAt: new Date(),
-        deletedAt: null,
+      const newSkill = await SkillService.createSkill({
+        name: newSkillName
       });
 
       // Update the local state

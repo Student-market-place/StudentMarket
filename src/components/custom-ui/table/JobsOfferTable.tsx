@@ -21,12 +21,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { CompanyOfferResponseDto } from "@/types/dto/company-offer.dto";
 import CompanyOfferService from "@/services/companyOffer.service";
 import { useQueryClient } from "@tanstack/react-query";
 
+type JobOffer = CompanyOfferWithRelation | CompanyOfferResponseDto;
+
 interface JobsOfferTableProps {
-  jobOffers: CompanyOfferWithRelation[];
+  jobOffers: JobOffer[];
   onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onNew?: () => void;
 }
 
 type SortField =
@@ -41,6 +46,8 @@ type SortDirection = "asc" | "desc";
 export const JobsOfferTable = ({
   jobOffers,
   onDelete,
+  onEdit,
+  onNew,
 }: JobsOfferTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -67,7 +74,7 @@ export const JobsOfferTable = ({
     }).format(date);
   };
 
-  const getJobStatus = (job: CompanyOfferWithRelation) => {
+  const getJobStatus = (job: JobOffer) => {
     const now = new Date();
     const startDate = new Date(job.startDate);
 
@@ -98,8 +105,8 @@ export const JobsOfferTable = ({
       });
     } else if (sortField === "studentApplies") {
       sorted = sorted.sort((a, b) => {
-        const appliesA = a.studentApplies?.length || 0;
-        const appliesB = b.studentApplies?.length || 0;
+        const appliesA = 'studentApplies' in a ? a.studentApplies?.length || 0 : a.studentAppliesCount || 0;
+        const appliesB = 'studentApplies' in b ? b.studentApplies?.length || 0 : b.studentAppliesCount || 0;
 
         return sortDirection === "asc"
           ? appliesA - appliesB
@@ -130,7 +137,7 @@ export const JobsOfferTable = ({
     return sorted;
   }, [jobOffers, searchTerm, sortField, sortDirection, statusSort]);
 
-  const handleDelete = async (job: CompanyOfferWithRelation) => {
+  const handleDelete = async (job: JobOffer) => {
     try {
       await CompanyOfferService.deleteCompanyOffer(job.id);
       onDelete?.(job.id);
@@ -155,7 +162,7 @@ export const JobsOfferTable = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="default" className="cursor-pointer">
+        <Button variant="default" className="cursor-pointer" onClick={onNew}>
           New
         </Button>
       </div>
@@ -324,7 +331,7 @@ export const JobsOfferTable = ({
                           {formatDate(job.startDate)}
                         </TableCell>
                         <TableCell className="w-[10%] text-center">
-                          {job.studentApplies?.length || 0}
+                          {'studentApplies' in job ? job.studentApplies?.length || 0 : job.studentAppliesCount || 0}
                         </TableCell>
                         <TableCell className="w-[10%] text-center">
                           <Badge
@@ -349,6 +356,7 @@ export const JobsOfferTable = ({
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 cursor-pointer"
+                              onClick={() => onEdit?.(job.id)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>

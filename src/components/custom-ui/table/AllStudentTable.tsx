@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto } from "@/types/dto/student.dto";
 import StudentService from "@/services/student.service";
 import { UpdateStudent } from "../UpdateStudent";
 import { CreateStudent } from "../CreateStudent";
@@ -125,7 +126,7 @@ export function AllStudentTable() {
     });
   }, [searchTerm, sortField, sortDirection, students]);
 
-  const handleDelete = async (student: StudentWithRelation) => {
+  const handleDelete = async (student: StudentWithRelation | StudentResponseDto) => {
     try {
       await StudentService.deleteStudent(student.id);
       await queryClient.invalidateQueries({ queryKey: ["students"] });

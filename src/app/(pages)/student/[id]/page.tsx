@@ -12,15 +12,21 @@ import { HistoryWithRelation } from "@/types/studentHistory.type";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { StudentResponseDto } from "@/types/dto/student.dto";
+import StudentProfileCard from "@/components/custom-ui/StudentProfileCard";
+import Link from "next/link";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const StudentProfilPage = () => {
   const { id } = useParams();
-  const [student, setStudent] = useState<StudentWithRelation | null>(null);
+  const [student, setStudent] = useState<any>(null);
   const [reviews, setReviews] = useState<ReviewWithRelation[]>([]);
   const [history, setHistory] = useState<HistoryWithRelation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
+
     if (id) {
       StudentService.fetchStudentById(id as string)
         .then((data) => setStudent(data))
@@ -50,6 +56,25 @@ const StudentProfilPage = () => {
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = student?.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, utiliser l'image par défaut
+      if (!url) return "/default-avatar.png";
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, utiliser l'image par défaut
+      console.warn("URL d'image invalide pour l'étudiant:", student?.firstName, student?.lastName);
+      return "/default-avatar.png";
+    }
+  };
 
   if (loading) {
     return (
@@ -93,7 +118,7 @@ const StudentProfilPage = () => {
         <div className="w-full lg:w-1/3 flex flex-col gap-6 items-center">
           <div className="w-full flex justify-center">
             <Image
-              src={student?.profilePicture?.url || "/default-avatar.png"}
+              src={getValidImageUrl()}
               width={200}
               height={200}
               className="w-[150px] h-[150px] md:w-[200px] md:h-[200px] rounded-xl object-cover shadow-lg"
@@ -176,7 +201,7 @@ const StudentProfilPage = () => {
               <TabsContent value="skills" className="pt-2">
                 {student?.skills && student.skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {student.skills.map((skill, index) => (
+                    {student.skills.map((skill: { id: string, name: string }, index: number) => (
                       <Badge key={index} variant="secondary">
                         {skill?.name}
                       </Badge>

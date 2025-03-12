@@ -1,28 +1,52 @@
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { RegisterUserDto, RegisterResponseDto } from "@/types/dto/auth.dto";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, role } = await req.json();
+    // Lire les données brutes une seule fois
+    const rawData = await req.json();
+    // Typer ensuite en tant que DTO
+    const data = rawData as RegisterUserDto;
+
+    if (!data.email) {
+      return NextResponse.json(
+        { error: "L'email est requis" },
+        { status: 400 }
+      );
+    }
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: data.email }
     });
 
     if (existingUser) {
-      return NextResponse.json({ exists: true }, { status: 200 });
+      const responseDto: RegisterResponseDto = {
+        id: existingUser.id,
+        email: existingUser.email,
+        role: existingUser.role,
+        exists: true
+      };
+      return NextResponse.json(responseDto, { status: 200 });
     }
 
     // Créer un nouvel utilisateur
     const newUser = await prisma.user.create({
       data: {
-        email,
-        role: (role as Role) || "student"
+        email: data.email,
+        role: data.role || "student"
       }
     });
-    return NextResponse.json(newUser, { status: 201 });
+
+    // Conversion en ResponseDto
+    const responseDto: RegisterResponseDto = {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role
+    };
+
+    return NextResponse.json(responseDto, { status: 201 });
   } catch (error) {
     console.error("❌ API - Erreur lors de l'inscription:", error);
     return NextResponse.json(

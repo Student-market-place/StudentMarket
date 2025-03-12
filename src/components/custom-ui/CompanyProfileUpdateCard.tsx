@@ -16,12 +16,33 @@ interface CompanyProfilCardProps {
 }
 
 const CompanyProfilCard = ({ company }: CompanyProfilCardProps) => {
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = company.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, retourner undefined
+      if (!url) return undefined;
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, retourner undefined
+      console.warn("URL d'image invalide pour l'entreprise:", company.name);
+      return undefined;
+    }
+  };
+
+  const imageUrl = getValidImageUrl();
+
   return (
     <Card className="flex flex-col h-fit gap-2 w-[300px] pt-0 shadow-lg rounded-2xl overflow-hidden border-2 items-center transition-all">
       <CardHeader className="p-4 items-center">
         <Avatar className="h-35 w-35 relative">
           <AvatarImage
-            src={company.profilePicture?.url}
+            src={imageUrl}
             alt={`${company.name} logo`}
             className="object-cover"
           />

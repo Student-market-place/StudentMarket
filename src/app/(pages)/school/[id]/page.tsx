@@ -22,8 +22,8 @@ import SchoolService from "@/services/school.service";
 import StudentService from "@/services/student.service";
 import CompanyOfferService from "@/services/companyOffer.service";
 import { StudentWithRelation } from "@/types/student.type";
-
-import { CompanyOfferWithRelation, Status } from "@/types/companyOffer.type";
+import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { OfferStatus } from "@prisma/client";
 
 // Définir un type pour l'erreur
 // type ErrorType = {
@@ -72,8 +72,8 @@ const DashboardContent = () => {
   const params = useParams();
   const schoolId = typeof params.id === "string" ? params.id : "";
   const [school, setSchool] = useState<SimplifiedSchool | null>(null);
-  const [students, setStudents] = useState<StudentWithRelation[]>([]);
-  const [offers, setOffers] = useState<CompanyOfferWithRelation[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const DashboardContent = () => {
 
         // Récupération des offres ouvertes qui correspondent aux compétences des étudiants
         const offersData = await CompanyOfferService.fetchCompanyOffers({
-          status: "Open" as Status, // Utiliser directement la valeur au lieu de l'énumération
+          status: "en_cours" as OfferStatus, // Utiliser la valeur enum correcte
         });
 
         // Filtrer les offres pertinentes pour les étudiants de cette école
@@ -157,7 +157,7 @@ const DashboardContent = () => {
   const skillGroups: Record<string, number> = {};
   students.forEach((student) => {
     if (student.skills) {
-      student.skills.forEach((skill) => {
+      student.skills.forEach((skill: { name: string }) => {
         if (!skillGroups[skill.name]) skillGroups[skill.name] = 0;
         skillGroups[skill.name]++;
       });
@@ -169,6 +169,25 @@ const DashboardContent = () => {
     .sort(([, countA], [, countB]) => Number(countB) - Number(countA))
     .slice(0, 5);
 
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = school.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, retourner undefined
+      if (!url) return undefined;
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, retourner undefined
+      console.warn("URL d'image invalide pour l'école:", school.name);
+      return undefined;
+    }
+  };
+
   return (
     <div className="space-y-8 p-12">
       {/* En-tête avec informations de l'école */}
@@ -176,7 +195,7 @@ const DashboardContent = () => {
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">
             <AvatarImage
-              src={school.profilePicture?.url || ""}
+              src={getValidImageUrl()}
               alt={school.name}
             />
             <AvatarFallback>

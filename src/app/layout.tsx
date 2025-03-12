@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={inter.className + " min-h-screen flex flex-col justify-between"}>
         <Providers>
           <NavBar />
           <main className="py-5">{children}</main>

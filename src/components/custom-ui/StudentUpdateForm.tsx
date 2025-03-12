@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto, UpdateStudentDto } from "@/types/dto/student.dto";
 import { Skill } from "@prisma/client";
 import { SkillsCombobox } from "./SkillsCombobox";
 import { useRouter } from "next/navigation";
@@ -34,7 +35,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
 interface StudentUpdateFormProps {
-  student: StudentWithRelation;
+  student: StudentWithRelation | StudentResponseDto;
   allSkills: Skill[];
 }
 
@@ -54,18 +55,48 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function StudentUpdateForm({
+const StudentUpdateForm = ({
   student,
   allSkills,
-}: StudentUpdateFormProps) {
+}: StudentUpdateFormProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedSkills, setSelectedSkills] = useState<string[]>(
-    student.skills.map((skill) => skill.id)
+    student.skills?.map((skill) => skill.id) || []
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFileUploading, setIsFileUploading] = useState(false);
   const [isCVUploading, setIsCVUploading] = useState(false);
+
+  // Fonction pour vérifier si nous avons un StudentWithRelation
+  const isStudentWithRelation = (student: StudentWithRelation | StudentResponseDto): student is StudentWithRelation => {
+    return 'profilePicture' in student || 'CV' in student;
+  };
+
+  // Fonction pour obtenir l'URL de la photo de profil
+  const getProfilePictureUrl = () => {
+    if (isStudentWithRelation(student) && student.profilePicture) {
+      return `/api/file/${student.profilePicture.id}`;
+    } else if (student.profilePictureId) {
+      return `/api/file/${student.profilePictureId}`;
+    }
+    return null;
+  };
+
+  // Fonction pour obtenir l'URL du CV
+  const getCvUrl = () => {
+    if (isStudentWithRelation(student) && student.CV) {
+      return `/api/file/${student.CV.id}`;
+    } else if (student.CVId) {
+      return `/api/file/${student.CVId}`;
+    }
+    return null;
+  };
+  
+  // Créer un état local pour l'image de profil
+  const [localProfilePicture, setLocalProfilePicture] = useState<string | null>(getProfilePictureUrl());
+  // Créer un état local pour le CV
+  const [localCvUrl, setLocalCvUrl] = useState<string | null>(getCvUrl());
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -102,9 +133,13 @@ export default function StudentUpdateForm({
       const data = await response.json();
 
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         profilePictureId: data.fileId,
       });
 
+      // Mettre à jour l'état local pour afficher la nouvelle image immédiatement
+      setLocalProfilePicture(data.url);
+      
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Photo de profil mise à jour avec succès");
     } catch (error) {
@@ -136,8 +171,12 @@ export default function StudentUpdateForm({
       const data = await response.json();
 
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         CVId: data.fileId,
       });
+
+      // Mettre à jour l'état local pour afficher le nouveau CV immédiatement
+      setLocalCvUrl(data.url);
 
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("CV mis à jour avec succès");
@@ -153,8 +192,9 @@ export default function StudentUpdateForm({
     try {
       setIsSubmitting(true);
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         ...values,
-        skillsId: selectedSkills,
+        skills: selectedSkills,
       });
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Profil mis à jour avec succès");
@@ -287,24 +327,12 @@ export default function StudentUpdateForm({
                 <div className="space-y-4">
                   <FormLabel>Photo de profil</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {student.profilePicture && (
-                      <div className="border rounded-lg p-2 w-full flex justify-center">
-                        <Image
-                          src={`/api/file/${student.profilePicture.id}`}
-                          alt="Photo de profil"
-                          width={120}
-                          height={120}
-                          className="rounded-full object-cover"
-                        />
-                      </div>
-                    )}
                     <div className="w-full">
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
                         className="w-full"
-                        disabled
                       />
                       {isFileUploading && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -318,10 +346,10 @@ export default function StudentUpdateForm({
                 <div className="space-y-4">
                   <FormLabel>CV</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {student.CV && (
+                    {localCvUrl && (
                       <div className="border rounded-lg p-3 w-full">
                         <a
-                          href={`/api/file/${student.CV.id}`}
+                          href={localCvUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline flex items-center"
@@ -350,7 +378,6 @@ export default function StudentUpdateForm({
                         accept=".pdf,.doc,.docx"
                         onChange={handleCVChange}
                         className="w-full"
-                        disabled
                       />
                       {isCVUploading && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -383,4 +410,6 @@ export default function StudentUpdateForm({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default StudentUpdateForm;

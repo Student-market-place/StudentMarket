@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import CompanyService from "@/services/company.service";
 import CompanyOfferService from "@/services/companyOffer.service";
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { CompanyOfferResponseDto } from "@/types/dto/company-offer.dto";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -106,7 +107,7 @@ const CompanyPublicPage = () => {
           
           {offers && offers.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {offers.map((offer: CompanyOfferWithRelation) => (
+              {offers.map((offer: CompanyOfferResponseDto) => (
                 <CardJobOffer key={offer.id} jobOffer={offer} />
               ))}
             </div>

@@ -1,7 +1,7 @@
 "use client";
 import { CreateSchool } from "@/components/custom-ui/CreateSchool";
 import { UpdateSchool } from "@/components/custom-ui/UpdateSchool";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Trash2, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { SchoolResponseDto } from "@/types/dto/school.dto";
 
 type SortField = "name" | "domainName" | "students" | "isActive";
 type SortDirection = "asc" | "desc";
@@ -36,13 +38,19 @@ export function SchoolTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-
+  const [schools, setSchools] = useState<SchoolResponseDto[]>([]);
   const queryClient = useQueryClient();
 
-  const { data: schools = [], isLoading } = useQuery({
-    queryKey: ["schools"],
-    queryFn: SchoolService.fetchSchools,
-  });
+  useEffect(() => {
+    // Récupération des écoles depuis l'API
+    SchoolService.fetchSchools()
+      .then((data) => {
+        setSchools(data);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des écoles:", error);
+      });
+  }, []);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -53,17 +61,15 @@ export function SchoolTable() {
     }
   };
 
-  const filteredAndSortedData = useMemo(() => {
-    if (!schools.length) return [];
-
+  const filteredAndSortedSchools = (() => {
     const filtered = schools.filter((school) => {
       if (!searchTerm.trim()) return true;
       const searchLower = searchTerm.toLowerCase();
       return (
         school.name.toLowerCase().includes(searchLower) ||
         school.domainName.toLowerCase().includes(searchLower) ||
-        (Array.isArray(school.students)
-          ? school.students.length.toString()
+        (school.studentCount !== undefined
+          ? school.studentCount.toString()
           : "0"
         ).includes(searchTerm) ||
         (school.isActive ? "yes" : "no").includes(searchLower)
@@ -72,32 +78,34 @@ export function SchoolTable() {
 
     return [...filtered].sort((a, b) => {
       if (sortField === "students") {
-        const aCount = Array.isArray(a.students) ? a.students.length : 0;
-        const bCount = Array.isArray(b.students) ? b.students.length : 0;
+        const aCount = a.studentCount !== undefined ? a.studentCount : 0;
+        const bCount = b.studentCount !== undefined ? b.studentCount : 0;
         return sortDirection === "asc" ? aCount - bCount : bCount - aCount;
       } else if (sortField === "isActive") {
         return sortDirection === "asc"
           ? a[sortField] === b[sortField]
             ? 0
             : a[sortField]
-              ? -1
-              : 1
+            ? -1
+            : 1
           : a[sortField] === b[sortField]
-            ? 0
-            : a[sortField]
-              ? 1
-              : -1;
+          ? 0
+          : a[sortField]
+          ? 1
+          : -1;
       } else {
+        const valueA = a[sortField]?.toString().toLowerCase() || "";
+        const valueB = b[sortField]?.toString().toLowerCase() || "";
         return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
       }
     });
-  }, [searchTerm, sortField, sortDirection, schools]);
+  })();
 
-  const handleDelete = async (school: School) => {
+  const handleDelete = async (schoolId: string) => {
     try {
-      await SchoolService.deleteSchool(school);
+      await SchoolService.deleteSchool(schoolId);
       await queryClient.invalidateQueries({ queryKey: ["schools"] });
     } catch (error) {
       console.error("Erreur lors de la suppression de l'école:", error);
@@ -108,13 +116,10 @@ export function SchoolTable() {
     <div className="space-y-4 p-12">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="relative w-full max-w-sm">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-muted-foreground" />
-          </div>
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            type="text"
-            placeholder="Search Schools"
-            className="pl-10 pr-4 py-2 border rounded-md w-full"
+            placeholder="Rechercher une école..."
+            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -123,90 +128,105 @@ export function SchoolTable() {
       </div>
 
       <div className="rounded-md border">
-        <div className="overflow-hidden">
-          <Table className="table-fixed border-collapse">
-            <TableHeader className="sticky top-0 z-10 bg-muted/50">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead
+                className="w-[30%] cursor-pointer"
+                onClick={() => handleSort("name")}
+              >
+                <div className="flex items-center">
+                  Nom
+                  {sortField === "name" ? (
+                    sortDirection === "asc" ? (
+                      <ChevronUp className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    )
+                  ) : null}
+                </div>
+              </TableHead>
+              <TableHead
+                className="w-[30%] cursor-pointer"
+                onClick={() => handleSort("domainName")}
+              >
+                <div className="flex items-center">
+                  Domaine
+                  {sortField === "domainName" ? (
+                    sortDirection === "asc" ? (
+                      <ChevronUp className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    )
+                  ) : null}
+                </div>
+              </TableHead>
+              <TableHead
+                className="cursor-pointer text-center"
+                onClick={() => handleSort("students")}
+              >
+                <div className="flex items-center justify-center">
+                  Étudiants
+                  {sortField === "students" ? (
+                    sortDirection === "asc" ? (
+                      <ChevronUp className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    )
+                  ) : null}
+                </div>
+              </TableHead>
+              <TableHead
+                className="cursor-pointer text-center"
+                onClick={() => handleSort("isActive")}
+              >
+                <div className="flex items-center justify-center">
+                  Actif
+                  {sortField === "isActive" ? (
+                    sortDirection === "asc" ? (
+                      <ChevronUp className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    )
+                  ) : null}
+                </div>
+              </TableHead>
+              <TableHead className="w-[15%] text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAndSortedSchools.length === 0 ? (
               <TableRow>
-                <TableHead className="w-[25%]">
-                  <Button
-                    variant="ghost"
-                    className="h-7 p-0 hover:bg-transparent font-medium"
-                    onClick={() => handleSort("name")}
-                  >
-                    <span>School</span>
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </TableHead>
-                <TableHead className="w-[25%]">
-                  <Button
-                    variant="ghost"
-                    className="h-7 p-0 hover:bg-transparent font-medium"
-                    onClick={() => handleSort("domainName")}
-                  >
-                    <span>Domain</span>
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </TableHead>
-                <TableHead className="w-[20%] text-center">
-                  <Button
-                    variant="ghost"
-                    className="h-7 p-0 hover:bg-transparent font-medium"
-                    onClick={() => handleSort("students")}
-                  >
-                    <span>Number of Students</span>
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </TableHead>
-                <TableHead className="w-[15%] text-center">
-                  <Button
-                    variant="ghost"
-                    className="h-7 p-0 hover:bg-transparent font-medium"
-                    onClick={() => handleSort("isActive")}
-                  >
-                    <span>In Partnership</span>
-                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </TableHead>
-                <TableHead className="w-[15%] text-center font-medium">
-                  Actions
-                </TableHead>
+                <TableCell colSpan={5} className="text-center py-16">
+                  <div className="flex flex-col items-center justify-center">
+                    <p className="text-xl text-gray-400">
+                      Aucune école trouvée
+                    </p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Essayez de changer vos critères de recherche
+                    </p>
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="h-24 text-center font-medium text-gray-500"
-                  >
-                    Chargement...
+            ) : (
+              filteredAndSortedSchools.map((school) => (
+                <TableRow key={school.id}>
+                  <TableCell>{school.name}</TableCell>
+                  <TableCell>{school.domainName}</TableCell>
+                  <TableCell className="text-center">
+                    {school.studentCount !== undefined ? school.studentCount : 0}
                   </TableCell>
-                </TableRow>
-              ) : filteredAndSortedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    No schools found.
+                  <TableCell className="text-center">
+                    <Badge
+                      variant={school.isActive ? "success" : "destructive"}
+                      className="w-16 justify-center"
+                    >
+                      {school.isActive ? "Oui" : "Non"}
+                    </Badge>
                   </TableCell>
-                </TableRow>
-              ) : (
-                filteredAndSortedData.map((school) => (
-                  <TableRow key={school.name}>
-                    <TableCell>{school.name}</TableCell>
-                    <TableCell>{school.domainName}</TableCell>
-                    <TableCell className="text-center">
-                      {Array.isArray(school.students)
-                        ? school.students.length
-                        : 0}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={school.isActive ? "success" : "secondary"}
-                      >
-                        {school.isActive ? "Yes" : "No"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <UpdateSchool id={school.id} school={school} />
+                  <TableCell className="w-[20%] text-center">
+                    <div className="flex justify-center">
+                      <UpdateSchool school={school} />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -223,14 +243,15 @@ export function SchoolTable() {
                               Êtes-vous sûr de vouloir supprimer cette école ?
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Cette action ne peut pas être annulée. Toutes les
-                              données liées à cette école seront perdues.
+                              Cette action est irréversible et supprimera
+                              définitivement l&apos;école et tous ses étudiants
+                              associés.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(school)}
+                              onClick={() => handleDelete(school.id)}
                               className="bg-red-500 hover:bg-red-600"
                             >
                               Supprimer
@@ -238,13 +259,13 @@ export function SchoolTable() {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

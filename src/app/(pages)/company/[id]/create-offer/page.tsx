@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import CompanyOfferService from "@/services/companyOffer.service";
 import SkillService from "@/services/skill.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Skill } from "@prisma/client";
+import { Skill, EnumStatusTYpe } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { CompanyOffer, Type, Status } from "@/types/companyOffer.type";
@@ -149,23 +149,40 @@ const CreateOfferPage = () => {
     );
 
     if (skillExists) {
-      toast.error("Cette compétence existe déjà");
+      // Trouver la compétence existante
+      const existingSkill = skills.find(
+        (s: Skill) => s.name.toLowerCase() === newSkillName.trim().toLowerCase()
+      );
+      
+      if (existingSkill) {
+        // Vérifier si la compétence n'est pas déjà sélectionnée
+        const isAlreadySelected = selectedSkills.some((s) => s.value === existingSkill.id);
+        
+        if (!isAlreadySelected) {
+          // Ajouter la compétence aux sélections
+          const skillOption = { label: existingSkill.name, value: existingSkill.id };
+          setSelectedSkills([...selectedSkills, skillOption]);
+          setValue(
+            "skills",
+            [...selectedSkills, skillOption].map((s) => s.value)
+          );
+          toast.success(`La compétence "${existingSkill.name}" a été sélectionnée`);
+        } else {
+          toast.info(`La compétence "${existingSkill.name}" est déjà sélectionnée`);
+        }
+        
+        // Réinitialiser le champ de saisie
+        setNewSkillName("");
+      }
       return;
     }
 
     setIsCreatingSkill(true);
 
     try {
-      // Créer un identifiant temporaire
-      const tempId = `temp-${Date.now()}`;
-
       // Créer la nouvelle compétence dans la base de données
-      const newSkill = await SkillService.postSkill({
-        id: tempId,
+      const newSkill = await SkillService.createSkill({
         name: newSkillName.trim(),
-        createdAt: new Date(),
-        modifiedAt: new Date(),
-        deletedAt: null, // Nécessaire pour la compatibilité des types
       });
 
       // Mettre à jour l'état local
@@ -200,19 +217,14 @@ const CreateOfferPage = () => {
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: CompanyOffer = {
-        id: "", // sera généré par l'API
+      const offerData = {
         companyId: companyId,
         title: data.title,
         description: data.description,
-        type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
+        type: data.type === "Stage" ? EnumStatusTYpe.stage : EnumStatusTYpe.alternance,
         startDate: new Date(data.startDate),
-        status: Status.OPEN,
+        expectedSkills: data.expectedSkills || "",
         skills: data.skills,
-        studentApplies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(),
       };
 
       await CompanyOfferService.postCompanyOffer(offerData);
@@ -344,21 +356,35 @@ const CreateOfferPage = () => {
                 </Button>
               </div>
 
-              {/* Liste des compétences existantes */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {skills.map((skill: Skill) => (
-                  <div
-                    key={skill.id}
-                    className={`cursor-pointer p-2 rounded border ${
-                      selectedSkills.some((s) => s.value === skill.id)
-                        ? "bg-blue-100 border-blue-300"
-                        : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                    }`}
-                    onClick={() => handleSkillSelect(skill.id)}
-                  >
-                    {skill.name}
+              <div className="relative">
+                <p className="text-sm text-gray-600 mb-1">Sélectionnez les compétences requises:</p>
+                {/* Liste des compétences existantes */}
+                <div 
+                  className="max-h-[300px] overflow-y-auto border rounded p-2"
+                  style={{ 
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#3b82f6 #f3f4f6'
+                  }}
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {skills.map((skill: Skill) => (
+                      <div
+                        key={skill.id}
+                        className={`cursor-pointer p-2 rounded border ${
+                          selectedSkills.some((s) => s.value === skill.id)
+                            ? "bg-blue-100 border-blue-300"
+                            : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                        }`}
+                        onClick={() => handleSkillSelect(skill.id)}
+                      >
+                        {skill.name}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+                {skills.length > 12 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                )}
               </div>
 
               {/* Compétences sélectionnées */}

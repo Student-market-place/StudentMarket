@@ -27,7 +27,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto } from "@/types/dto/student.dto";
 import { Pencil } from "lucide-react";
+import { EnumStatusTYpe } from "@prisma/client";
 
 type StudentStatus = "stage" | "alternance";
 
@@ -45,7 +47,7 @@ interface UpdateStudentData {
 }
 
 interface UpdateStudentProps {
-  student: StudentWithRelation;
+  student: StudentWithRelation | StudentResponseDto;
 }
 
 export function UpdateStudent({ student }: UpdateStudentProps) {
@@ -53,13 +55,32 @@ export function UpdateStudent({ student }: UpdateStudentProps) {
   const [firstName, setFirstName] = useState(student.firstName);
   const [lastName, setLastName] = useState(student.lastName);
   const [status, setStatus] = useState<StudentStatus>(
-    student.status as StudentStatus
+    student.status === "stage" || student.status === "alternance"
+      ? student.status
+      : "stage"
   );
   const [description, setDescription] = useState(student.description || "");
   const [isAvailable, setIsAvailable] = useState(student.isAvailable);
   const [selectedSchoolId, setSelectedSchoolId] = useState(student.schoolId);
 
   const queryClient = useQueryClient();
+
+  // Fonction pour vérifier si nous avons un StudentWithRelation
+  const isStudentWithRelation = (student: StudentWithRelation | StudentResponseDto): student is StudentWithRelation => {
+    return 'profilePicture' in student || 'CV' in student;
+  };
+
+  // Fonction pour obtenir les compétences de manière sécurisée
+  const getSkillIds = () => {
+    if (!student.skills) return [];
+    return student.skills.map((skill) => skill.id);
+  };
+
+  // Fonction pour obtenir l'ID utilisateur de manière sécurisée
+  const getUserId = () => {
+    if (!student.user) return "";
+    return student.user.id;
+  };
 
   // Récupérer la liste des écoles
   const { data: schools = [] } = useQuery({
@@ -76,24 +97,28 @@ export function UpdateStudent({ student }: UpdateStudentProps) {
     }
 
     try {
-      const updateData: UpdateStudentData = {
+      const updateData: any = {
+        id: student.id, // Ajout de l'ID requis pour UpdateStudentDto
         firstName,
         lastName,
-        status: status === "stage" ? "internship" : "apprenticeship",
+        status: status as EnumStatusTYpe,
         description,
         isAvailable,
-        userId: student.user?.id,
-        skillsId: student.skills.map((skill) => skill.id),
         schoolId: selectedSchoolId,
+        skills: getSkillIds(), // Utiliser les skills disponibles
       };
 
       // Ajouter CVId et profilePictureId seulement s'ils existent
-      if (student.CV?.id) {
+      if (isStudentWithRelation(student) && student.CV?.id) {
         updateData.CVId = student.CV.id;
+      } else if (student.CVId) {
+        updateData.CVId = student.CVId;
       }
 
-      if (student.profilePicture?.id) {
+      if (isStudentWithRelation(student) && student.profilePicture?.id) {
         updateData.profilePictureId = student.profilePicture.id;
+      } else if (student.profilePictureId) {
+        updateData.profilePictureId = student.profilePictureId;
       }
 
       // Vérification des champs obligatoires
@@ -101,8 +126,6 @@ export function UpdateStudent({ student }: UpdateStudentProps) {
         firstName: updateData.firstName,
         lastName: updateData.lastName,
         status: updateData.status,
-        userId: updateData.userId,
-        skillsId: updateData.skillsId,
         schoolId: updateData.schoolId,
       };
 

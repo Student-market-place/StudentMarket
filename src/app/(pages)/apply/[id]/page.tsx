@@ -110,7 +110,36 @@ const ApplyPage = () => {
     const userId = localStorage.getItem("userId");
     if (userId) {
       UserService.fetchUserById(userId)
-        .then((data) => setUser(data))
+        .then(async (data) => {
+          // Récupérer les données d'étudiant si l'utilisateur est un étudiant mais que l'objet student est absent
+          if (data && data.role === "student" && !data.student) {
+            try {
+              console.log("Tentative de récupération des données d'étudiant pour l'utilisateur:", data.id);
+              const studentsResponse = await fetch('/api/student/filter?userId=' + data.id);
+              
+              if (!studentsResponse.ok) {
+                throw new Error('Aucun étudiant trouvé pour cet utilisateur');
+              }
+              
+              const students = await studentsResponse.json();
+              
+              if (students && students.length > 0) {
+                // Vérifier que l'étudiant appartient bien à l'utilisateur actuel
+                const matchingStudent = students.find((s: any) => s.userId === data.id);
+                if (matchingStudent) {
+                  data.student = matchingStudent;
+                  console.log("Données d'étudiant récupérées pour la page d'application:", data.student);
+                } else {
+                  console.warn("⚠️ Étudiant trouvé mais avec un userId différent");
+                }
+              }
+            } catch (error) {
+              console.error("Impossible de récupérer les données d'étudiant:", error);
+            }
+          }
+          
+          setUser(data);
+        })
         .catch((err) => {
           console.error("Erreur lors du chargement de l'utilisateur:", err);
           setError("Vous devez être connecté pour postuler à cette offre.");
@@ -142,7 +171,7 @@ const ApplyPage = () => {
   // Soumission du formulaire
   const onSubmit = async (values: FormValues) => {
     // Vérifier que l'utilisateur est un étudiant
-    if (!user || !user.student) {
+    if (!user || !user.student || user.role !== "student") {
       setError("Vous devez être un étudiant pour postuler à cette offre.");
       return;
     }
@@ -196,6 +225,8 @@ const ApplyPage = () => {
     );
   }
 
+  console.log("User data:", user);  
+
   // Vérifier si l'utilisateur est un étudiant
   if (user.role !== "student" || !user.student) {
     return (
@@ -205,6 +236,11 @@ const ApplyPage = () => {
           <AlertTitle>Accès refusé</AlertTitle>
           <AlertDescription>
             Vous devez être un étudiant pour postuler à cette offre.
+            Données disponibles: {JSON.stringify({
+              role: user.role,
+              hasStudentObject: !!user.student,
+              studentId: user.student?.id
+            })}
           </AlertDescription>
         </Alert>
         <div className="flex justify-center mt-6">

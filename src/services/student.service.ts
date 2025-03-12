@@ -3,13 +3,19 @@ import {
   StudentWithRelation,
   StudentFormData,
 } from "@/types/student.type";
+import { 
+  StudentResponseDto,
+  CreateStudentDto,
+  UpdateStudentDto,
+  StudentSearchDto
+} from "@/types/dto/student.dto";
 import axios from "axios";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchStudents(
-  params: GetAllParams
-): Promise<StudentWithRelation[]> {
+  params: StudentSearchDto
+): Promise<StudentResponseDto[]> {
   const url = `${baseUrl}/api/student`;
 
   // Construction d'un objet de paramètres de requête
@@ -24,39 +30,40 @@ async function fetchStudents(
     // Axios va sérialiser le tableau en répétant le paramètre dans l'URL
     queryObject.skills = params.skills;
   }
-  if (params.userId) {
-    queryObject.userId = [params.userId];
+  if (params.schoolId) {
+    queryObject.schoolId = [params.schoolId];
+  }
+  if (params.query) {
+    queryObject.query = [params.query];
   }
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;
 }
 
-async function fetchStudentById(id: string): Promise<StudentWithRelation> {
+async function fetchStudentById(id: string): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student/${id}`;
 
   const response = await axios.get(url);
   return response.data;
 }
 
-interface UpdateStudentData {
-  firstName?: string;
-  lastName?: string;
-  status?: string;
-  isAvailable?: boolean;
-  description?: string;
-  skillsId?: string[];
-  profilePictureId?: string;
-  CVId?: string;
-  email?: string;
-  schoolId?: string;
-  userId?: string;
+async function fetchStudentApplications(id: string) {
+  try {
+    // Importer dynamiquement le service StudentApplyService
+    const { default: StudentApplyService } = await import('./studentApply.service');
+    // Utiliser la méthode fetchStudentApplies de ce service
+    return await StudentApplyService.fetchStudentApplies(id);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des candidatures:", error);
+    throw error;
+  }
 }
 
 async function updateStudent(
   id: string,
-  data: UpdateStudentData
-): Promise<StudentWithRelation> {
+  data: UpdateStudentDto
+): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student/${id}`;
   console.log("URL de l'API:", url);
   console.log("Données envoyées:", data);
@@ -71,8 +78,8 @@ async function updateStudent(
 }
 
 async function createStudent(
-  data: StudentFormData
-): Promise<StudentWithRelation> {
+  data: CreateStudentDto
+): Promise<StudentResponseDto> {
   const url = `${baseUrl}/api/student`;
 
   const response = await axios.post(url, data);
@@ -91,6 +98,7 @@ const StudentService = {
   fetchStudentById,
   updateStudent,
   createStudent,
+  fetchStudentApplications,
   deleteStudent,
 };
 
