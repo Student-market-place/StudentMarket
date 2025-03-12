@@ -53,7 +53,9 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-center justify-center gap-2 text-center">
           <h2 className="text-xl md:text-2xl font-bold">+ 30</h2>
-          <p className="text-sm md:text-base">Entreprises nous font confiance</p>
+          <p className="text-sm md:text-base">
+            Entreprises nous font confiance
+          </p>
         </div>
       </div>
 
@@ -138,7 +140,7 @@ export default function Home() {
               sera dédié à la plateforme, avec un tableau de bord incluant des
               visualisations de données et la liste des étudiants inscrits.
             </p>
-            <Link href="/contact">
+            <Link href="mailto:contact@studentmarket.fr">
               <Button className="bg-blue-500 hover:bg-blue-700 w-fit">
                 Devenir Partenaire
               </Button>
