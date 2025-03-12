@@ -45,10 +45,12 @@ interface UpdateStudentData {
   status?: string;
   isAvailable?: boolean;
   description?: string;
-  skillIds?: string[];
+  skillsId?: string[];
   profilePictureId?: string;
   CVId?: string;
   email?: string;
+  schoolId?: string;
+  userId?: string;
 }
 
 async function updateStudent(
@@ -56,9 +58,16 @@ async function updateStudent(
   data: UpdateStudentData
 ): Promise<StudentWithRelation> {
   const url = `${baseUrl}/api/student/${id}`;
+  console.log("URL de l'API:", url);
+  console.log("Données envoyées:", data);
 
-  const response = await axios.put(url, data);
-  return response.data;
+  try {
+    const response = await axios.put(url, data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur API:", error.response?.data);
+    throw error;
+  }
 }
 
 async function createStudent(
@@ -70,11 +79,19 @@ async function createStudent(
   return response.data;
 }
 
+async function deleteStudent(id: string): Promise<StudentWithRelation> {
+  const url = `${baseUrl}/api/student/${id}`;
+
+  const response = await axios.delete(url);
+  return response.data;
+}
+
 const StudentService = {
   fetchStudents,
   fetchStudentById,
   updateStudent,
   createStudent,
+  deleteStudent,
 };
 
 export default StudentService;

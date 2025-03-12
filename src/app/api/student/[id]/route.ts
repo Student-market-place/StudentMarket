@@ -1,8 +1,21 @@
 import { IParams } from "@/types/api.type";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma, EnumStatusTYpe } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
+
+interface StudentUpdateData extends Omit<Prisma.StudentUpdateInput, "status"> {
+  firstName: string;
+  lastName: string;
+  status: EnumStatusTYpe;
+  description: string;
+  isAvailable: boolean;
+  user: { connect: { id: string } };
+  skills?: { set: { id: string }[] };
+  school: { connect: { id: string } };
+  CV?: { connect: { id: string } };
+  profilePicture?: { connect: { id: string } };
+}
 
 export async function GET(req: NextRequest, { params }: IParams) {
   const { id } = await params;
@@ -46,16 +59,7 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     profilePictureId,
   } = await req.json();
 
-  if (
-    !firstName ||
-    !lastName ||
-    !status ||
-    !userId ||
-    !skillsId ||
-    !schoolId ||
-    !CVId ||
-    !profilePictureId
-  ) {
+  if (!firstName || !lastName || !status || !userId || !schoolId) {
     return NextResponse.json(
       { error: "Veuillez renseigner tous les champs obligatoires" },
       { status: 400 }
@@ -63,26 +67,49 @@ export async function PUT(req: NextRequest, { params }: IParams) {
   }
 
   try {
+    const updateData: StudentUpdateData = {
+      firstName,
+      lastName,
+      status:
+        status === "internship"
+          ? EnumStatusTYpe.stage
+          : EnumStatusTYpe.alternance,
+      description,
+      isAvailable,
+      user: { connect: { id: userId } },
+      school: { connect: { id: schoolId } },
+    };
+
+    // Only add skills if skillsId is provided and is an array
+    if (Array.isArray(skillsId)) {
+      updateData.skills = { set: skillsId.map((id: string) => ({ id })) };
+    }
+
+    if (CVId) {
+      updateData.CV = { connect: { id: CVId } };
+    }
+
+    if (profilePictureId) {
+      updateData.profilePicture = { connect: { id: profilePictureId } };
+    }
+
     const student = await prisma.student.update({
       where: {
         id: id,
       },
-      data: {
-        firstName,
-        lastName,
-        status,
-        description,
-        isAvailable,
-        user: { connect: { id: userId } },
-        skills: { set: skillsId.map((id: string) => ({ id })) },
-        school: { connect: { id: schoolId } },
-        CV: { connect: { id: CVId } },
-        profilePicture: { connect: { id: profilePictureId } },
+      data: updateData,
+      include: {
+        user: true,
+        skills: true,
+        school: true,
+        CV: true,
+        profilePicture: true,
       },
     });
 
     return NextResponse.json(student, { status: 200 });
   } catch (error) {
+    console.error("Erreur lors de la mise à jour:", error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
