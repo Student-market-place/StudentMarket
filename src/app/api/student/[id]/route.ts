@@ -82,8 +82,8 @@ export async function PUT(req: NextRequest, { params }: IParams) {
     };
 
     // Only add skills if skillsId is provided and is an array
-    if (Array.isArray(skillsId)) {
-      updateData.skills = { set: skillsId.map((id: string) => ({ id })) };
+    if (Array.isArray(skillIds)) {
+      updateData.skills = { set: skillIds.map((id: string) => ({ id })) };
     }
 
     if (CVId) {
