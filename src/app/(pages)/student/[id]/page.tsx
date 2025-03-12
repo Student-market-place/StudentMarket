@@ -57,6 +57,25 @@ const StudentProfilPage = () => {
     }
   }, [id]);
 
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = student?.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, utiliser l'image par défaut
+      if (!url) return "/default-avatar.png";
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, utiliser l'image par défaut
+      console.warn("URL d'image invalide pour l'étudiant:", student?.firstName, student?.lastName);
+      return "/default-avatar.png";
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh] p-4">
@@ -99,7 +118,7 @@ const StudentProfilPage = () => {
         <div className="w-full lg:w-1/3 flex flex-col gap-6 items-center">
           <div className="w-full flex justify-center">
             <Image
-              src={student?.profilePicture?.url || "/default-avatar.png"}
+              src={getValidImageUrl()}
               width={200}
               height={200}
               className="w-[150px] h-[150px] md:w-[200px] md:h-[200px] rounded-xl object-cover shadow-lg"

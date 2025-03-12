@@ -13,7 +13,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
  * @returns Liste des compétences
  */
 async function fetchSkills(): Promise<SkillResponseDto[]> {
-  const url = `${baseUrl}/api/skill`;
+  const url = `${baseUrl}/api/skills`;
   const response = await axios.get(url);
   return response.data;
 }
@@ -24,7 +24,7 @@ async function fetchSkills(): Promise<SkillResponseDto[]> {
  * @returns Liste des compétences correspondantes
  */
 async function searchSkills(searchParams: SkillSearchDto): Promise<SkillResponseDto[]> {
-  const url = `${baseUrl}/api/skill`;
+  const url = `${baseUrl}/api/skills`;
   
   // Construction des paramètres de requête
   const params: Record<string, string> = {};
@@ -62,7 +62,7 @@ async function fetchSkill(id: string): Promise<SkillResponseDto> {
  * @returns La compétence créée
  */
 async function createSkill(skill: CreateSkillDto): Promise<SkillResponseDto> {
-  const url = `${baseUrl}/api/skill`;
+  const url = `${baseUrl}/api/skills`;
   const response = await axios.post(url, skill);
   return response.data;
 }

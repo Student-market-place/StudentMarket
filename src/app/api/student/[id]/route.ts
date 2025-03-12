@@ -64,6 +64,14 @@ export async function GET(req: NextRequest, { params }: IParams) {
         id: student.user.id,
         email: student.user.email,
         name: student.user.name
+      } : undefined,
+      profilePicture: student.profilePicture ? {
+        id: student.profilePicture.id,
+        url: student.profilePicture.url
+      } : undefined,
+      CV: student.CV ? {
+        id: student.CV.id,
+        url: student.CV.url
       } : undefined
     };
 

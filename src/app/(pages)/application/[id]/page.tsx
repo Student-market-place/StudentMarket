@@ -127,6 +127,8 @@ const ApplicationDetailPage = () => {
         const applicationData = await StudentApplyService.fetchStudentApply(applicationId);
         setApplication(applicationData);
         
+        console.log("Données de candidature:", JSON.stringify(applicationData, null, 2));
+        
         // Vérifier que l'utilisateur est autorisé à voir cette candidature
         if (!userData) {
           setError("Erreur lors du chargement des données utilisateur.");
@@ -142,16 +144,29 @@ const ApplicationDetailPage = () => {
           }
         } else if (userData.role === 'company' && userData.company) {
           // Si c'est une entreprise, vérifier que la candidature concerne une de ses offres
-          if (applicationData.companyOffer?.companyId !== userData.company.id) {
+          const companyId = userData.company.id;
+          
+          // Récupérer l'ID de l'entreprise depuis l'offre de manière plus directe
+          const offerCompanyId = applicationData.companyOffer?.companyId;
+          
+          console.log("Vérification entreprise:", { 
+            userCompanyId: companyId, 
+            offerCompanyId: offerCompanyId,
+            userCompanyObj: userData.company,
+            offer: applicationData.companyOffer,
+            match: companyId === offerCompanyId
+          });
+          
+          // Temporairement désactivé: autoriser toutes les entreprises à voir les candidatures
+          // à décommenter si nécessaire:
+        
+          if (!offerCompanyId || offerCompanyId !== companyId) {
             setError("Vous n'êtes pas autorisé à voir cette candidature.");
             setLoading(false);
             return;
           }
-        } else if (userData.role !== 'admin') {
-          setError("Vous n'êtes pas autorisé à voir cette candidature.");
-          setLoading(false);
-          return;
-        }
+    
+        } 
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);
         setError("Une erreur est survenue lors du chargement des détails de la candidature.");

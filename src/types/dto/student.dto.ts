@@ -58,6 +58,14 @@ export interface StudentResponseDto {
     email: string;
     name: string | null;
   };
+  profilePicture?: {
+    id: string;
+    url: string;
+  };
+  CV?: {
+    id: string;
+    url: string;
+  };
 }
 
 /**

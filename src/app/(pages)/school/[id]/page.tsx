@@ -169,6 +169,25 @@ const DashboardContent = () => {
     .sort(([, countA], [, countB]) => Number(countB) - Number(countA))
     .slice(0, 5);
 
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = school.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, retourner undefined
+      if (!url) return undefined;
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, retourner undefined
+      console.warn("URL d'image invalide pour l'école:", school.name);
+      return undefined;
+    }
+  };
+
   return (
     <div className="space-y-8 p-12">
       {/* En-tête avec informations de l'école */}
@@ -176,7 +195,7 @@ const DashboardContent = () => {
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">
             <AvatarImage
-              src={school.profilePicture?.url || ""}
+              src={getValidImageUrl()}
               alt={school.name}
             />
             <AvatarFallback>

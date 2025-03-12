@@ -92,6 +92,11 @@ const StudentUpdateForm = ({
     }
     return null;
   };
+  
+  // Créer un état local pour l'image de profil
+  const [localProfilePicture, setLocalProfilePicture] = useState<string | null>(getProfilePictureUrl());
+  // Créer un état local pour le CV
+  const [localCvUrl, setLocalCvUrl] = useState<string | null>(getCvUrl());
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -132,6 +137,9 @@ const StudentUpdateForm = ({
         profilePictureId: data.fileId,
       });
 
+      // Mettre à jour l'état local pour afficher la nouvelle image immédiatement
+      setLocalProfilePicture(data.url);
+      
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Photo de profil mise à jour avec succès");
     } catch (error) {
@@ -166,6 +174,9 @@ const StudentUpdateForm = ({
         id: student.id,
         CVId: data.fileId,
       });
+
+      // Mettre à jour l'état local pour afficher le nouveau CV immédiatement
+      setLocalCvUrl(data.url);
 
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("CV mis à jour avec succès");
@@ -316,24 +327,12 @@ const StudentUpdateForm = ({
                 <div className="space-y-4">
                   <FormLabel>Photo de profil</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {getProfilePictureUrl() && (
-                      <div className="border rounded-lg p-2 w-full flex justify-center">
-                        <Image
-                          src={getProfilePictureUrl() as string}
-                          alt="Photo de profil"
-                          width={120}
-                          height={120}
-                          className="rounded-full object-cover"
-                        />
-                      </div>
-                    )}
                     <div className="w-full">
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
                         className="w-full"
-                        disabled
                       />
                       {isFileUploading && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -347,10 +346,10 @@ const StudentUpdateForm = ({
                 <div className="space-y-4">
                   <FormLabel>CV</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {getCvUrl() && (
+                    {localCvUrl && (
                       <div className="border rounded-lg p-3 w-full">
                         <a
-                          href={getCvUrl() as string}
+                          href={localCvUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline flex items-center"
@@ -379,7 +378,6 @@ const StudentUpdateForm = ({
                         accept=".pdf,.doc,.docx"
                         onChange={handleCVChange}
                         className="w-full"
-                        disabled
                       />
                       {isCVUploading && (
                         <p className="text-sm text-gray-500 mt-1">

@@ -114,6 +114,34 @@ const ApplicationsPage = () => {
         }
         
         const userData = await UserService.fetchUserById(userId);
+        
+        // Récupérer les données d'étudiant si l'utilisateur est un étudiant mais que l'objet student est absent
+        if (userData && userData.role === 'student' && !userData.student) {
+          try {
+            console.log("Tentative de récupération des données d'étudiant pour l'utilisateur:", userData.id);
+            const studentsResponse = await fetch('/api/student/filter?userId=' + userData.id);
+            
+            if (!studentsResponse.ok) {
+              throw new Error('Aucun étudiant trouvé pour cet utilisateur');
+            }
+            
+            const students = await studentsResponse.json();
+            
+            if (students && students.length > 0) {
+              // Vérifier que l'étudiant appartient bien à l'utilisateur actuel
+              const matchingStudent = students.find((s: any) => s.userId === userData.id);
+              if (matchingStudent) {
+                userData.student = matchingStudent;
+                console.log("Données d'étudiant récupérées pour la page d'applications:", userData.student);
+              } else {
+                console.warn("⚠️ Étudiant trouvé mais avec un userId différent");
+              }
+            }
+          } catch (error) {
+            console.error("Impossible de récupérer les données d'étudiant:", error);
+          }
+        }
+        
         setUser(userData);
         
         // Vérifier si l'utilisateur est un étudiant
