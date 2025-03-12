@@ -16,11 +16,32 @@ interface CardStudentProps {
 }
 
 const CardStudent = ({ student }: CardStudentProps) => {
+  // Fonction pour vérifier si l'URL est valide
+  const getValidImageUrl = () => {
+    try {
+      // Vérifier si profilePicture existe et si l'URL est définie
+      const url = student.profilePicture?.url;
+      
+      // Si l'URL n'existe pas ou est vide, utiliser l'image par défaut
+      if (!url) return "/default-avatar.png";
+      
+      // Vérifier si l'URL est valide en essayant de créer un objet URL
+      new URL(url);
+      return url;
+    } catch (error) {
+      // En cas d'URL invalide, utiliser l'image par défaut
+      console.warn("URL d'image invalide pour l'étudiant:", student.firstName, student.lastName);
+      return "/default-avatar.png";
+    }
+  };
+
+  const imageUrl = getValidImageUrl();
+
   return (
     <Card className="flex flex-col h-fit gap-2 w-[250px] p-0 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0">
         <Image
-          src={student.profilePicture?.url ?? "/default-avatar.png"}
+          src={imageUrl}
           alt="Student"
           width={250}
           height={140}

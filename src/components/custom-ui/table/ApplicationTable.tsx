@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Pencil,
   Trash2,
@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Search,
   ArrowUpDown,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,59 +21,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
-const applications = [
-  {
-    title: "Software Developer",
-    company: "Google",
-    type: "Internship",
-    startDate: "2022-06-01",
-    endDate: "2022-08-31",
-  },
-  {
-    title: "Data Analyst",
-    company: "Microsoft",
-    type: "Apprenticeship",
-    startDate: "2022-09-15",
-    endDate: "2023-09-14",
-  },
-  {
-    title: "Cybersecurity Engineer",
-    company: "IBM",
-    type: "Internship",
-    startDate: "2023-10-01",
-    endDate: "2023-12-31",
-  },
-  {
-    title: "Machine Learning Engineer",
-    company: "Meta",
-    type: "Internship",
-    startDate: "2024-01-10",
-    endDate: "2024-04-10",
-  },
-  {
-    title: "Cloud Engineer",
-    company: "Amazon",
-    type: "Apprenticeship",
-    startDate: "2024-05-01",
-    endDate: "2025-03-01",
-  },
-  {
-    title: "Frontend Developer",
-    company: "Netflix",
-    type: "Internship",
-    startDate: "2025-03-10",
-    endDate: null,
-  },
-];
+import StudentService from "@/services/student.service";
+import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
+import { Apply_Status } from "@prisma/client";
 
-type SortField = "title" | "company" | "type" | "startDate" | "endDate";
+interface ApplicationTableProps {
+  studentId: string;
+}
+
+type SortField = "title" | "company" | "type" | "status" | "createdAt";
 type SortDirection = "asc" | "desc";
 
-export function ApplicationTable() {
+export function ApplicationTable({ studentId }: ApplicationTableProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<SortField>("endDate");
+  const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [applications, setApplications] = useState<StudentApplyResponseDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -83,50 +52,125 @@ export function ApplicationTable() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Ongoing";
+  useEffect(() => {
+    async function loadApplications() {
+      try {
+        setLoading(true);
+        const data = await StudentService.fetchStudentApplications(studentId);
+        setApplications(data);
+        setError(null);
+      } catch (err) {
+        console.error("Erreur lors du chargement des candidatures:", err);
+        setError("Une erreur est survenue lors du chargement des candidatures.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
+    loadApplications();
+  }, [studentId]);
+
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat("fr-FR", {
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
     }).format(date);
   };
 
+  // Fonction pour obtenir la classe de couleur du badge selon le statut
+  const getStatusBadgeClass = (status: Apply_Status) => {
+    switch (status) {
+      case 'en_attente':
+        return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'accepte':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'refuse':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Fonction pour traduire le statut
+  const getStatusLabel = (status: Apply_Status) => {
+    switch (status) {
+      case 'en_attente':
+        return 'En attente';
+      case 'accepte':
+        return 'Acceptée';
+      case 'refuse':
+        return 'Refusée';
+      default:
+        return status;
+    }
+  };
+
   const filteredAndSortedData = useMemo(() => {
+    // Filtre les applications
     const filtered = applications.filter((application) => {
       if (!searchTerm) return true;
 
       const searchLower = searchTerm.toLowerCase();
 
       return (
-        application.title.toLowerCase().includes(searchLower) ||
-        application.company.toLowerCase().includes(searchLower)
+        (application.companyOffer?.title || "").toLowerCase().includes(searchLower) ||
+        (application.companyOffer?.company?.name || "").toLowerCase().includes(searchLower)
       );
     });
 
+    // Trie les applications
     return [...filtered].sort((a, b) => {
-      if (sortField === "startDate" || sortField === "endDate") {
-        if (sortField === "endDate") {
-          if (a.endDate === null && b.endDate === null) return 0;
-          if (a.endDate === null) return sortDirection === "desc" ? -1 : 1;
-          if (b.endDate === null) return sortDirection === "desc" ? 1 : -1;
-        }
-
-        const dateA = new Date(a[sortField] || "");
-        const dateB = new Date(b[sortField] || "");
-
+      if (sortField === "createdAt") {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
         return sortDirection === "asc"
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
-      } else {
+      } else if (sortField === "status") {
         return sortDirection === "asc"
-          ? a[sortField].localeCompare(b[sortField])
-          : b[sortField].localeCompare(a[sortField]);
+          ? a.status.localeCompare(b.status)
+          : b.status.localeCompare(a.status);
+      } else if (sortField === "title") {
+        const titleA = a.companyOffer?.title || "";
+        const titleB = b.companyOffer?.title || "";
+        return sortDirection === "asc"
+          ? titleA.localeCompare(titleB)
+          : titleB.localeCompare(titleA);
+      } else if (sortField === "company") {
+        const companyA = a.companyOffer?.company?.name || "";
+        const companyB = b.companyOffer?.company?.name || "";
+        return sortDirection === "asc"
+          ? companyA.localeCompare(companyB)
+          : companyB.localeCompare(companyA);
+      } else if (sortField === "type") {
+        // Type n'est pas disponible dans StudentApplyResponseDto
+        return 0;
       }
+      return 0;
     });
-  }, [searchTerm, sortField, sortDirection]);
+  }, [searchTerm, sortField, sortDirection, applications]);
+
+  if (loading) {
+    return (
+      <div className="space-y-4 p-12">
+        <div className="text-center py-10">
+          Chargement des candidatures...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4 p-12">
+        <div className="text-center py-10 text-red-500">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 p-12">
@@ -137,7 +181,7 @@ export function ApplicationTable() {
           </div>
           <Input
             type="text"
-            placeholder="Search by title or company..."
+            placeholder="Rechercher par titre ou entreprise..."
             className="pl-10 pr-4 py-2 border rounded-md w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -157,7 +201,7 @@ export function ApplicationTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("title")}
                     >
-                      <span>Title</span>
+                      <span>Titre</span>
                       {sortField === "title" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -175,7 +219,7 @@ export function ApplicationTable() {
                       className="h-7 p-0 hover:bg-transparent font-medium"
                       onClick={() => handleSort("company")}
                     >
-                      <span>Company</span>
+                      <span>Entreprise</span>
                       {sortField === "company" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
@@ -187,7 +231,7 @@ export function ApplicationTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[15%] text-center">
+                  <TableHead className="w-[15%]">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
@@ -205,14 +249,14 @@ export function ApplicationTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[15%] text-center">
+                  <TableHead className="w-[15%]">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
-                      onClick={() => handleSort("startDate")}
+                      onClick={() => handleSort("status")}
                     >
-                      <span>Start Date</span>
-                      {sortField === "startDate" ? (
+                      <span>Statut</span>
+                      {sortField === "status" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
                         ) : (
@@ -223,14 +267,14 @@ export function ApplicationTable() {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[15%] text-center">
+                  <TableHead className="w-[15%]">
                     <Button
                       variant="ghost"
                       className="h-7 p-0 hover:bg-transparent font-medium"
-                      onClick={() => handleSort("endDate")}
+                      onClick={() => handleSort("createdAt")}
                     >
-                      <span>End Date</span>
-                      {sortField === "endDate" ? (
+                      <span>Date</span>
+                      {sortField === "createdAt" ? (
                         sortDirection === "asc" ? (
                           <ChevronUp className="ml-2 h-4 w-4" />
                         ) : (
@@ -255,52 +299,37 @@ export function ApplicationTable() {
                 {filteredAndSortedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-
-                      No applications found matching &quot;{searchTerm}&quot;.
-
+                      {searchTerm 
+                        ? `Aucune candidature trouvée pour "${searchTerm}".`
+                        : "Vous n'avez pas encore de candidature."}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAndSortedData.map((application, index) => (
-                    <TableRow
-                      key={`${application.title}-${application.company}-${index}`}
-                    >
+                  filteredAndSortedData.map((application) => (
+                    <TableRow key={application.id}>
                       <TableCell className="w-[25%] font-medium">
-                        {application.title}
+                        {application.companyOffer?.title || "Offre non disponible"}
                       </TableCell>
                       <TableCell className="w-[20%]">
-                        {application.company}
+                        {application.companyOffer?.company?.name || "Entreprise inconnue"}
                       </TableCell>
-                      <TableCell className="w-[15%] text-center">
+                      <TableCell className="w-[15%]">
                         <Badge
-                          variant={
-                            application.type === "Internship"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className={
-                            application.type === "Internship"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                          }
+                          variant="outline"
                         >
-                          {application.type}
+                          Stage/Alternance
                         </Badge>
                       </TableCell>
-                      <TableCell className="w-[15%] text-center">
-                        {formatDate(application.startDate)}
+                      <TableCell className="w-[15%]">
+                        <Badge
+                          variant="outline"
+                          className={getStatusBadgeClass(application.status)}
+                        >
+                          {getStatusLabel(application.status)}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="w-[15%] text-center">
-                        {application.endDate ? (
-                          formatDate(application.endDate)
-                        ) : (
-                          <Badge
-                            variant="success"
-                            className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          >
-                            Ongoing
-                          </Badge>
-                        )}
+                      <TableCell className="w-[15%]">
+                        {formatDate(application.createdAt)}
                       </TableCell>
                       <TableCell className="w-[10%] text-center">
                         <div className="flex justify-center gap-2">
@@ -308,15 +337,19 @@ export function ApplicationTable() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 cursor-pointer"
+                            onClick={() => router.push(`/application/${application.id}`)}
+                            title="Voir les détails"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive/90 cursor-pointer"
+                            className="h-8 w-8 cursor-pointer"
+                            onClick={() => router.push(`/offer/${application.companyOfferId}`)}
+                            title="Voir l'offre"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

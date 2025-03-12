@@ -44,14 +44,14 @@ export default {
           });
 
           if (!response.ok) {
-            console.error("❌ Échec de l'envoi d'email. Status:", response.status);
+            console.error(
+              "❌ Échec de l'envoi d'email. Status:",
+              response.status
+            );
             const errorData = await response.json();
             console.error("📛 Détails de l'erreur:", errorData);
             throw new Error(`Erreur HTTP: ${response.status}`);
           }
-
-          const responseData = await response.json();
-
         } catch (error) {
           console.error("❌ Erreur lors de l'envoi de l'email:", error);
           throw error;
@@ -61,7 +61,6 @@ export default {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-
       if (account && user) {
         token.accessToken = account.access_token;
         token.id = user.id;
@@ -72,7 +71,6 @@ export default {
       return token;
     },
     async session({ session, token }) {
-
       session.accessToken = token.accessToken as string;
       session.user.id = token.id as string;
       session.user.email = (token.email as string) ?? null;
@@ -81,34 +79,32 @@ export default {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      
       try {
         let email;
-        
+
         // Cas spécial pour le callback Resend
-        if (url.includes('/api/auth/callback/resend')) {
-          const params = new URLSearchParams(url.split('?')[1]);
-          email = params.get('email');
+        if (url.includes("/api/auth/callback/resend")) {
+          const params = new URLSearchParams(url.split("?")[1]);
+          email = params.get("email");
           return `${baseUrl}/auth/create-account?email=${email}`;
         }
-        
+
         // Pour les autres cas
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        email = urlParams.get('email');
-        
-        if (url.includes('/auth/create-account')) {
-          
-          if (url.includes('/api/auth/callback/google')) {
+        const urlParams = new URLSearchParams(url.split("?")[1]);
+        email = urlParams.get("email");
+
+        if (url.includes("/auth/create-account")) {
+          if (url.includes("/api/auth/callback/google")) {
           }
-          
+
           if (email) {
             const decodedEmail = decodeURIComponent(email);
             try {
               const user = await prisma.user.findUnique({
                 where: { email: decodedEmail },
-                include: { student: true, company: true }
-              })
-              
+                include: { student: true, company: true },
+              });
+
               if (user?.student || user?.company) {
                 return `${baseUrl}/home?email=${email}`;
               }
@@ -116,21 +112,29 @@ export default {
               console.error("❌ Erreur vérification utilisateur:", error);
             }
           }
-          
-          const redirectUrl = email ? `${baseUrl}/auth/create-account?email=${email}` : `${baseUrl}/auth/create-account`;
+
+          const redirectUrl = email
+            ? `${baseUrl}/auth/create-account?email=${email}`
+            : `${baseUrl}/auth/create-account`;
           return redirectUrl;
         }
-        
-        if (url.includes('/auth/signin') || url === baseUrl || url === `${baseUrl}/`) {
+
+        if (
+          url.includes("/auth/signin") ||
+          url === baseUrl ||
+          url === `${baseUrl}/`
+        ) {
           return `${baseUrl}/home`;
         }
-        
+
         // Si l'URL contient un email, le préserver dans la redirection
         if (email) {
-          const finalUrl = url.includes('?') ? `${url}&email=${email}` : `${url}?email=${email}`;
+          const finalUrl = url.includes("?")
+            ? `${url}&email=${email}`
+            : `${url}?email=${email}`;
           return finalUrl;
         }
-        
+
         return url;
       } catch (error) {
         console.error("❌ Erreur dans redirect:", error);

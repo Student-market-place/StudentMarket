@@ -3,14 +3,20 @@ import {
   CompanyOfferWithRelation,
   GetAllParams,
 } from "@/types/companyOffer.type";
+import { 
+  CompanyOfferResponseDto,
+  CreateCompanyOfferDto,
+  UpdateCompanyOfferDto,
+  CompanyOfferSearchDto
+} from "@/types/dto/company-offer.dto";
 import axios from "axios";
 
-const END_POINT = `${process.env.NEXT_PUBLIC_API_URL}/company_offer`;
+// Utiliser la même base URL pour toutes les requêtes
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchCompanyOffers(
-  params: GetAllParams
-): Promise<CompanyOfferWithRelation[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  params: CompanyOfferSearchDto
+): Promise<CompanyOfferResponseDto[]> {
   const url = `${baseUrl}/api/company_offer`;
 
   // Construction d'un objet de paramètres de requête
@@ -23,39 +29,62 @@ async function fetchCompanyOffers(
     queryObject.skills = params.skills;
   }
   if (params.type) {
-    queryObject.type = [params.type];
+    queryObject.type = [params.type.toString()];
+  }
+  if (params.companyId) {
+    queryObject.companyId = [params.companyId];
+  }
+  if (params.query) {
+    queryObject.query = [params.query];
+  }
+  if (params.startDateFrom) {
+    queryObject.startDateFrom = [params.startDateFrom.toISOString()];
+  }
+  if (params.startDateTo) {
+    queryObject.startDateTo = [params.startDateTo.toISOString()];
   }
 
   const response = await axios.get(url, { params: queryObject });
   return response.data;
 }
 
-async function fetchCompanyOffer(id: string): Promise<CompanyOffer> {
-  const response = await axios.get(`${END_POINT}/${id}`);
+async function fetchCompanyOffer(id: string): Promise<CompanyOfferResponseDto> {
+  const url = `${baseUrl}/api/company_offer/${id}`;
+  const response = await axios.get(url);
+  return response.data;
+}
+
+async function fetchCompanyOffersByCompany(
+  companyId: string
+): Promise<CompanyOfferResponseDto[]> {
+  const url = `${baseUrl}/api/company_offer/company/${companyId}`;
+  const response = await axios.get(url);
   return response.data;
 }
 
 async function postCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
-  const response = await axios.post(END_POINT, companyOffer);
+  companyOffer: CreateCompanyOfferDto
+): Promise<CompanyOfferResponseDto> {
+  const url = `${baseUrl}/api/company_offer`;
+  const response = await axios.post(url, companyOffer);
   return response.data;
 }
 
 async function putCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
-  const response = await axios.put(
-    `${END_POINT}/${companyOffer.id}`,
-    companyOffer
-  );
+  companyOffer: UpdateCompanyOfferDto
+): Promise<CompanyOfferResponseDto> {
+  if (!companyOffer.id) {
+    throw new Error("ID de l'offre est requis pour la mise à jour");
+  }
+  
+  const url = `${baseUrl}/api/company_offer/${companyOffer.id}`;
+  const response = await axios.put(url, companyOffer);
   return response.data;
 }
 
-async function deleteCompanyOffer(
-  companyOffer: CompanyOffer
-): Promise<CompanyOffer> {
-  const response = await axios.delete(`${END_POINT}/${companyOffer.id}`);
+async function deleteCompanyOffer(id: string): Promise<CompanyOfferResponseDto> {
+  const url = `${baseUrl}/api/company_offer/${id}`;
+  const response = await axios.delete(url);
   return response.data;
 }
 
@@ -65,6 +94,7 @@ const CompanyOfferService = {
   postCompanyOffer,
   putCompanyOffer,
   deleteCompanyOffer,
+  fetchCompanyOffersByCompany,
 };
 
 export default CompanyOfferService;

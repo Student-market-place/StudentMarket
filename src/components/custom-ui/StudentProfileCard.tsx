@@ -1,4 +1,5 @@
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto } from "@/types/dto/student.dto";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
@@ -11,16 +12,27 @@ import {
 import { Label } from "../ui/label";
 
 interface StudentProfileCardProps {
-  student: StudentWithRelation;
+  student: StudentWithRelation | StudentResponseDto;
 }
 
 const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
+  // Récupérer l'URL de la photo de profil de façon sécurisée
+  const getProfilePictureUrl = () => {
+    if ('profilePicture' in student && student.profilePicture?.url) {
+      return student.profilePicture.url;
+    }
+    if (student.profilePictureId) {
+      return `/api/file/${student.profilePictureId}`;
+    }
+    return "/default-avatar.png";
+  };
+
   return (
     <Card className="flex flex-col h-fit gap-2 w-[300px] pt-0 shadow-lg rounded-2xl overflow-hidden border-2  transition-all">
       <CardHeader className="p-4 items-center">
         <Avatar className="w-35 h-35 relative">
           <AvatarImage
-            src={student.profilePicture?.url || "/default-avatar.png"}
+            src={getProfilePictureUrl()}
             className="object-cover"
             alt="Student"
           />
@@ -35,7 +47,7 @@ const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
             {student?.firstName} {student?.lastName}
           </CardTitle>
           <CardDescription className="text-xs text-gray-500">
-            {student?.user.email}
+            {student?.user?.email || ""}
           </CardDescription>
         </div>
       </CardHeader>
@@ -54,12 +66,12 @@ const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
         </div>
         <div>
           <Label>Ecole :</Label>
-          <div className="text-gray-700">{student?.school.name}</div>
+          <div className="text-gray-700">{student?.school?.name || ""}</div>
         </div>
         <div>
           <Label>Skills :</Label>
           <div className="flex flex-wrap gap-1 mt-1">
-            {student?.skills?.map((skill, index) => (
+            {student?.skills?.map((skill: any, index: number) => (
               <Badge key={index} variant="secondary" className="text-gray-700">
                 {skill?.name}
               </Badge>
@@ -70,7 +82,7 @@ const StudentProfileCard = ({ student }: StudentProfileCardProps) => {
           <Label>Decription : </Label>
           <Card className="mt-2 p-1 bg-gray-100 rounded-sm ">
             <CardContent className="text-sm text-gray-700 p-1">
-              {student?.description.length > 100
+              {student?.description?.length > 100
                 ? student?.description.slice(0, 100) + "..."
                 : student?.description}
             </CardContent>

@@ -1,4 +1,5 @@
 import { CompanyOfferWithRelation } from "@/types/companyOffer.type";
+import { CompanyOfferResponseDto } from "@/types/dto/company-offer.dto";
 import { Badge } from "../ui/badge";
 import {
   Card,
@@ -8,12 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CardJobOfferProps {
-  jobOffer: CompanyOfferWithRelation;
+  jobOffer: CompanyOfferWithRelation | CompanyOfferResponseDto;
 }
 
 const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
+  const router = useRouter();
+  
   return (
     <Card className=" w-[250px] p-4 shadow-lg rounded-2xl overflow-hidden border-2 border-transparent  transition-all">
       <CardHeader className="p-0 text-center">
@@ -29,18 +34,25 @@ const CardJobOffer = ({ jobOffer }: CardJobOfferProps) => {
         <div className="flex item-center justify-center flex-wrap gap-1 mt-1 ">
           {jobOffer.skills?.map((skill, index) => (
             <Badge key={index} variant="secondary">
-              {skill.name}
+              {typeof skill === 'string' ? skill : skill.name}
             </Badge>
           ))}
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 px-3 pb-3 text-center text-xs text-gray-400  justify-center item-center">
-        <button className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition">
+        <button 
+          className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition"
+          onClick={() => router.push(`/apply/${jobOffer.id}`)}
+        >
           Postuler
         </button>
-        <button className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition">
-          Détails
-        </button>
+        <Link href={`/offer/${jobOffer.id}`}>
+          <button
+            className="bg-blue-500 text-white px-4 py-1 rounded-md text-xs hover:bg-blue-600 transition"
+          >
+            Détails
+          </button>
+        </Link>
       </CardFooter>
     </Card>
   );

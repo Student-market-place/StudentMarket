@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { SessionEmailResponseDto } from "@/types/dto/auth.dto";
 
 // Route pour récupérer l'email de la session
 export async function GET() {
@@ -15,8 +16,13 @@ export async function GET() {
       );
     }
 
+    // Construction du DTO de réponse
+    const responseDto: SessionEmailResponseDto = {
+      email
+    };
+
     // Retourner l'email
-    return NextResponse.json({ email });
+    return NextResponse.json(responseDto);
   } catch (error) {
     console.error("Erreur lors de la récupération de l'email:", error);
     return NextResponse.json(
@@ -40,8 +46,14 @@ export async function POST() {
       );
     }
 
+    // Construction du DTO de réponse
+    const responseDto: SessionEmailResponseDto = {
+      email,
+      success: true
+    };
+
     // Créer une réponse avec l'email
-    const response = NextResponse.json({ email, success: true });
+    const response = NextResponse.json(responseDto);
     
     // Ajouter le cookie à la réponse
     response.cookies.set("user-email", email, {
