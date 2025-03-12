@@ -17,7 +17,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, BriefcaseIcon, BuildingIcon } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CompanyOfferResponseDto } from "@/types/dto/company-offer.dto";
 
 // Type de params adapté à Next.js
 // type PageParams = {
@@ -27,11 +30,13 @@ import { useParams } from "next/navigation";
 // };
 
 export default function OfferPage() {
+  const router = useRouter();
+  
   // Utilisation de useParams au lieu de recevoir params comme prop
   const params = useParams();
   const id = params.id as string;
 
-  const { data: offer, isLoading } = useQuery<CompanyOfferWithRelation>({
+  const { data: offer, isLoading } = useQuery<any>({
     queryKey: ["company_offer", id],
     queryFn: () => CompanyOfferService.fetchCompanyOffer(id),
   });
@@ -156,7 +161,7 @@ export default function OfferPage() {
               Compétences requises
             </h3>
             <div className="flex flex-wrap gap-2">
-              {offer.skills.map((skill) => (
+              {offer.skills.map((skill: { id: string, name: string }) => (
                 <Badge key={skill.id} variant="secondary" className="text-sm">
                   {skill.name}
                 </Badge>

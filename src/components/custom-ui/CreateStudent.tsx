@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { EnumStatusTYpe } from "@prisma/client";
+import { SchoolResponseDto } from "@/types/dto/school.dto";
 
 type StudentStatus = "stage" | "alternance";
 
@@ -80,13 +82,10 @@ export function CreateStudent() {
       await StudentService.createStudent({
         firstName,
         lastName,
-        status: status === "stage" ? "internship" : "apprenticeship",
+        status: status as EnumStatusTYpe,
         description,
         isAvailable,
         userId: user.id,
-        profilePicture: "",
-        CV: "",
-        skills: [],
         schoolId: selectedSchoolId,
       });
 

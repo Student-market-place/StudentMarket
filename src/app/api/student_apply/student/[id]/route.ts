@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
+import { IParams } from "@/types/api.type";
 
 /**
  * GET /api/student_apply/student/[id]
@@ -12,14 +13,14 @@ import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: IParams
 ) {
   try {
-    const studentId = params.id;
+    const { id } = await params;
 
     // Vérifier si l'étudiant existe
     const student = await prisma.student.findUnique({
-      where: { id: studentId },
+      where: { id },
     });
 
     if (!student) {
@@ -32,7 +33,7 @@ export async function GET(
     // Récupérer toutes les candidatures de l'étudiant
     const studentApplies = await prisma.student_apply.findMany({
       where: {
-        studentId: studentId,
+        studentId: id,
         deletedAt: null,
       },
       include: {

@@ -59,7 +59,7 @@ export function CreateSchool() {
         email: values.email,
         isActive: values.isActive ?? false,
       };
-      await SchoolService.postSchool(dataToSubmit);
+      await SchoolService.createSchool(dataToSubmit);
       await queryClient.invalidateQueries({ queryKey: ["schools"] });
       toast.success("École créée avec succès");
       setOpen(false);

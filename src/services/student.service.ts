@@ -99,6 +99,7 @@ const StudentService = {
   updateStudent,
   createStudent,
   fetchStudentApplications,
+  deleteStudent,
 };
 
 export default StudentService;

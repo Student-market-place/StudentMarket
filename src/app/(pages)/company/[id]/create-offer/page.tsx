@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import CompanyOfferService from "@/services/companyOffer.service";
 import SkillService from "@/services/skill.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Skill } from "@prisma/client";
+import { Skill, EnumStatusTYpe } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { CompanyOffer, Type, Status } from "@/types/companyOffer.type";
@@ -180,16 +180,9 @@ const CreateOfferPage = () => {
     setIsCreatingSkill(true);
 
     try {
-      // Créer un identifiant temporaire
-      const tempId = `temp-${Date.now()}`;
-
       // Créer la nouvelle compétence dans la base de données
-      const newSkill = await SkillService.postSkill({
-        id: tempId,
+      const newSkill = await SkillService.createSkill({
         name: newSkillName.trim(),
-        createdAt: new Date(),
-        modifiedAt: new Date(),
-        deletedAt: null, // Nécessaire pour la compatibilité des types
       });
 
       // Mettre à jour l'état local
@@ -224,19 +217,14 @@ const CreateOfferPage = () => {
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: CompanyOffer = {
-        id: "", // sera généré par l'API
+      const offerData = {
         companyId: companyId,
         title: data.title,
         description: data.description,
-        type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
+        type: data.type === "Stage" ? EnumStatusTYpe.stage : EnumStatusTYpe.alternance,
         startDate: new Date(data.startDate),
-        status: Status.OPEN,
+        expectedSkills: data.expectedSkills || "",
         skills: data.skills,
-        studentApplies: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(),
       };
 
       await CompanyOfferService.postCompanyOffer(offerData);

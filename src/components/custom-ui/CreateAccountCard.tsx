@@ -23,7 +23,9 @@ import SchoolService from "@/services/school.service";
 import StudentService from "@/services/student.service";
 import CompanyService from "@/services/company.service";
 import SkillService from "@/services/skill.service";
-import { School, Skill } from "@prisma/client";
+import { Skill } from "@prisma/client";
+import { SchoolResponseDto } from "@/types/dto/school.dto";
+import { EnumStatusTYpe } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -38,7 +40,7 @@ interface StudentFormValues {
   profilePicture: string;
   firstName: string;
   lastName: string;
-  status: string;
+  status: EnumStatusTYpe;
   isAvailable: boolean;
   CV: string;
   skills: string[];
@@ -57,7 +59,7 @@ interface CreateAccountCardProps {
 }
 
 const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
-  const [schools, setSchools] = useState<School[]>([]);
+  const [schools, setSchools] = useState<SchoolResponseDto[]>([]);
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const isStudent = role === "student";
   const [userId, setUserId] = useState<string | null>(null);
@@ -132,7 +134,7 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
       profilePicture: "",
       firstName: "",
       lastName: "",
-      status: "",
+      status: "stage",
       isAvailable: false,
       CV: "",
       skills: [],
@@ -295,18 +297,18 @@ const CreateAccountCard = ({ role }: CreateAccountCardProps) => {
                           <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                               <Checkbox
-                                checked={field.value === "internship"}
+                                checked={field.value === "stage"}
                                 onCheckedChange={() =>
-                                  field.onChange("internship")
+                                  field.onChange("stage")
                                 }
                               />
                               <Label>Stage</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Checkbox
-                                checked={field.value === "apprenticeship"}
+                                checked={field.value === "alternance"}
                                 onCheckedChange={() =>
-                                  field.onChange("apprenticeship")
+                                  field.onChange("alternance")
                                 }
                               />
                               <Label>Alternance</Label>

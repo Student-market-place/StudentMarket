@@ -69,4 +69,5 @@ export interface StudentSearchDto {
   isAvailable?: boolean;
   skills?: string[];
   query?: string;
+  userId?: string;
 } 

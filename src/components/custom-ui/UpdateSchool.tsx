@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Pencil } from "lucide-react";
-import { SchoolWithRelations } from "@/types/school.type";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,10 +18,10 @@ import SchoolService from "@/services/school.service";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Switch } from "../ui/switch";
+import { SchoolResponseDto } from "@/types/dto/school.dto";
 
 interface UpdateSchoolProps {
-  id: string;
-  school: SchoolWithRelations;
+  school: SchoolResponseDto;
 }
 
 const formSchema = z.object({
@@ -52,7 +51,7 @@ export function UpdateSchool({ school }: UpdateSchoolProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: school.name,
-      email: school.user.email || "",
+      email: school.user?.email || "",
       domainName: school.domainName,
       isActive: school.isActive,
     },
@@ -62,6 +61,7 @@ export function UpdateSchool({ school }: UpdateSchoolProps) {
     try {
       setIsSubmitting(true);
       const dataToSubmit = {
+        id: school.id,
         name: values.name,
         domainName: values.domainName,
         ...(values.email && { email: values.email }),
@@ -69,7 +69,7 @@ export function UpdateSchool({ school }: UpdateSchoolProps) {
           isActive: values.isActive,
         }),
       };
-      await SchoolService.putSchool(school.id, dataToSubmit);
+      await SchoolService.updateSchool(school.id, dataToSubmit);
       queryClient.invalidateQueries({ queryKey: ["schools"] });
       toast.success("École mise à jour avec succès");
       setOpen(false);

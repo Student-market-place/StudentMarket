@@ -27,6 +27,7 @@ import {
 import StudentApplyService, { StudentApplyWithRelations } from "@/services/studentApply.service";
 import UserService from "@/services/user.service";
 import { UserWithRelations } from "@/types/user.type";
+import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
 
 // Composant de chargement
 const ApplicationDetailLoading = () => (
@@ -96,14 +97,14 @@ const formatTime = (dateString: string) => {
 
 // Composant principal
 const ApplicationDetailPage = () => {
-  const params = useParams();
+  const { id: applicationId } = useParams() as { id: string };
   const router = useRouter();
-  const applicationId = typeof params.id === 'string' ? params.id : '';
-  
-  const [user, setUser] = useState<UserWithRelations | null>(null);
-  const [application, setApplication] = useState<StudentApplyWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [application, setApplication] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -12,15 +12,21 @@ import { HistoryWithRelation } from "@/types/studentHistory.type";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { StudentResponseDto } from "@/types/dto/student.dto";
+import StudentProfileCard from "@/components/custom-ui/StudentProfileCard";
+import Link from "next/link";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const StudentProfilPage = () => {
   const { id } = useParams();
-  const [student, setStudent] = useState<StudentWithRelation | null>(null);
+  const [student, setStudent] = useState<any>(null);
   const [reviews, setReviews] = useState<ReviewWithRelation[]>([]);
   const [history, setHistory] = useState<HistoryWithRelation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
+
     if (id) {
       StudentService.fetchStudentById(id as string)
         .then((data) => setStudent(data))
@@ -176,7 +182,7 @@ const StudentProfilPage = () => {
               <TabsContent value="skills" className="pt-2">
                 {student?.skills && student.skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {student.skills.map((skill, index) => (
+                    {student.skills.map((skill: { id: string, name: string }, index: number) => (
                       <Badge key={index} variant="secondary">
                         {skill?.name}
                       </Badge>

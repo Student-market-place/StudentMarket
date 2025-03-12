@@ -24,10 +24,11 @@ import { useForm } from "react-hook-form";
 import CompanyOfferService from "@/services/companyOffer.service";
 import SkillService from "@/services/skill.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Skill } from "@prisma/client";
+import { Skill, EnumStatusTYpe } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { CompanyOffer, Type, Status } from "@/types/companyOffer.type";
+import { UpdateCompanyOfferDto } from "@/types/dto/company-offer.dto";
 
 interface Option {
   label: string;
@@ -213,16 +214,9 @@ const EditOfferPage = () => {
     setIsCreatingSkill(true);
 
     try {
-      // Créer un identifiant temporaire
-      const tempId = `temp-${Date.now()}`;
-
       // Créer la nouvelle compétence dans la base de données
-      const newSkill = await SkillService.postSkill({
-        id: tempId,
+      const newSkill = await SkillService.createSkill({
         name: newSkillName.trim(),
-        createdAt: new Date(),
-        modifiedAt: new Date(),
-        deletedAt: null,
       });
 
       // Mettre à jour l'état local
@@ -257,18 +251,17 @@ const EditOfferPage = () => {
     setIsSubmitting(true);
     try {
       // Préparer les données pour l'API
-      const offerData: Partial<CompanyOffer> = {
+      const offerData: UpdateCompanyOfferDto = {
         id: offerId,
-        companyId: companyId,
         title: data.title,
         description: data.description,
-        type: data.type === "Stage" ? Type.STAGE : Type.ALTERNANCE,
         startDate: new Date(data.startDate),
+        expectedSkills: data.expectedSkills,
+        type: data.type === "Stage" ? EnumStatusTYpe.stage : EnumStatusTYpe.alternance,
         skills: data.skills,
-        updatedAt: new Date(),
       };
 
-      await CompanyOfferService.putCompanyOffer(offerData as CompanyOffer);
+      await CompanyOfferService.putCompanyOffer(offerData);
 
       toast.success("Votre offre a été modifiée avec succès.");
 

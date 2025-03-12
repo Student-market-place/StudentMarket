@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto, UpdateStudentDto } from "@/types/dto/student.dto";
 import { Skill } from "@prisma/client";
 import { SkillsCombobox } from "./SkillsCombobox";
 import { useRouter } from "next/navigation";
@@ -34,7 +35,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
 interface StudentUpdateFormProps {
-  student: StudentWithRelation;
+  student: StudentWithRelation | StudentResponseDto;
   allSkills: Skill[];
 }
 
@@ -54,18 +55,43 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function StudentUpdateForm({
+const StudentUpdateForm = ({
   student,
   allSkills,
-}: StudentUpdateFormProps) {
+}: StudentUpdateFormProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedSkills, setSelectedSkills] = useState<string[]>(
-    student.skills.map((skill) => skill.id)
+    student.skills?.map((skill) => skill.id) || []
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFileUploading, setIsFileUploading] = useState(false);
   const [isCVUploading, setIsCVUploading] = useState(false);
+
+  // Fonction pour vérifier si nous avons un StudentWithRelation
+  const isStudentWithRelation = (student: StudentWithRelation | StudentResponseDto): student is StudentWithRelation => {
+    return 'profilePicture' in student || 'CV' in student;
+  };
+
+  // Fonction pour obtenir l'URL de la photo de profil
+  const getProfilePictureUrl = () => {
+    if (isStudentWithRelation(student) && student.profilePicture) {
+      return `/api/file/${student.profilePicture.id}`;
+    } else if (student.profilePictureId) {
+      return `/api/file/${student.profilePictureId}`;
+    }
+    return null;
+  };
+
+  // Fonction pour obtenir l'URL du CV
+  const getCvUrl = () => {
+    if (isStudentWithRelation(student) && student.CV) {
+      return `/api/file/${student.CV.id}`;
+    } else if (student.CVId) {
+      return `/api/file/${student.CVId}`;
+    }
+    return null;
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -102,6 +128,7 @@ export default function StudentUpdateForm({
       const data = await response.json();
 
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         profilePictureId: data.fileId,
       });
 
@@ -136,6 +163,7 @@ export default function StudentUpdateForm({
       const data = await response.json();
 
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         CVId: data.fileId,
       });
 
@@ -153,8 +181,9 @@ export default function StudentUpdateForm({
     try {
       setIsSubmitting(true);
       await StudentService.updateStudent(student.id, {
+        id: student.id,
         ...values,
-        skillsId: selectedSkills,
+        skills: selectedSkills,
       });
       queryClient.invalidateQueries({ queryKey: ["student", student.id] });
       toast.success("Profil mis à jour avec succès");
@@ -287,10 +316,10 @@ export default function StudentUpdateForm({
                 <div className="space-y-4">
                   <FormLabel>Photo de profil</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {student.profilePicture && (
+                    {getProfilePictureUrl() && (
                       <div className="border rounded-lg p-2 w-full flex justify-center">
                         <Image
-                          src={`/api/file/${student.profilePicture.id}`}
+                          src={getProfilePictureUrl() as string}
                           alt="Photo de profil"
                           width={120}
                           height={120}
@@ -318,10 +347,10 @@ export default function StudentUpdateForm({
                 <div className="space-y-4">
                   <FormLabel>CV</FormLabel>
                   <div className="flex flex-col items-start gap-4">
-                    {student.CV && (
+                    {getCvUrl() && (
                       <div className="border rounded-lg p-3 w-full">
                         <a
-                          href={`/api/file/${student.CV.id}`}
+                          href={getCvUrl() as string}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline flex items-center"
@@ -383,4 +412,6 @@ export default function StudentUpdateForm({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default StudentUpdateForm;

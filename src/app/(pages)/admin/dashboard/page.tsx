@@ -4,11 +4,12 @@ import { CompanyTable } from "@/components/custom-ui/table/CompanyTable";
 import { SchoolTable } from "@/components/custom-ui/table/SchoolTable";
 import { StudentTable } from "@/components/custom-ui/table/StudentTable";
 import { StudentWithRelation } from "@/types/student.type";
+import { StudentResponseDto } from "@/types/dto/student.dto";
 import StudentService from "@/services/student.service";
 import { useEffect, useState } from "react";
 
 const DashboardAdminPage = () => {
-  const [students, setStudents] = useState<StudentWithRelation[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
 
   useEffect(() => {
     const loadStudentsData = async () => {

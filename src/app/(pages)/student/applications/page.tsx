@@ -25,6 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ExternalLink, Eye } from "lucide-react";
 
 import StudentApplyService, { StudentApplyWithRelations } from "@/services/studentApply.service";
+import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
 import UserService from "@/services/user.service";
 import { UserWithRelations } from "@/types/user.type";
 
@@ -94,7 +95,7 @@ const formatDate = (dateString: string) => {
 const ApplicationsPage = () => {
   const router = useRouter();
   const [user, setUser] = useState<UserWithRelations | null>(null);
-  const [applications, setApplications] = useState<StudentApplyWithRelations[]>([]);
+  const [applications, setApplications] = useState<StudentApplyResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

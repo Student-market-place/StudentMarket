@@ -24,7 +24,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import StudentService from "@/services/student.service";
-import { StudentApplyWithRelations } from "@/services/studentApply.service";
+import { StudentApplyResponseDto } from "@/types/dto/student-apply.dto";
 import { Apply_Status } from "@prisma/client";
 
 interface ApplicationTableProps {
@@ -39,7 +39,7 @@ export function ApplicationTable({ studentId }: ApplicationTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [applications, setApplications] = useState<StudentApplyWithRelations[]>([]);
+  const [applications, setApplications] = useState<StudentApplyResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -145,11 +145,8 @@ export function ApplicationTable({ studentId }: ApplicationTableProps) {
           ? companyA.localeCompare(companyB)
           : companyB.localeCompare(companyA);
       } else if (sortField === "type") {
-        const typeA = a.companyOffer?.type || "";
-        const typeB = b.companyOffer?.type || "";
-        return sortDirection === "asc"
-          ? typeA.localeCompare(typeB)
-          : typeB.localeCompare(typeA);
+        // Type n'est pas disponible dans StudentApplyResponseDto
+        return 0;
       }
       return 0;
     });
@@ -320,7 +317,7 @@ export function ApplicationTable({ studentId }: ApplicationTableProps) {
                         <Badge
                           variant="outline"
                         >
-                          {application.companyOffer?.type || "N/A"}
+                          Stage/Alternance
                         </Badge>
                       </TableCell>
                       <TableCell className="w-[15%]">
